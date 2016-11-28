@@ -1,11 +1,8 @@
-package Interfaces;
+package Classes;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
-
-import Classes.Paycheck;
-import Classes.WorkCompPaycheck;
 
 public interface StateLawCalculable {
 	

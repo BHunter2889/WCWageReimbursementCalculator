@@ -6,9 +6,6 @@ import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.Scanner;
 import java.util.TimeZone;
-
-import Interfaces.StateLawCalculable;
-
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.math.BigDecimal;

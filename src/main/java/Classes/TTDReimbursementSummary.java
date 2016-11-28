@@ -3,8 +3,6 @@ package Classes;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
-import Interfaces.StateLawCalculable;
-
 public class TTDReimbursementSummary extends ReimbursementSummary {
 	
 	public TTDReimbursementSummary() {

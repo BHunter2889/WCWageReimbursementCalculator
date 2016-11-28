@@ -7,8 +7,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 
-import Interfaces.StateLawCalculable;
-
 public class TPDReimbursementSummary extends ReimbursementSummary {
 	//additional fields
 	protected ArrayList<Paycheck> receivedWorkPayments;

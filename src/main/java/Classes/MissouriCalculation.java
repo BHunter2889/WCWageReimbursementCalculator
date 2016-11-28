@@ -1,4 +1,4 @@
-package Interfaces;
+package Classes;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -10,9 +10,6 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import javax.swing.JOptionPane;
-
-import Classes.Paycheck;
-import Classes.WorkCompPaycheck;
 
 
 public class MissouriCalculation implements StateLawCalculable {

@@ -8,8 +8,6 @@ import java.sql.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import Interfaces.StateLawCalculable;
-
 public class WorkCompPaycheck extends Paycheck {
 	//additional fields
 	protected boolean isContested;

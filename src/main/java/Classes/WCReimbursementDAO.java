@@ -21,8 +21,6 @@ import javax.swing.JOptionPane;
 
 import org.apache.derby.tools.ij;
 
-import Interfaces.StateLawCalculable;
-
 //adapted from http://www.oracle.com/technetwork/articles/javase/javadb-141163.html Credit: John O'Conner
 public class WCReimbursementDAO {
 	protected static final String dbName = "WCReimbursementDB";

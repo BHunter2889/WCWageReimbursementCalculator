@@ -2,9 +2,6 @@ package Classes;
 
 import java.util.ArrayList;
 
-import Interfaces.MissouriCalculation;
-import Interfaces.StateLawCalculable;
-
 public final class StatesWithCalculations extends ArrayList<StateLawCalculable> {
 
 	private static final long serialVersionUID = 1L;

@@ -12,8 +12,6 @@ import java.util.GregorianCalendar;
 import java.util.Scanner;
 import java.util.TimeZone;
 
-import Interfaces.StateLawCalculable;
-
 public abstract class ReimbursementSummary {
 	//fields
 	protected BigDecimal calculatedWeeklyPayment; //represents the calculated payment owed to employee before taxes and deductions

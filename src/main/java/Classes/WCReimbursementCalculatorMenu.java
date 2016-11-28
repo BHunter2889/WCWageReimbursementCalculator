@@ -14,8 +14,6 @@ import javax.swing.event.ListSelectionListener;
 import org.jdesktop.swingx.JXDatePicker;
 import org.jdesktop.swingx.JXMonthView;
 
-import Interfaces.StateLawCalculable;
-
 import java.awt.Font;
 import javax.swing.JButton;
 
