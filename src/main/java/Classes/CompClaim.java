@@ -39,7 +39,7 @@ public class CompClaim {
 
 		setOrUpdateEarliestPriorWageDate();
 	}
-	
+	/*
 	//constructor w/ call to setPriorWages - month should be actual month (i.e. January = 1), not Java Calendar month
 	public CompClaim(int year, int month, int day, boolean setWages) {
 		this.s = new Scanner(System.in);
@@ -55,7 +55,7 @@ public class CompClaim {
 			setPriorWages();
 		}
 		
-	}
+	}*/
 		
 	//constructor to set stateWeeksPriorPeriod
 	public CompClaim(int year, int month, int day, StateLawCalculable sLC) {
@@ -71,7 +71,7 @@ public class CompClaim {
 
 		setOrUpdateEarliestPriorWageDate();
 	}
-	
+	/*
 	//constructor to set stateWeeksPriorPeriod w/ call to setPriorWages
 	public CompClaim(int year, int month, int day, StateLawCalculable sLC, boolean setWages) {
 		this.s = new Scanner(System.in);
@@ -88,7 +88,7 @@ public class CompClaim {
 		if (setWages){
 			setPriorWages();
 		}
-	}
+	}*/
 	
 	// Constructor to complete all CompClaim fields when called from DAO, should take sql.Date object
 	public CompClaim(Date dateInjured, StateLawCalculable sLC) {
@@ -149,7 +149,7 @@ public class CompClaim {
 		this.priorWages = priorWages;
 		this.sortPaychecksByDate();
 	}
-
+/*
 	public void setPriorWages(){
 		boolean complete = false;
 		boolean added = false;
@@ -197,10 +197,10 @@ public class CompClaim {
 				int eMonth = s.nextInt();
 				System.out.println("Day of the month of Pay Period End date (format: dd): ");
 				int eDay = s.nextInt();
-				added = addPaycheck(grossAmount, iYear, iMonth, iDay, sYear, sMonth, sDay, eYear, eMonth, eDay);	
+			//	added = addPaycheck(grossAmount, iYear, iMonth, iDay, sYear, sMonth, sDay, eYear, eMonth, eDay);	
 			}
 			else{
-				added = addPaycheck(grossAmount, iYear, iMonth, iDay, sYear, sMonth, sDay);
+			//	added = addPaycheck(grossAmount, iYear, iMonth, iDay, sYear, sMonth, sDay);
 			}
 			
 			if (added){
@@ -210,7 +210,7 @@ public class CompClaim {
 					//assume that prior wages are completed and compute aPGWP
 					computeAvgPriorGrossWeeklyPayment();
 					System.out.println("Total time period of prior wages entered now meets State Law criteria. Done adding prior wages.");
-/* may want to add information to clear all or delete wages here*/					
+//may want to add information to clear all or delete wages here				
 					return;
 				}
 			}
@@ -233,13 +233,13 @@ public class CompClaim {
 		else{
 			System.out.println("Total time period of prior wages entered does not complete State Law criteria. If all dates are correct and claimant has earned wages during the time period specified by law, additional paycheck(s) will need to be added later.");
 		}
-	}
+	}*/
 	
 	public void addPaycheck(Paycheck pc, StateLawCalculable stateLawCalc){
 		this.priorWages = stateLawCalc.addAndTrimToPriorWages(pc, this.priorWages, this.priorWeekStart);
 		this.sortPaychecksByDate();
 	}
-	
+	/*
 	//if payment date is same as period end date
 	public boolean addPaycheck(String grossAmount, int iYear, int iMonth, int iDay, int sYear, int sMonth, int sDay){
 		Paycheck pc = new Paycheck(grossAmount, iYear, iMonth, iDay, sYear, sMonth, sDay);
@@ -480,7 +480,7 @@ public class CompClaim {
 		boolean added = this.priorWages.add(pc);
 		return added;
 		
-	}
+	}*/
 
 	//Super method. Can be altered for other states in child classes.
 	public void computeAvgPriorGrossWeeklyPayment(){

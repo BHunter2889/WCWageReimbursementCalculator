@@ -19,6 +19,4 @@ public interface StateLawCalculable {
 	public String getStateAbbrv();
 	public String getStateName();
 	public boolean priorWagesIsComplete(ArrayList<Paycheck> priorWages); //CompClaim
-
-
 }

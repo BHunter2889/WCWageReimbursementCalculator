@@ -101,7 +101,7 @@ public class WCReimbursementCalculatorMenu {
 		frmWorkersCompensationLost.setFont(new Font("Dialog", Font.BOLD, 12));
 		frmWorkersCompensationLost.setTitle("Worker's Compensation Lost Wages Calculator v1.0");
 		frmWorkersCompensationLost.setBounds(100, 100, 700, 740);
-		frmWorkersCompensationLost.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //TODO Make sure everything gets saved in DB on close
+		frmWorkersCompensationLost.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
 		frmWorkersCompensationLost.getContentPane().setLayout(null);
 		
 		notCreate = new ButtonGroup();
