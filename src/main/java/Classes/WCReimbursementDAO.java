@@ -24,7 +24,7 @@ import org.apache.derby.tools.ij;
 //adapted from http://www.oracle.com/technetwork/articles/javase/javadb-141163.html Credit: John O'Conner
 public class WCReimbursementDAO {
 	protected static final String dbName = "WCReimbursementDB";
-	protected Properties dbProperties = null;
+	protected static final String dbDriverName = "org.apache.derby.jdbc.EmbededDriver";
 	protected Connection dbConnection; //Close this connection upon exit by calling .close() or .shutdownAllConnectionInstances() to also close PreparedStatements first
 	protected String systemDir;
 	protected ClaimPreparedStatements preparedStatements; //Close these statements before exiting application by calling .shutdownAllConnectionInstances()
@@ -32,9 +32,9 @@ public class WCReimbursementDAO {
 
 	public WCReimbursementDAO() {
 		setDBSystemDir();
-	    this.dbProperties = loadDBProperties();
-	    String driverName = this.dbProperties.getProperty("derby.driver"); 
-	    loadDatabaseDriver(driverName);
+	    //this.dbProperties = loadDBProperties();
+	    //String driverName = this.dbProperties.getProperty("derby.driver"); 
+	    loadDatabaseDriver(dbDriverName);
 	    boolean success = false;
     	label: try {
     		success = this.establishConnection();
@@ -64,7 +64,7 @@ public class WCReimbursementDAO {
 			}
 	    }
 	}
-
+/*
 	protected Properties loadDBProperties() {
 	    InputStream dbPropInputStream = null;
 	    dbPropInputStream = WCReimbursementDAO.class.getClassLoader().getResourceAsStream("config.properties");
@@ -76,7 +76,7 @@ public class WCReimbursementDAO {
 	    }
 	    return dbProperties;
 	}
-	
+*/
 	protected void loadDatabaseDriver(String driverName) {
 	    // Load the Java DB driver.
 	    try {
