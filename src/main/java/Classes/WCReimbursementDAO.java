@@ -67,7 +67,7 @@ public class WCReimbursementDAO {
 
 	protected Properties loadDBProperties() {
 	    InputStream dbPropInputStream = null;
-	    dbPropInputStream = WCReimbursementDAO.class.getResourceAsStream("Configuration.properties");
+	    dbPropInputStream = WCReimbursementDAO.class.getClassLoader().getResourceAsStream("../resources/config.properties");
 	    Properties dbProperties = new Properties();
 	    try {
 	        dbProperties.load(dbPropInputStream);
