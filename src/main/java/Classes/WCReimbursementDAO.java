@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -15,8 +14,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
 import java.util.ArrayList;
-import java.util.Properties;
-
 import javax.swing.JOptionPane;
 
 import org.apache.derby.tools.ij;
@@ -32,8 +29,7 @@ public class WCReimbursementDAO {
 
 	public WCReimbursementDAO() {
 		setDBSystemDir();
-	    //this.dbProperties = loadDBProperties();
-	    //String driverName = this.dbProperties.getProperty("derby.driver"); 
+	    
 	    loadDatabaseDriver(dbDriverName);
 	    boolean success = false;
     	label: try {
@@ -64,19 +60,7 @@ public class WCReimbursementDAO {
 			}
 	    }
 	}
-/*
-	protected Properties loadDBProperties() {
-	    InputStream dbPropInputStream = null;
-	    dbPropInputStream = WCReimbursementDAO.class.getClassLoader().getResourceAsStream("config.properties");
-	    Properties dbProperties = new Properties();
-	    try {
-	        dbProperties.load(dbPropInputStream);
-	    } catch (IOException ex) {
-	        ex.printStackTrace();
-	    }
-	    return dbProperties;
-	}
-*/
+
 	protected void loadDatabaseDriver(String driverName) {
 	    // Load the Java DB driver.
 	    try {
