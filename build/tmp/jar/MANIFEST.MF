@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Implementation-Title: Workers Compensation Lost Wages Reimbursement Ca
+ lculator
+Implementation-Version: 1.0
+Main-Class: Classes.WCReimbursementCalculatorMenu
+

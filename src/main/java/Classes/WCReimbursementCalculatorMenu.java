@@ -183,6 +183,15 @@ public class WCReimbursementCalculatorMenu {
 		panel.add(btnEditPersonalInfo);
 		notCreate.add(btnEditPersonalInfo);
 		
+		this.claimListModel = new DefaultListModel<ReimbursementOverview>();
+		loadExistingData();
+		JPanel panel_1 = new JPanel();
+		FlowLayout flowLayout_1 = (FlowLayout) panel_1.getLayout();
+		flowLayout_1.setVgap(11);
+		flowLayout_1.setHgap(9);
+		panel_1.setBounds(0, 165, 690, 127);
+		frmWorkersCompensationLost.getContentPane().add(panel_1);
+		
 		this.claimantList = new JList<ReimbursementOverview>(this.claimListModel);
 		claimantList.setName("Claims");
 		claimantList.setValueIsAdjusting(true);
@@ -220,16 +229,6 @@ public class WCReimbursementCalculatorMenu {
 		btnChangeInjuryDate.setPreferredSize(new Dimension(180, 30));
 		panel.add(btnChangeInjuryDate);
 		notCreate.add(btnChangeInjuryDate);
-
-		
-		this.claimListModel = new DefaultListModel<ReimbursementOverview>();
-		loadExistingData();
-		JPanel panel_1 = new JPanel();
-		FlowLayout flowLayout_1 = (FlowLayout) panel_1.getLayout();
-		flowLayout_1.setVgap(11);
-		flowLayout_1.setHgap(9);
-		panel_1.setBounds(0, 165, 690, 127);
-		frmWorkersCompensationLost.getContentPane().add(panel_1);
 		
 		btnEntercompletePriorWage = new JButton("Enter/Complete Prior Wage Payments");
 		btnEntercompletePriorWage.addActionListener(new ActionListener() {

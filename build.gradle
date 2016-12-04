@@ -21,6 +21,7 @@ jar {
                    'Implementation-Version': version,
                    'Main-Class': 'Classes.WCReimbursementCalculatorMenu'
     }
+    mainClassName = "Classes.WCReimbursementCalculatorMenu"
 }
 
 // In this section you declare where to find the dependencies of your project

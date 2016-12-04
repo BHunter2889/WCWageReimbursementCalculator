@@ -2,6 +2,13 @@
 <classpath>
 	<classpathentry kind="src" path="src/main/java">
 		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="WCWageReimbursementCalculator/lib"/>
+			<attribute name="FROM_GRADLE_MODEL" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path="src/main/resources">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="WCWageReimbursementCalculator/lib"/>
 			<attribute name="FROM_GRADLE_MODEL" value="true"/>
 		</attributes>
 	</classpathentry>
@@ -11,13 +18,13 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
-	<classpathentry exported="true" kind="lib" path="derbytools.jar"/>
-	<classpathentry exported="true" kind="lib" path="jgoodies-common-1.8.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="jgoodies-forms-1.8.0.jar"/>
-	<classpathentry kind="lib" path="derby.jar"/>
+	<classpathentry exported="true" kind="lib" path="F:/Brandon/Workspace/WCWageReimbursementCalculator/lib/derbytools.jar"/>
+	<classpathentry exported="true" kind="lib" path="F:/Brandon/Workspace/WCWageReimbursementCalculator/lib/jgoodies-common-1.8.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="F:/Brandon/Workspace/WCWageReimbursementCalculator/lib/jgoodies-forms-1.8.0.jar"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.datatools.connectivity.jdt.DRIVERLIBRARY/Derby Embedded JDBC Driver"/>
-	<classpathentry exported="true" kind="lib" path="swingx-all-1.6.4.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="tools.jar"/>
+	<classpathentry exported="true" kind="lib" path="F:/Brandon/Workspace/WCWageReimbursementCalculator/lib/swingx-all-1.6.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="F:/Brandon/Workspace/WCWageReimbursementCalculator/lib/tools.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/derby.jar"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_102"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

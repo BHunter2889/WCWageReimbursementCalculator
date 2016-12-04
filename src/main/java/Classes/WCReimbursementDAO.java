@@ -64,7 +64,11 @@ public class WCReimbursementDAO {
 	protected void loadDatabaseDriver(String driverName) {
 	    // Load the Java DB driver.
 	    try {
-	        Class.forName(driverName);
+	        try {
+				Class.forName(driverName).newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
 	    } catch (ClassNotFoundException ex) {
 	        ex.printStackTrace();
 	    }
@@ -111,7 +115,7 @@ public class WCReimbursementDAO {
 	//retrieve a connection to the DB driver
 	protected boolean establishConnection() throws SQLException{
 		Connection dbConnection = null;
-		String strUrl = "jdbc:derby:WCReibursementDB";
+		String strUrl = "jdbc:derby:WCReimbursementDB";
 		boolean success = false;
 		
 		//May use these for permission levels/multiple users at a later time
