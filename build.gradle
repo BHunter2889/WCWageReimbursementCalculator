@@ -15,14 +15,7 @@ apply plugin: 'application'
 
 sourceCompatibility = 1.8
 version = '1.0'
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'Workers Compensation Lost Wages Reimbursement Calculator',
-                   'Implementation-Version': version,
-                   'Main-Class': 'Classes.WCReimbursementCalculatorMenu'
-    }
-    mainClassName = "Classes.WCReimbursementCalculatorMenu"
-}
+
 
 // In this section you declare where to find the dependencies of your project
 
@@ -38,7 +31,8 @@ dependencies {
     // The production code uses the SLF4J logging API at compile time
     
     compile 'org.slf4j:slf4j-api:1.7.21'
-	compile fileTree(dir: 'lib', include: '*.jar') 
+	compile fileTree(dir: 'lib', include: '*.jar')
+	compile "org.apache.derby:derby:10.12.1.1" 
 	
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the
@@ -46,4 +40,14 @@ dependencies {
     // 'test.useTestNG()' to your build script.
     
     testCompile 'junit:junit:4.12'
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Workers Compensation Lost Wages Reimbursement Calculator',
+                   'Implementation-Version': version,
+                   'Main-Class': 'Classes.WCReimbursementCalculatorMenu',
+                   'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
+    }
+    mainClassName = "Classes.WCReimbursementCalculatorMenu"
 }

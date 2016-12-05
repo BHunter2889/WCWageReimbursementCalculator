@@ -2,5 +2,8 @@ Manifest-Version: 1.0
 Implementation-Title: Workers Compensation Lost Wages Reimbursement Ca
  lculator
 Implementation-Version: 1.0
+Class-Path: derby.jar derbytools.jar jgoodies-common-1.8.0.jar jgoodie
+ s-forms-1.8.0.jar swingx-all-1.6.4.jar tools.jar slf4j-api-1.7.21.jar
+  derby-10.12.1.1.jar
 Main-Class: Classes.WCReimbursementCalculatorMenu
 

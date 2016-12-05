@@ -21,7 +21,7 @@ import org.apache.derby.tools.ij;
 //adapted from http://www.oracle.com/technetwork/articles/javase/javadb-141163.html Credit: John O'Conner
 public class WCReimbursementDAO {
 	protected static final String dbName = "WCReimbursementDB";
-	protected static final String dbDriverName = "org.apache.derby.jdbc.EmbededDriver";
+	protected static final String dbDriverName = "org.apache.derby.jdbc.EmbeddedDriver";
 	protected Connection dbConnection; //Close this connection upon exit by calling .close() or .shutdownAllConnectionInstances() to also close PreparedStatements first
 	protected String systemDir;
 	protected ClaimPreparedStatements preparedStatements; //Close these statements before exiting application by calling .shutdownAllConnectionInstances()

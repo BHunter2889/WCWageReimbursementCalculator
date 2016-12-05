@@ -63,7 +63,7 @@ set CMD_LINE_ARGS=%*
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\WCWageReimbursementCalculator-1.0.jar;%APP_HOME%\lib\derby.jar;%APP_HOME%\lib\derbytools.jar;%APP_HOME%\lib\jgoodies-common-1.8.0.jar;%APP_HOME%\lib\jgoodies-forms-1.8.0.jar;%APP_HOME%\lib\swingx-all-1.6.4.jar;%APP_HOME%\lib\tools.jar;%APP_HOME%\lib\slf4j-api-1.7.21.jar
+set CLASSPATH=%APP_HOME%\lib\WCWageReimbursementCalculator-1.0.jar;%APP_HOME%\lib\derby.jar;%APP_HOME%\lib\derbytools.jar;%APP_HOME%\lib\jgoodies-common-1.8.0.jar;%APP_HOME%\lib\jgoodies-forms-1.8.0.jar;%APP_HOME%\lib\swingx-all-1.6.4.jar;%APP_HOME%\lib\tools.jar;%APP_HOME%\lib\slf4j-api-1.7.21.jar;%APP_HOME%\lib\derby-10.12.1.1.jar
 
 @rem Execute WCWageReimbursementCalculator
 "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %WC_WAGE_REIMBURSEMENT_CALCULATOR_OPTS%  -classpath "%CLASSPATH%" Classes.WCReimbursementCalculatorMenu %CMD_LINE_ARGS%
