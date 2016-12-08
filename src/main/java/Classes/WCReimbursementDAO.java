@@ -231,33 +231,41 @@ public class WCReimbursementDAO {
 	
 	public boolean deleteRecord(int id) {
 	    boolean bDeleted = false;
-	    PreparedStatement stmtDeleteClaimRecord = this.preparedStatements.getStmtDeleteClaimRecord();
+	    
+	    PreparedStatement stmtDeleteClaimRecord = null;
 	    try {
+    		stmtDeleteClaimRecord = this.dbConnection.prepareStatement(this.preparedStatements.getStmtDeleteClaimRecord("APP.CLAIMANTS"));
 	        stmtDeleteClaimRecord.clearParameters();
-	        stmtDeleteClaimRecord.setString(1, "APP.CLAIMANTS");
-	        stmtDeleteClaimRecord.setInt(2, id);
+	        stmtDeleteClaimRecord.setInt(1, id);
 	        stmtDeleteClaimRecord.executeUpdate();
+	        stmtDeleteClaimRecord.close();
 	       
+    		stmtDeleteClaimRecord = this.dbConnection.prepareStatement(this.preparedStatements.getStmtDeleteClaimRecord("APP.R_SUMMARY"));
 	        stmtDeleteClaimRecord.clearParameters();
-	        stmtDeleteClaimRecord.setString(1, "APP.R_SUMMARY");
-	        stmtDeleteClaimRecord.setInt(2, id);
+	        stmtDeleteClaimRecord.setInt(1, id);
 	        stmtDeleteClaimRecord.executeUpdate();
+	        stmtDeleteClaimRecord.close();
 	       
+    		stmtDeleteClaimRecord = this.dbConnection.prepareStatement(this.preparedStatements.getStmtDeleteClaimRecord("APP.CLAIM_SUMMARY"));
 	        stmtDeleteClaimRecord.clearParameters();
-	        stmtDeleteClaimRecord.setString(1, "APP.CLAIM_SUMMARY");
-	        stmtDeleteClaimRecord.setInt(2, id);
+	        stmtDeleteClaimRecord.setInt(1, id);
 	        stmtDeleteClaimRecord.executeUpdate();
+	        stmtDeleteClaimRecord.close();
 	        
+    		stmtDeleteClaimRecord = this.dbConnection.prepareStatement(this.preparedStatements.getStmtDeleteClaimRecord("APP.PAYCHECKS"));
 	        stmtDeleteClaimRecord.clearParameters();
-	        stmtDeleteClaimRecord.setString(1, "APP.PAYCHECKS");
-	        stmtDeleteClaimRecord.setInt(2, id);
+	        stmtDeleteClaimRecord.setInt(1, id);
 	        stmtDeleteClaimRecord.executeUpdate();
+	        stmtDeleteClaimRecord.close();
 	       
+    		stmtDeleteClaimRecord = this.dbConnection.prepareStatement(this.preparedStatements.getStmtDeleteClaimRecord("APP.WC_PAYCHECKS"));
 	        stmtDeleteClaimRecord.clearParameters();
-	        stmtDeleteClaimRecord.setString(1, "APP.WC_PAYCHECKS");
-	        stmtDeleteClaimRecord.setInt(2, id);
+	        stmtDeleteClaimRecord.setInt(1, id);
 	        stmtDeleteClaimRecord.executeUpdate();
+	        stmtDeleteClaimRecord.close();
+		        
 	        bDeleted = true;
+
 	    } catch (SQLException sqle) {
 	        sqle.printStackTrace();
 	    } finally {
@@ -274,12 +282,16 @@ public class WCReimbursementDAO {
 	
 	public boolean deletePaychecksFrmSingleClaim(int id, String type){
 		boolean deleted = false;
-		PreparedStatement stmtDeletePaychecksFrmSingleClaim = this.preparedStatements.getStmtDeletePaychecksFrmSingleClaim();
+		PreparedStatement stmtDeletePaychecksFrmSingleClaim = null;
+		try {
+			stmtDeletePaychecksFrmSingleClaim = this.dbConnection.prepareStatement(this.preparedStatements.getStmtDeletePaychecksFrmSingleClaim());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		try{
 			stmtDeletePaychecksFrmSingleClaim.clearParameters();
-			stmtDeletePaychecksFrmSingleClaim.setString(1, "APP.PAYCHECKS");
-			stmtDeletePaychecksFrmSingleClaim.setInt(2, id);
-			stmtDeletePaychecksFrmSingleClaim.setString(3, type);
+			stmtDeletePaychecksFrmSingleClaim.setInt(1, id);
+			stmtDeletePaychecksFrmSingleClaim.setString(2, type);
 			stmtDeletePaychecksFrmSingleClaim.executeUpdate();
 			deleted = true;
 		} catch (SQLException sqle) {
@@ -297,7 +309,12 @@ public class WCReimbursementDAO {
 	
 	public boolean updateClaimants(int id, String lastname, String firstname, String middlename, String workplace, String state){
 		boolean updated = false;
-		PreparedStatement stmtUpdateClaimants = this.preparedStatements.getStmtUpdateClaimants();
+		PreparedStatement stmtUpdateClaimants = null;
+		try {
+			stmtUpdateClaimants = this.dbConnection.prepareStatement(this.preparedStatements.getStmtUpdateClaimants());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		try {
 			stmtUpdateClaimants.clearParameters();
 			stmtUpdateClaimants.setString(1, lastname);
@@ -323,7 +340,12 @@ public class WCReimbursementDAO {
 	
 	public boolean updateRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid){
 		boolean updated = false;
-		PreparedStatement stmtUpdateRSummary = this.preparedStatements.getStmtUpdateRSummary();
+		PreparedStatement stmtUpdateRSummary = null;
+		try {
+			stmtUpdateRSummary = this.dbConnection.prepareStatement(this.preparedStatements.getStmtUpdateRSummary());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		try {
 			stmtUpdateRSummary.clearParameters();
 			stmtUpdateRSummary.setString(1, tdType);
@@ -348,7 +370,12 @@ public class WCReimbursementDAO {
 	
 	public boolean updateClaimSummary(int id, Date dateInj, Date priorWS, Date earliestPW, BigDecimal avgPGWP, long daysInj, long weeksInj){
 		boolean updated = false;
-		PreparedStatement stmtUpdateClaimSummary = this.preparedStatements.getStmtUpdateClaimSummary();
+		PreparedStatement stmtUpdateClaimSummary = null;
+		try {
+			stmtUpdateClaimSummary = this.dbConnection.prepareStatement(this.preparedStatements.getStmtUpdateClaimSummary());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		try {
 			stmtUpdateClaimSummary.clearParameters();
 			stmtUpdateClaimSummary.setDate(1, dateInj);
@@ -375,7 +402,12 @@ public class WCReimbursementDAO {
 	
 	public boolean updatePaychecks(int id, String pcType, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt){
 		boolean updated = false;
-		PreparedStatement stmtUpdatePaychecks = this.preparedStatements.getStmtUpdatePaychecks();
+		PreparedStatement stmtUpdatePaychecks = null;
+		try {
+			stmtUpdatePaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtUpdatePaychecks());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		try {
 			stmtUpdatePaychecks.clearParameters();
 			stmtUpdatePaychecks.setString(1, pcType);
@@ -404,7 +436,12 @@ public class WCReimbursementDAO {
 	public boolean updateWCPaychecks(int id, String wcPCType, boolean isContest, boolean isLate, boolean ftHours, int stDaysToLate, 
 			Date payReceived, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdAmntOwed, Date contestRslvd){
 		boolean updated = false;
-		PreparedStatement stmtUpdateWCPaychecks = this.preparedStatements.getStmtUpdateWCPaychecks();
+		PreparedStatement stmtUpdateWCPaychecks = null;
+		try {
+			stmtUpdateWCPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtUpdateWCPaychecks());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		try {
 			stmtUpdateWCPaychecks.clearParameters();
 			stmtUpdateWCPaychecks.setString(1, wcPCType);
@@ -437,7 +474,12 @@ public class WCReimbursementDAO {
 	
 	public int insertClaimants(String lastname, String firstname, String middlename, String workplace, String state){
 		int id = -1;
-		PreparedStatement stmtInsertClaimants = this.preparedStatements.getStmtInsertClaimants();
+		PreparedStatement stmtInsertClaimants = null;
+		try {
+			stmtInsertClaimants = this.dbConnection.prepareStatement(this.preparedStatements.getStmtInsertClaimants(), PreparedStatement.RETURN_GENERATED_KEYS);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		try {
 			stmtInsertClaimants.clearParameters();
 			stmtInsertClaimants.setString(1, lastname);
@@ -466,7 +508,12 @@ public class WCReimbursementDAO {
 	
 	public boolean insertRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid){
 		boolean updated = false;
-		PreparedStatement stmtInsertRSummary = this.preparedStatements.getStmtInsertRSummary();
+		PreparedStatement stmtInsertRSummary = null;
+		try {
+			stmtInsertRSummary = this.dbConnection.prepareStatement(this.preparedStatements.getStmtInsertRSummary());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		try {
 			stmtInsertRSummary.clearParameters();
 			stmtInsertRSummary.setInt(1, id);
@@ -490,7 +537,12 @@ public class WCReimbursementDAO {
 	
 	public boolean insertClaimSummary(int id, Date dateInj, Date priorWS, Date earliestPW, BigDecimal avgPGWP, long daysInj, long weeksInj){
 		boolean updated = false;
-		PreparedStatement stmtInsertClaimSummary = this.preparedStatements.getStmtInsertClaimSummary();
+		PreparedStatement stmtInsertClaimSummary = null;
+		try {
+			stmtInsertClaimSummary = this.dbConnection.prepareStatement(this.preparedStatements.getStmtInsertClaimSummary());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		try {
 			stmtInsertClaimSummary.clearParameters();
 			stmtInsertClaimSummary.setInt(1, id);
@@ -517,7 +569,12 @@ public class WCReimbursementDAO {
 	
 	public boolean insertPaychecks(int id, String pcType, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt){
 		boolean updated = false;
-		PreparedStatement stmtInsertPaychecks = this.preparedStatements.getStmtInsertPaychecks();
+		PreparedStatement stmtInsertPaychecks = null;
+		try {
+			stmtInsertPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtInsertPaychecks());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		try {
 			stmtInsertPaychecks.clearParameters();
 			stmtInsertPaychecks.setInt(1, id);
@@ -544,7 +601,12 @@ public class WCReimbursementDAO {
 	public boolean insertWCPaychecks(int id, String wcPCType, boolean isContest, boolean isLate, boolean ftHours, 
 			Date payReceived, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdAmntOwed, Date contestRslvd){
 		boolean updated = false;
-		PreparedStatement stmtInsertWCPaychecks = this.preparedStatements.getStmtInsertWCPaychecks();
+		PreparedStatement stmtInsertWCPaychecks = null;
+		try {
+			stmtInsertWCPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtInsertWCPaychecks());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		try {
 			stmtInsertWCPaychecks.clearParameters();
 			stmtInsertWCPaychecks.setInt(1, id);
@@ -575,7 +637,12 @@ public class WCReimbursementDAO {
 	}
 	
 	public Claimant selectClaimants(int id){
-		PreparedStatement stmtSelectClaimants = this.preparedStatements.getStmtSelectClaimants();
+		PreparedStatement stmtSelectClaimants = null;
+		try {
+			stmtSelectClaimants = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectClaimants());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		ResultSet results = null;
 		try{
 			stmtSelectClaimants.clearParameters();
@@ -608,15 +675,42 @@ public class WCReimbursementDAO {
 	}
 	
 	public ArrayList<Claimant> selectAllClaimants(){
-		PreparedStatement stmtSelectClaimants = this.preparedStatements.getStmtSelectClaimants();
+		PreparedStatement stmtSelectClaimants = null;
+		try {
+			stmtSelectClaimants = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectAllClaimants());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		ResultSet results = null;
 		try{
 			stmtSelectClaimants.clearParameters();
 			results = stmtSelectClaimants.executeQuery();
+			if (!results.isBeforeFirst()){
+				results.close();
+				stmtSelectClaimants.close();
+				return null;
+			}
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
 		} catch (SQLException e){
 			e.printStackTrace();
+			try {
+				if (!results.isBeforeFirst()){
+					results.close();
+					stmtSelectClaimants.close();
+				}
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			} finally {
+				try{
+					results.close();
+					stmtSelectClaimants.close();
+					return null;
+				} catch (SQLException se){
+					se.printStackTrace();
+				}
+			}
+			
 		}
 		
 		ArrayList<Claimant> cList = new ArrayList<Claimant>();
@@ -644,7 +738,12 @@ public class WCReimbursementDAO {
 	}
 	
 	public CompClaim selectClaimSummary(int id){
-		PreparedStatement stmtSelectClaimSummary = this.preparedStatements.getStmtSelectClaimSummary();
+		PreparedStatement stmtSelectClaimSummary = null;
+		try {
+			stmtSelectClaimSummary = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectClaimSummary());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		ResultSet results = null;
 		try{
 			stmtSelectClaimSummary.clearParameters();
@@ -710,7 +809,12 @@ public class WCReimbursementDAO {
 	
 	public ArrayList<Paycheck> selectPaychecks(int id, String pcType){
 		ArrayList<Paycheck> pcList = new ArrayList<Paycheck>();
-		PreparedStatement stmtSelectPaychecks = this.preparedStatements.getStmtSelectPCType();
+		PreparedStatement stmtSelectPaychecks = null;
+		try {
+			stmtSelectPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectPCType());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		ResultSet results = null;
 		
 		try{
@@ -767,7 +871,12 @@ public class WCReimbursementDAO {
 	
 	public ArrayList<WorkCompPaycheck> selectWorkCompPaychecks(int id, String wcpcType){
 		ArrayList<WorkCompPaycheck> wcpcList = new ArrayList<WorkCompPaycheck>();
-		PreparedStatement stmtSelectWCPaychecks = this.preparedStatements.getStmtSelectWCPCType();
+		PreparedStatement stmtSelectWCPaychecks = null;
+		try {
+			stmtSelectWCPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectWCPCType());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		ResultSet results = null;
 		
 		try{
@@ -834,7 +943,12 @@ public class WCReimbursementDAO {
 		CompClaim claimSum = this.selectClaimSummary(id);
 		ArrayList<Paycheck> workPay = this.selectPaychecks(id, "WORKPAYMENTS");
 		ArrayList<WorkCompPaycheck> tpdWCPay = this.selectWorkCompPaychecks(id, "TPD");
-		PreparedStatement stmtSelectRSummary = this.preparedStatements.getStmtSelectTDType();
+		PreparedStatement stmtSelectRSummary = null;
+		try {
+			stmtSelectRSummary = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectTDType());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		ResultSet results = null;
 		try{
 			stmtSelectRSummary.clearParameters();
@@ -885,7 +999,12 @@ public class WCReimbursementDAO {
 	public TTDReimbursementSummary selectTTDRSummary(int id){
 		CompClaim claimSum = this.selectClaimSummary(id);
 		ArrayList<WorkCompPaycheck> ttdWCPay = this.selectWorkCompPaychecks(id, "TTD");
-		PreparedStatement stmtSelectRSummary = this.preparedStatements.getStmtSelectTDType();
+		PreparedStatement stmtSelectRSummary = null;
+		try {
+			stmtSelectRSummary = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectTDType());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		ResultSet results = null;
 		try{
 			stmtSelectRSummary.clearParameters();
@@ -934,7 +1053,7 @@ public class WCReimbursementDAO {
 	
 	public boolean shutdownAllConnectionInstances(){
 		try {
-			this.preparedStatements.shutdownAllPreparedStatements();
+			//this.preparedStatements.shutdownAllPreparedStatements();
 			this.dbConnection.close();
 		} catch (SQLException e){
 			e.printStackTrace();

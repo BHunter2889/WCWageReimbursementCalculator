@@ -1,30 +1,29 @@
 package Classes;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class ClaimPreparedStatements {
 	
 	protected Connection dbConnection;
-	protected PreparedStatement stmtDeleteClaimRecord;
-	protected PreparedStatement stmtDeletePaychecksFrmSingleClaim;
-	protected PreparedStatement stmtUpdateClaimants;
-	protected PreparedStatement stmtUpdateRSummary;
-	protected PreparedStatement stmtUpdateClaimSummary;
-	protected PreparedStatement stmtUpdatePaychecks;
-	protected PreparedStatement stmtUpdateWCPaychecks;
-	protected PreparedStatement stmtInsertClaimants;
-	protected PreparedStatement stmtInsertRSummary;
-	protected PreparedStatement stmtInsertClaimSummary;
-	protected PreparedStatement stmtInsertPaychecks;
-	protected PreparedStatement stmtInsertWCPaychecks;
-	protected PreparedStatement stmtSelectClaimants;
-	protected PreparedStatement stmtSelectClaimSummary;
-	protected PreparedStatement stmtSelectTDType;
-	protected PreparedStatement stmtSelectPCType;
-	protected PreparedStatement stmtSelectWCPCType;
-	protected PreparedStatement stmtSelectAllClaimants;
+	protected String stmtDeleteClaimRecord;
+	protected String stmtDeletePaychecksFrmSingleClaim;
+	protected String stmtUpdateClaimants;
+	protected String stmtUpdateRSummary;
+	protected String stmtUpdateClaimSummary;
+	protected String stmtUpdatePaychecks;
+	protected String stmtUpdateWCPaychecks;
+	protected String stmtInsertClaimants;
+	protected String stmtInsertRSummary;
+	protected String stmtInsertClaimSummary;
+	protected String stmtInsertPaychecks;
+	protected String stmtInsertWCPaychecks;
+	protected String stmtSelectClaimants;
+	protected String stmtSelectClaimSummary;
+	protected String stmtSelectTDType;
+	protected String stmtSelectPCType;
+	protected String stmtSelectWCPCType;
+	protected String stmtSelectAllClaimants;
 
 	public ClaimPreparedStatements(Connection dbConnection) throws SQLException {
 		this.dbConnection = dbConnection;
@@ -49,91 +48,67 @@ public class ClaimPreparedStatements {
 	}
 	
 	public void setStmtDeleteClaimRecord(){
-		try {
-			this.stmtDeleteClaimRecord = this.dbConnection.prepareStatement(
-			        "DELETE FROM ? " +
-			        "WHERE ID = ?");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+			this.stmtDeleteClaimRecord =
+			        "DELETE FROM " +
+			        "tableName " +
+			        "where ID = ?";
 	}
 	
 	public void setStmtDeletePaychecksFrmSingleClaim(){
-		try {
-			this.stmtDeletePaychecksFrmSingleClaim = this.dbConnection.prepareStatement(
-			        "DELETE FROM ? " +
-			        "WHERE ID = ? AND PC_TYPE = ?");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+			this.stmtDeletePaychecksFrmSingleClaim =
+			        "DELETE FROM APP.PAYCHECKS " +
+			        "where ID = ? AND PC_TYPE = ?";
 	}
 	
 	public void setStmtUpdateClaimants(){
-		try {
-			this.stmtUpdateClaimants = this.dbConnection.prepareStatement(
+			this.stmtUpdateClaimants =
 			    "UPDATE APP.CLAIMANTS " +
 			    "SET LASTNAME = ?, " +
 			    "    FIRSTNAME = ?, " +
 			    "    MIDDLENAME = ?, " +
 			    "    WORKPLACE = ?, " +
 			    "    STATE = ?, " +
-			    "WHERE ID = ?");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+			    "where ID = ?";
 	}
 	
 	public void setStmtUpdateRSummary(){
-		try {
-			this.stmtUpdateRSummary = this.dbConnection.prepareStatement(
+			this.stmtUpdateRSummary =
 			    "UPDATE APP.R_SUMMARY " +
 			    "SET TD_TYPE = ?, " +
 			    "    BD_CALCWEEKPAY = ?, " +
 			    "    BD_ANOTPAID = ?, " +
-			    "WHERE CLAIM_ID = ? " + //This AND statement may throw an error
-			    "AND TD_TYPE = ?");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+			    "where CLAIM_ID = ? " + //This AND statement may throw an error
+			    "AND TD_TYPE = ?";
 	}
 	
 	public void setStmtUpdateClaimSummary(){
-		try {
-			this.stmtUpdateClaimSummary = this.dbConnection.prepareStatement(
-			    "UPDATE APP.CLAIM_SUMMARY " +
+			this.stmtUpdateClaimSummary =
+				"UPDATE APP.CLAIM_SUMMARY " +
 			    "SET DATE_INJ = ?, " +
 			    "    PRIOR_WS = ?, " +
 			    "    EARLIEST_PW = ?, " +
 			    "    BD_AVG_PGWP = ?, " +
 			    "    DAYS_INJ = ?, " +
 			    "    WEEKS_INJ = ?, " +
-			    "WHERE CLAIM_ID = ?");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+			    "where CLAIM_ID = ?";
 	}
 	
 	public void setStmtUpdatePaychecks(){
-		try {
-			this.stmtUpdatePaychecks = this.dbConnection.prepareStatement(
-			    "UPDATE APP.PAYCHECKS " +
+			this.stmtUpdatePaychecks =
+				"UPDATE APP.PAYCHECKS " +
 			    "SET PC_TYPE = ?, " +
 			    "    PAY_DATE = ?, " +
 			    "    PAY_START = ?, " +
 			    "    PAY_END = ?, " +
 			    "    BD_GROSS_AMNT = ?, " +
-			    "WHERE CLAIM_ID = ? " +
+			    "where CLAIM_ID = ? " +
 			    "AND PC_TYPE = ?" +
-			    "AND PAY_END = ?");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+			    "AND PAY_END = ?";
 	}
 	
 	public void setStmtUpdateWCPaychecks(){
-		try {
-			this.stmtUpdateWCPaychecks = this.dbConnection.prepareStatement(
-			    "UPDATE APP.WC_PAYCHECKS " +
+			this.stmtUpdateWCPaychecks = 
+				"UPDATE APP.WC_PAYCHECKS " +
 			    "SET WC_PC_TYPE = ?, " +
 			    "    IS_CONTEST = ?, " +
 			    "    IS_LATE = ?, " +
@@ -145,199 +120,158 @@ public class ClaimPreparedStatements {
 			    "    BD_GROSS_AMNT = ?, " +
 			    "    BD_AMNT_OWED = ?, " +
 			    "    CONTEST_RSLVD = ?, " +
-			    "WHERE CLAIM_ID = ? " +
-			    "AND WC_PC_TYPE = ?");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+			    "where CLAIM_ID = ? " +
+			    "AND WC_PC_TYPE = ?";
 	}
 	
 	public void setStmtInsertClaimants(){
-		try {
-			this.stmtInsertClaimants = this.dbConnection.prepareStatement(
+			this.stmtInsertClaimants =
 				"INSERT INTO APP.CLAIMANTS" + 
 				"(LASTNAME, FIRSTNAME, MIDDLENAME, WORKPLACE, STATE) VALUES" +
-				"(?,?,?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+				"(?,?,?,?,?)";
 	}
 	
 	public void setStmtInsertRSummary(){
-		try {
-			this.stmtInsertRSummary = this.dbConnection.prepareStatement(
+			this.stmtInsertRSummary =
 				"INSERT INTO APP.R_SUMMARY" + 
 				"(CLAIM_ID, TD_TYPE, BD_CALCWEEKPAY, BD_ANOTPAID) VALUES" +
-				"(?,?,?,?)");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+				"(?,?,?,?)";
 	}
 	
 	public void setStmtInsertClaimSummary(){
-		try {
-			this.stmtInsertClaimSummary = this.dbConnection.prepareStatement(
+			this.stmtInsertClaimSummary =
 				"INSERT INTO APP.CLAIM_SUMMARY" + 
 				"(CLAIM_ID, DATE_INJ, PRIOR_WS, EARLIEST_PW, BD_AVG_PGWP, DAYS_INJ, WEEKS_INJ) VALUES" +
-				"(?,?,?,?,?,?,?)");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+				"(?,?,?,?,?,?,?)";
 	}
 	
 	public void setStmtInsertPaychecks(){
-		try {
-			this.stmtInsertPaychecks = this.dbConnection.prepareStatement(
+			this.stmtInsertPaychecks =
 				"INSERT INTO APP.PAYCHECKS" + 
 				"(CLAIM_ID, PC_TYPE, PAY_DATE, PAY_START, PAY_END, BD_GROSS_AMNT) VALUES" +
-				"(?,?,?,?,?,?)");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+				"(?,?,?,?,?,?)";
 	}
 	
 	public void setStmtInsertWCPaychecks(){
-		try {
-			this.stmtInsertWCPaychecks = this.dbConnection.prepareStatement(
+			this.stmtInsertWCPaychecks =
 				"INSERT INTO APP.WC_PAYCHECKS" + 
 				"(CLAIM_ID, WC_PC_TYPE, IS_CONTEST, IS_LATE, FT_HOURS, PAY_RECEIVED, PAY_DATE, PAY_START, PAY_END, BD_GROSS_AMNT, BD_AMNT_OWED, CONTEST_RSLVD) VALUES" +
-				"(?,?,?,?,?,?,?,?,?,?,?,?)");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+				"(?,?,?,?,?,?,?,?,?,?,?,?)";
 	}
 	
 	public void setStmtSelectClaimants(){
-		try {
-			this.stmtSelectClaimants = this.dbConnection.prepareStatement(
+			this.stmtSelectClaimants = 
 				"SELECT * FROM APP.CLAIMANTS" + 
-				"WHERE ID = ?");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+				"where ID = ?";
 	}
 	
 	public void setStmtSelectClaimSummary(){
-		try {
-			this.stmtSelectClaimSummary = this.dbConnection.prepareStatement(
+			this.stmtSelectClaimSummary =
 				"SELECT * FROM APP.CLAIM_SUMMARY " + 
-				"WHERE CLAIM_ID = ?");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+				"where CLAIM_ID = ?";
 	}
 	
 	public void setStmtSelectTDType(){
-		try {
-			this.stmtSelectTDType = this.dbConnection.prepareStatement(
+			this.stmtSelectTDType =
 				"SELECT * FROM APP.R_SUMMARY " + 
-				"WHERE CLAIM_ID = ? AND TD_TYPE = ?");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+				"where CLAIM_ID = ? AND TD_TYPE = ?";
 	}
 	
 	public void setStmtSelectPCType(){
-		try {
-			this.stmtSelectPCType = this.dbConnection.prepareStatement(
+			this.stmtSelectPCType =
 				"SELECT * FROM APP.PAYCHECKS " + 
-				"WHERE CLAIM_ID = ? AND PC_TYPE = ?");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+				"where CLAIM_ID = ? AND PC_TYPE = ?";
 	}
 	
 	public void setStmtSelectWCPCType(){
-		try {
-			this.stmtSelectWCPCType = this.dbConnection.prepareStatement(
+			this.stmtSelectWCPCType =
 				"SELECT * FROM APP.WC_PAYCHECKS " + 
-				"WHERE CLAIM_ID = ? AND WC_PC_TYPE = ?");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+				"where CLAIM_ID = ? AND WC_PC_TYPE = ?";
+
 	}
 	
 	public void setStmtSelectAllClaimants(){
-		try {
-			this.stmtSelectAllClaimants = this.dbConnection.prepareStatement(
-				"SELECT * FROM APP.CLAIMANTS");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+			this.stmtSelectAllClaimants =
+				"SELECT * FROM APP.CLAIMANTS";
 	}
 	
-	public PreparedStatement getStmtDeleteClaimRecord(){
-		return this.stmtDeleteClaimRecord;
+	public String getStmtDeleteClaimRecord(String tableName){
+		return this.setTableName(this.stmtDeleteClaimRecord, tableName);
 	}
 	
-	public PreparedStatement getStmtDeletePaychecksFrmSingleClaim(){
+	public String getStmtDeletePaychecksFrmSingleClaim(){
 		return this.stmtDeletePaychecksFrmSingleClaim;
 	}
 	
-	public PreparedStatement getStmtUpdateClaimants(){
+	public String getStmtUpdateClaimants(){
 		return this.stmtUpdateClaimants;
 	}
 	
-	public PreparedStatement getStmtUpdateRSummary(){
+	public String getStmtUpdateRSummary(){
 		return this.stmtUpdateRSummary;
 	}
 	
-	public PreparedStatement getStmtUpdateClaimSummary(){
+	public String getStmtUpdateClaimSummary(){
 		return this.getStmtUpdateClaimSummary();
 	}
 
-	public PreparedStatement getStmtUpdatePaychecks(){
+	public String getStmtUpdatePaychecks(){
 		return this.stmtUpdatePaychecks;
 	}
 	
-	public PreparedStatement getStmtUpdateWCPaychecks(){
+	public String getStmtUpdateWCPaychecks(){
 		return this.stmtUpdateWCPaychecks;
 	}
 	
-	public PreparedStatement getStmtInsertClaimants(){
+	public String getStmtInsertClaimants(){
 		return this.stmtInsertClaimants;
 	}
 	
-	public PreparedStatement getStmtInsertRSummary(){
+	public String getStmtInsertRSummary(){
 		return this.stmtInsertRSummary;
 	}
 	
-	public PreparedStatement getStmtInsertClaimSummary(){
+	public String getStmtInsertClaimSummary(){
 		return this.stmtInsertClaimSummary;
 	}
 	
-	public PreparedStatement getStmtInsertPaychecks(){
+	public String getStmtInsertPaychecks(){
 		return this.stmtInsertPaychecks;
 	}
 	
-	public PreparedStatement getStmtInsertWCPaychecks(){
+	public String getStmtInsertWCPaychecks(){
 		return this.stmtInsertWCPaychecks;
 	}
 	
-	public PreparedStatement getStmtSelectClaimants(){
+	public String getStmtSelectClaimants(){
 		return this.stmtSelectClaimants;
 	}
 	
-	public PreparedStatement getStmtSelectClaimSummary(){
+	public String getStmtSelectClaimSummary(){
 		return this.stmtSelectClaimSummary;
 	}
 	
-	public PreparedStatement getStmtSelectTDType(){
+	public String getStmtSelectTDType(){
 		return this.stmtSelectTDType;
 	}
 	
-	public PreparedStatement getStmtSelectPCType(){
+	public String getStmtSelectPCType(){
 		return this.stmtSelectPCType;
 	}
 	
-	public PreparedStatement getStmtSelectWCPCType(){
+	public String getStmtSelectWCPCType(){
 		return this.stmtSelectWCPCType;
 	}
 	
-	public PreparedStatement getStmtSelectAllClaimants(){
+	public String getStmtSelectAllClaimants(){
 		return this.stmtSelectAllClaimants;
 	}
 	
+	public String setTableName(String statement, String tableName){
+		return statement.replace("tableName", tableName);
+	}
+	
+	/*Dead Code from prior implementation, saving for reference
 	//To be called when statements are no longer needed for a session (i.e. Application is closed)
 	public void shutdownAllPreparedStatements(){
 		
@@ -432,4 +366,5 @@ public class ClaimPreparedStatements {
 			e.printStackTrace();
 		}
 	}
+	*/
 }
