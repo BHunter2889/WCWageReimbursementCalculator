@@ -41,7 +41,7 @@ public class WCReimbursementCalculatorMenu {
 	private JFrame frmWorkersCompensationLost;
 	private DefaultListModel<ReimbursementOverview> claimListModel;
 	private JList<ReimbursementOverview> claimantList;
-	private static WCReimbursementDAO dataAccess = new WCReimbursementDAO();
+	private static WCReimbursementDAO dataAccess;
 	private StateLawCalculable sLC;
 	private ListSelectionModel listSelectionModel;
 	private JTextPane overviewText;
@@ -97,6 +97,17 @@ public class WCReimbursementCalculatorMenu {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		try {
+			WCReimbursementCalculatorMenu.dataAccess = new WCReimbursementDAO();
+		} catch (Exception e1) {
+			System.out.println(e1.getMessage());
+			e1.printStackTrace();
+			if(dataAccess.dbConnection != null){
+				dataAccess.shutdownAllConnectionInstances();
+				dataAccess = null;
+			}
+			return;
+		}
 		frmWorkersCompensationLost = new JFrame();
 		frmWorkersCompensationLost.setFont(new Font("Dialog", Font.BOLD, 12));
 		frmWorkersCompensationLost.setTitle("Worker's Compensation Lost Wages Calculator v1.0");

@@ -6,7 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -27,23 +29,47 @@ public class WCReimbursementDAO {
 	protected ClaimPreparedStatements preparedStatements; //Close these statements before exiting application by calling .shutdownAllConnectionInstances()
 	protected StateLawCalculable stateLawCalculation;
 
-	public WCReimbursementDAO() {
+	public WCReimbursementDAO() throws Exception {
 		setDBSystemDir();
 	    
 	    loadDatabaseDriver(dbDriverName);
 	    boolean success = false;
+	    boolean tblsExist = false;
+	    boolean tblsCreated = false;
     	label: try {
     		success = this.establishConnection();
+    		if(success){
+    			tblsExist = tablesExist();
+    			if (!tblsExist){
+    				tblsCreated = this.createTables();
+    				if (tblsCreated){
+    					break label;
+    				}
+    				else{
+    					System.out.println("******Could not create tables: ln 48******");
+    					this.shutdownAllConnectionInstances();
+    					throw new Exception("Could not create tables");
+    				}
+    			}
+    		}
 			
 		} catch (SQLException e) {
+			System.out.println(e.getMessage());
 			e.printStackTrace();
 			if(!success){
 				try {
 		    		success = this.createDBAndEstablishConnection();
-					success = this.createTables(this.dbConnection);
-					if(success){
-						break label;
-					}
+		    		if(success){
+	    				tblsCreated = this.createTables();
+	    				if (tblsCreated){
+	    					break label;
+	    				}
+	    				else{
+	    					System.out.println("******Could not create tables: ln 66******");
+	    					this.shutdownAllConnectionInstances();
+	    					throw new Exception("Could not create tables");
+	    				}
+		    		}
 				} catch (SQLException se) {
 					se.printStackTrace();
 				}
@@ -52,11 +78,24 @@ public class WCReimbursementDAO {
 	    
 	    if(!success){
 			try {
-				this.createDBAndEstablishConnection();
-				this.createTables(this.dbConnection);
+				success = this.createDBAndEstablishConnection();
+				if(success){
+    				tblsCreated = this.createTables();
+    				if (!tblsCreated){
+    					System.out.println("******Could not create tables: ln 84******");
+    					this.shutdownAllConnectionInstances();
+    					throw new Exception("Could not create tables");
+    				}
+	    		}
+				else {
+					System.out.println("******Could not create/establish Connection******");
+					throw new Exception("Could not create/establish Connection");
+				}
 	
 			} catch (SQLException se) {
 				se.printStackTrace();
+				this.shutdownAllConnectionInstances();
+				return;
 			}
 	    }
 	}
@@ -191,31 +230,43 @@ public class WCReimbursementDAO {
 	}
 	
 
-	protected boolean createTables(Connection dbConnection) {
+	protected boolean createTables() throws SQLException {
 	    boolean bCreatedTables = false;
-	    File createSQL = new File("CreateWCReimbursementTables.sql");
-	    try {
-	        bCreatedTables = runScript(createSQL, dbConnection);
-	    
-	    } catch (Exception ex) {
-	        ex.printStackTrace();
+	    ClassLoader classLoader = getClass().getClassLoader();
+	    File createSQL = new File(classLoader.getResource("CreateWCReimbursementTables.sql").getFile());
+	    if (!createSQL.exists()){
+	    	throw new SQLException("Could not LOCATE SQL File");
+	    }
+	    else if (!createSQL.isFile() || !createSQL.canExecute()){
+	    	throw new SQLException("Could not RUN SQL File");
+	    }
+	    else{
+		    try {
+		        bCreatedTables = runScript(createSQL);
+		    
+		    } catch (Exception ex) {
+		    	
+		        ex.printStackTrace();
+		    }
 	    }
 	    
 	    return bCreatedTables;
 	}
 	
-	protected boolean runScript(File scriptFile, Connection connection) { 
+	protected boolean runScript(File scriptFile) { 
 	    FileInputStream fileStream = null; 
 	    try { 
 	        fileStream = new FileInputStream(scriptFile); 
-	        int result  = ij.runScript(connection,fileStream,"UTF-8",System.out,"UTF-8"); 
+	        int result  = ij.runScript(this.dbConnection, fileStream, "UTF-8", System.out, "UTF-8"); 
 	        System.out.println("Result code is: " + result); 
 	        return (result==0); 
 	    } 
 	    catch (FileNotFoundException e) { 
+	    	e.printStackTrace();
 	        return false; 
 	    } 
 	    catch (UnsupportedEncodingException e) { 
+	    	e.printStackTrace();
 	        return false; 
 	    } 
 	    finally { 
@@ -227,6 +278,57 @@ public class WCReimbursementDAO {
 	            } 
 	        } 
 	    } 
+	}
+	
+	protected boolean tablesExist(){
+		boolean exist = false;
+		DatabaseMetaData meta = null;
+		try {
+			meta = dbConnection.getMetaData();
+		} catch (SQLException e1) {
+			System.out.println("******NO DATABASE IS CONNECTED!!!*****");
+			e1.printStackTrace();
+			return exist;
+		}
+		ResultSet results = null;
+		try {
+			results = meta.getTables(null, null, "My_Table_Name", 
+			     new String[] {"TABLE"});
+		} catch (SQLException e1) {
+			System.out.println("******DatabaseMetaDataAccess Error!!!*****");
+			e1.printStackTrace();
+			return exist;
+		}
+		try {
+			while (results.next()) {
+				try {
+					String tName = results.getString("TABLE_NAME");
+		            if (tName != null && tName.equals("APP.CLAIMANTS")) {
+		                exist = true;
+		                results.close();
+		                return exist;
+		            }
+				} catch (SQLException e) {
+					System.out.println("******Error getting TABLE_NAME******");
+					e.printStackTrace();
+					results.close();
+					return exist;
+				} 
+			}
+			results.close();
+			return exist;
+		} catch (SQLException e) {
+			System.out.println("******Error2 getting TABLE_NAME******");
+			e.printStackTrace();
+			try {
+				results.close();
+				return exist;
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+				return exist;
+			}
+			
+		}
 	}
 	
 	public boolean deleteRecord(int id) {
