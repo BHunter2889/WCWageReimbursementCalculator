@@ -775,43 +775,34 @@ public class WCReimbursementDAO {
 		return clmnt;
 	}
 	
-	public ArrayList<Claimant> selectAllClaimants(){
-		PreparedStatement stmtSelectClaimants = null;
+	public ArrayList<Claimant> selectAllClaimants() throws SQLException{
+		PreparedStatement stmtSelectAllClaimants = null;
 		try {
-			stmtSelectClaimants = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectAllClaimants());
+			stmtSelectAllClaimants = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectAllClaimants());
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
 		ResultSet results = null;
 		try{
-			stmtSelectClaimants.clearParameters();
-			results = stmtSelectClaimants.executeQuery();
-			if (!results.isBeforeFirst()){
-				results.close();
-				stmtSelectClaimants.close();
+			stmtSelectAllClaimants.clearParameters();
+			if (!stmtSelectAllClaimants.execute()){
+				stmtSelectAllClaimants.close();
 				return null;
 			}
+			results = stmtSelectAllClaimants.getResultSet();
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
 		} catch (SQLException e){
 			e.printStackTrace();
 			try {
-				if (!results.isBeforeFirst()){
-					results.close();
-					stmtSelectClaimants.close();
-				}
+				stmtSelectAllClaimants.close();
+				SQLException se = new SQLException(".execute returns False, but .executeQuery() ln 792 does not return valid ResultSet");
+				throw se;
 			} catch (SQLException e1) {
 				e1.printStackTrace();
-			} finally {
-				try{
-					results.close();
-					stmtSelectClaimants.close();
-					return null;
-				} catch (SQLException se){
-					se.printStackTrace();
-				}
 			}
 			
+			return null;
 		}
 		
 		ArrayList<Claimant> cList = new ArrayList<Claimant>();
@@ -831,7 +822,7 @@ public class WCReimbursementDAO {
 		}
 		try{
 			results.close();
-			stmtSelectClaimants.close();
+			stmtSelectAllClaimants.close();
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
@@ -1172,7 +1163,13 @@ public class WCReimbursementDAO {
 	}
 	
 	public ArrayList<ReimbursementOverview> selectAllReimbursementOverviews(){
-		ArrayList<Claimant> cList = this.selectAllClaimants();
+		ArrayList<Claimant> cList = null;
+		try {
+			cList = this.selectAllClaimants();
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
 		ArrayList<ReimbursementOverview> roList = new ArrayList<ReimbursementOverview>();
 		for (Claimant c : cList){
 			roList.add(this.selectReimbursementOverview(c));
