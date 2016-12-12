@@ -179,7 +179,7 @@ public class WCReimbursementCalculatorMenu {
 		btnCreateNewClaim.setMaximumSize(new Dimension(130, 30));
 		panel.add(btnCreateNewClaim);
 		
-		btnEditPersonalInfo = new JButton("Edit Claimant Personal Info");
+		btnEditPersonalInfo = new JButton("Edit Claimant Info");
 		btnEditPersonalInfo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				editPersonalInfo(false);
@@ -190,7 +190,8 @@ public class WCReimbursementCalculatorMenu {
 		btnEditPersonalInfo.setPreferredSize(new Dimension(180, 30));
 		btnEditPersonalInfo.setMinimumSize(new Dimension(140, 30));
 		btnEditPersonalInfo.setMaximumSize(new Dimension(140, 30));
-		btnEditPersonalInfo = setButtonTextFit(btnEditPersonalInfo, "Edit Claimant Personal Info");
+		//btnEditPersonalInfo = setButtonTextFit(btnEditPersonalInfo, "Edit Claimant Personal Info");
+		btnEditPersonalInfo.setEnabled(false);
 		panel.add(btnEditPersonalInfo);
 		notCreate.add(btnEditPersonalInfo);
 		
@@ -226,6 +227,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEditClaimHistory.setMinimumSize(new Dimension(140, 30));
 		btnEditClaimHistory.setMaximumSize(new Dimension(140, 30));
 		btnEditClaimHistory.setPreferredSize(new Dimension(180, 30));
+		btnEditClaimHistory.setEnabled(false);
 		panel.add(btnEditClaimHistory);
 		notCreate.add(btnEditClaimHistory);
 
@@ -239,6 +241,7 @@ public class WCReimbursementCalculatorMenu {
 		btnChangeInjuryDate.setFont(new Font("Dialog", Font.BOLD, 12));
 		btnChangeInjuryDate.setPreferredSize(new Dimension(180, 30));
 		panel.add(btnChangeInjuryDate);
+		btnChangeInjuryDate.setEnabled(false);
 		notCreate.add(btnChangeInjuryDate);
 		
 		btnEntercompletePriorWage = new JButton("Enter/Complete Prior Wage Payments");
@@ -264,6 +267,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEditWageReimbursement.setPreferredSize(new Dimension(228, 30));
 		btnEditWageReimbursement.setMaximumSize(new Dimension(228, 30));
 		btnEditWageReimbursement.setHorizontalTextPosition(SwingConstants.CENTER);
+		btnEntercompletePriorWage.setEnabled(false);
 		panel_1.add(btnEditWageReimbursement);
 		notCreate.add(btnEditWageReimbursement);
 
@@ -279,6 +283,7 @@ public class WCReimbursementCalculatorMenu {
 		});
 		btnAddWorkComp.setFont(new Font("Dialog", Font.BOLD, 12));
 		btnAddWorkComp.setPreferredSize(new Dimension(180, 30));
+		btnAddWorkComp.setEnabled(false);
 		panel_1.add(btnAddWorkComp);
 		notCreate.add(btnAddWorkComp);
 
@@ -291,6 +296,7 @@ public class WCReimbursementCalculatorMenu {
 		});
 		btnAddTtdWork.setFont(new Font("Dialog", Font.BOLD, 12));
 		panel_1.add(btnAddTtdWork);
+		btnAddTtdWork.setEnabled(false);
 		notCreate.add(btnAddTtdWork);
 		
 		btnAddTpdWork = new JButton("Add TPD Work Comp Payments");
@@ -300,21 +306,23 @@ public class WCReimbursementCalculatorMenu {
 			}
 		});
 		btnAddTpdWork.setFont(new Font("Dialog", Font.BOLD, 12));
+		btnAddTpdWork.setEnabled(false);
 		panel_1.add(btnAddTpdWork);
 		notCreate.add(btnAddTpdWork);
 		
 				
-				btnAddLightDuty = new JButton("Add Light Duty Work Payment");
-				btnAddLightDuty.setIconTextGap(10);
-				btnAddLightDuty.setFont(new Font("Dialog", Font.BOLD, 12));
-				btnAddLightDuty.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						//boolean balancedPayments = 
-						addWorkPayments(claimantList.getSelectedValue().getTPDRSumm()); // Make sure these payments are balanced at the end of the implemented method
-					}
-				});
-				panel_1.add(btnAddLightDuty);
-				notCreate.add(btnAddLightDuty);
+		btnAddLightDuty = new JButton("Add Light Duty Work Payment");
+		btnAddLightDuty.setIconTextGap(10);
+		btnAddLightDuty.setFont(new Font("Dialog", Font.BOLD, 12));
+		btnAddLightDuty.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//boolean balancedPayments = 
+				addWorkPayments(claimantList.getSelectedValue().getTPDRSumm()); // Make sure these payments are balanced at the end of the implemented method
+			}
+		});
+		btnAddLightDuty.setEnabled(false);
+		panel_1.add(btnAddLightDuty);
+		notCreate.add(btnAddLightDuty);
 
 		
 		btnViewClaimDetails = new JButton("View Claim Details");
@@ -323,6 +331,7 @@ public class WCReimbursementCalculatorMenu {
 		btnViewClaimDetails.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		btnViewClaimDetails.setPreferredSize(new Dimension(140, 30));
 		btnViewClaimDetails.setFont(new Font("Dialog", Font.BOLD, 12));
+		btnViewClaimDetails.setEnabled(false);
 		panel_1.add(btnViewClaimDetails);
 		
 		overviewText = new JTextPane();
@@ -334,7 +343,7 @@ public class WCReimbursementCalculatorMenu {
 	
 	public StateLawCalculable selectStateLawCalculable(){
 		StateLawCalculable sLC = null;
-		String state = (String) JOptionPane.showInternalInputDialog(frmWorkersCompensationLost, 
+		String state = (String) JOptionPane.showInternalInputDialog(frmWorkersCompensationLost.getContentPane(), 
 				"Select State in which claim is being filed:", 
 				"Select Available State", 
 				JOptionPane.PLAIN_MESSAGE, null, (new StatesWithCalculations()).getAvailableStateNamesArray().toArray(), null);
@@ -1115,10 +1124,10 @@ public class WCReimbursementCalculatorMenu {
 	    return button;
 	}
 	
-	class SharedListSelectionHandler implements ListSelectionListener {
+	public class SharedListSelectionHandler implements ListSelectionListener {
+		@Override
         public void valueChanged(ListSelectionEvent e) { 
-            ListSelectionModel lsm = (ListSelectionModel)e.getSource();
-            if(lsm.isSelectionEmpty()){
+            if(listSelectionModel.isSelectionEmpty()){
             	btnEditPersonalInfo.setEnabled(false);
             	btnEditClaimHistory.setEnabled(false);
             	btnChangeInjuryDate.setEnabled(false);

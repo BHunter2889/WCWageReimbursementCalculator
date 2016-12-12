@@ -279,7 +279,7 @@ public class WCReimbursementDAO {
 	    } 
 	}
 	
-	protected boolean tablesExist(){
+	protected boolean tablesExist() throws SQLException{
 		boolean exist = false;
 		DatabaseMetaData meta = null;
 		try {
@@ -287,22 +287,24 @@ public class WCReimbursementDAO {
 		} catch (SQLException e1) {
 			System.out.println("******NO DATABASE IS CONNECTED!!!*****");
 			e1.printStackTrace();
-			return exist;
+			throw new SQLException("******NO DATABASE IS CONNECTED!!!*****. DAO ln 286.");
+			//return exist;
 		}
 		ResultSet results = null;
 		try {
-			results = meta.getTables(null, null, "My_Table_Name", 
+			results = meta.getTables(null, "APP", "CLAIMANTS", 
 			     new String[] {"TABLE"});
 		} catch (SQLException e1) {
 			System.out.println("******DatabaseMetaDataAccess Error!!!*****");
 			e1.printStackTrace();
-			return exist;
+			throw new SQLException("Could not verify table name. DAO ln 295.");
+			//return exist;
 		}
 		try {
 			while (results.next()) {
 				try {
 					String tName = results.getString("TABLE_NAME");
-		            if (tName != null && tName.equals("APP.CLAIMANTS")) {
+		            if (tName != null && tName.equals("CLAIMANTS")) {
 		                exist = true;
 		                results.close();
 		                return exist;
@@ -311,7 +313,8 @@ public class WCReimbursementDAO {
 					System.out.println("******Error getting TABLE_NAME******");
 					e.printStackTrace();
 					results.close();
-					return exist;
+					throw new SQLException("Could not verify table name. DAO ln 307.");
+					//return exist;
 				} 
 			}
 			results.close();
@@ -415,6 +418,7 @@ public class WCReimbursementDAO {
 			stmtUpdateClaimants = this.dbConnection.prepareStatement(this.preparedStatements.getStmtUpdateClaimants());
 		} catch (SQLException e1) {
 			e1.printStackTrace();
+			return updated;
 		}
 		try {
 			stmtUpdateClaimants.clearParameters();

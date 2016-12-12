@@ -67,7 +67,7 @@ public class ClaimPreparedStatements {
 			    "    FIRSTNAME = ?, " +
 			    "    MIDDLENAME = ?, " +
 			    "    WORKPLACE = ?, " +
-			    "    STATE = ?, " +
+			    "    STATE = ? " +
 			    "where ID = ?";
 	}
 	
