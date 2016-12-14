@@ -77,22 +77,12 @@ public class WCReimbursementCalculatorMenu {
 			public void run() {
 				try {
 					WCReimbursementCalculatorMenu window = new WCReimbursementCalculatorMenu();
+					window.attachShutDownHook();
 					window.frmWorkersCompensationLost.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-		});
-		Runtime.getRuntime().addShutdownHook(new Thread() {  //TODO This thread needs to refere to a thread created by above Runnable (possibly?)
-		    public void run() {
-		    		if(dataAccess.shutdownAllConnectionInstances()){
-		    			System.gc();
-		    			System.exit(0);
-		    		}
-		    		else {
-		    			System.out.println("Error closing down database connection. You may need to force quit the application.");
-		    		}
-		    }
 		});
 	}
 
@@ -101,6 +91,23 @@ public class WCReimbursementCalculatorMenu {
 	 */
 	public WCReimbursementCalculatorMenu() {
 		initialize();
+	}
+	
+	//ShutDownHook to be added on application start
+	public void attachShutDownHook() {
+	    Runtime.getRuntime().addShutdownHook(new Thread() {
+	        @Override
+	        public void run() {
+	        	if(dataAccess.shutdownAllConnectionInstances()){
+	    			System.gc();
+	    			System.exit(0);
+	    		}
+	    		else {
+	    			System.out.println("Error closing down database connection. You may need to force quit the application.");
+	    		}	        
+	        }
+	    });
+
 	}
 
 	/**
