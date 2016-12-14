@@ -63,6 +63,16 @@ public class WCReimbursementCalculatorMenu {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		
+		 try { 
+		        UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel"); 
+		 } catch (Exception e){ 
+		    try {
+				throw new Exception("Could not change LookAndFeel");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		 }
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -73,8 +83,8 @@ public class WCReimbursementCalculatorMenu {
 				}
 			}
 		});
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-		    public void run() { 
+		Runtime.getRuntime().addShutdownHook(new Thread() {  //TODO This thread needs to refere to a thread created by above Runnable (possibly?)
+		    public void run() {
 		    		if(dataAccess.shutdownAllConnectionInstances()){
 		    			System.gc();
 		    			System.exit(0);
@@ -197,6 +207,7 @@ public class WCReimbursementCalculatorMenu {
 		
 		this.claimListModel = new DefaultListModel<ReimbursementOverview>();
 		loadExistingData();
+		
 		JPanel panel_1 = new JPanel();
 		FlowLayout flowLayout_1 = (FlowLayout) panel_1.getLayout();
 		flowLayout_1.setVgap(11);
@@ -206,13 +217,13 @@ public class WCReimbursementCalculatorMenu {
 		
 		this.claimantList = new JList<ReimbursementOverview>(this.claimListModel);
 		claimantList.setName("Claims");
-		claimantList.setValueIsAdjusting(true);
 		claimantList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		claimantList.setBorder(UIManager.getBorder("List.focusCellHighlightBorder"));
 		claimantList.setBounds(207, 11, 467, 151);
 		frmWorkersCompensationLost.getContentPane().add(claimantList);
 		
 		listSelectionModel = claimantList.getSelectionModel();
+		listSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         listSelectionModel.addListSelectionListener(
                 new SharedListSelectionHandler());
 		
@@ -252,11 +263,13 @@ public class WCReimbursementCalculatorMenu {
 		});
 		btnEntercompletePriorWage.setPreferredSize(new Dimension(242, 30));
 		btnEntercompletePriorWage.setFont(new Font("Dialog", Font.BOLD, 12));
+		btnEntercompletePriorWage.setEnabled(false);
 		panel_1.add(btnEntercompletePriorWage);
 		notCreate.add(btnEntercompletePriorWage);
 
 		
 		btnEditWageReimbursement = new JButton("Start Wage Reimbursement Details");
+		btnEntercompletePriorWage.setEnabled(false);
 		btnEditWageReimbursement.setIconTextGap(10);
 		btnEditWageReimbursement.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -267,12 +280,12 @@ public class WCReimbursementCalculatorMenu {
 		btnEditWageReimbursement.setPreferredSize(new Dimension(228, 30));
 		btnEditWageReimbursement.setMaximumSize(new Dimension(228, 30));
 		btnEditWageReimbursement.setHorizontalTextPosition(SwingConstants.CENTER);
-		btnEntercompletePriorWage.setEnabled(false);
 		panel_1.add(btnEditWageReimbursement);
 		notCreate.add(btnEditWageReimbursement);
 
 		
 		btnAddWorkComp = new JButton("Add Work Comp Payments");
+		btnAddWorkComp.setEnabled(false);
 		btnAddWorkComp.setMinimumSize(new Dimension(180, 30));
 		btnAddWorkComp.setMaximumSize(new Dimension(180, 30));
 		btnAddWorkComp.setIconTextGap(10);
@@ -283,7 +296,6 @@ public class WCReimbursementCalculatorMenu {
 		});
 		btnAddWorkComp.setFont(new Font("Dialog", Font.BOLD, 12));
 		btnAddWorkComp.setPreferredSize(new Dimension(180, 30));
-		btnAddWorkComp.setEnabled(false);
 		panel_1.add(btnAddWorkComp);
 		notCreate.add(btnAddWorkComp);
 
@@ -1126,7 +1138,9 @@ public class WCReimbursementCalculatorMenu {
 	
 	public class SharedListSelectionHandler implements ListSelectionListener {
 		@Override
-        public void valueChanged(ListSelectionEvent e) { 
+        public void valueChanged(ListSelectionEvent e) {
+			boolean nulled = false;
+			
             if(listSelectionModel.isSelectionEmpty()){
             	btnEditPersonalInfo.setEnabled(false);
             	btnEditClaimHistory.setEnabled(false);
@@ -1152,8 +1166,12 @@ public class WCReimbursementCalculatorMenu {
         				break label;
         			}
         		}
-
-            	if(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary() == null){
+            	try{
+            		nulled = (claimantList.getSelectedValue().getTTDRSumm().getClaimSummary() == null);
+            	} catch (NullPointerException ne) {
+            		nulled = true;
+            	}
+            	if(nulled){
             		btnEditPersonalInfo.setEnabled(true);
    	            	btnEditClaimHistory.setEnabled(true);
             		btnChangeInjuryDate.setEnabled(false);

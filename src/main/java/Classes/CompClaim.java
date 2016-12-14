@@ -4,7 +4,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
-import java.util.Scanner;
+//import java.util.Scanner;
 import java.util.TimeZone;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -22,14 +22,14 @@ public class CompClaim {
 	protected long daysInjured;
 	protected long weeksInjured;
 	protected BigDecimal avgPriorGrossWeeklyPayment; //calculated after priorWages is set. See above. 
-	protected Scanner s;
+	//protected Scanner s;
 	protected StateLawCalculable stateLawCalculation;
 	//moved to StateLawCalculable: protected BigDecimal stateWeeksPriorPeriod; //for Missouri, this is 13 weeks.
 	
 	
 	//constructor - month should be actual month (i.e. January = 1), not Java Calendar month
 	public CompClaim(int year, int month, int day) {
-		this.s = new Scanner(System.in);
+		//this.s = new Scanner(System.in);
 		this.priorWages = new ArrayList<Paycheck>();
 		setDateInjured(year, month, day);
 
@@ -59,7 +59,7 @@ public class CompClaim {
 		
 	//constructor to set stateWeeksPriorPeriod
 	public CompClaim(int year, int month, int day, StateLawCalculable sLC) {
-		this.s = new Scanner(System.in);
+		//this.s = new Scanner(System.in);
 		this.priorWages = new ArrayList<Paycheck>();
 		setDateInjured(year, month, day);
 
@@ -92,7 +92,7 @@ public class CompClaim {
 	
 	// Constructor to complete all CompClaim fields when called from DAO, should take sql.Date object
 	public CompClaim(Date dateInjured, StateLawCalculable sLC) {
-		this.s = new Scanner(System.in);
+		//this.s = new Scanner(System.in);
 		this.priorWages = new ArrayList<Paycheck>();
 		setDateInjured(dateInjured);
 

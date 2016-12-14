@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.sql.Date;
 import java.util.GregorianCalendar;
-import java.util.Scanner;
+//import java.util.Scanner;
 import java.util.TimeZone;
 
 public abstract class ReimbursementSummary {
@@ -19,11 +19,11 @@ public abstract class ReimbursementSummary {
 	protected BigDecimal amountNotPaid;
 	protected ArrayList<WorkCompPaycheck> wcPayments;
 	protected StateLawCalculable stateLawCalculation;
-	protected Scanner s;
+	//protected Scanner s;
 
 	//constructor
 	public ReimbursementSummary(CompClaim claim, StateLawCalculable stateLawcalc) {
-		this.s = new Scanner(System.in);
+		//this.s = new Scanner(System.in);
 		this.claimSummary = claim;
 		this.wcPayments = new ArrayList<WorkCompPaycheck>();
 		this.stateLawCalculation = stateLawcalc;
@@ -32,7 +32,7 @@ public abstract class ReimbursementSummary {
 	}
 	
 	public ReimbursementSummary() {
-		this.s = new Scanner(System.in);
+		//this.s = new Scanner(System.in);
 		this.claimSummary = null;
 		this.wcPayments = new ArrayList<WorkCompPaycheck>();
 		this.calculatedWeeklyPayment = null;
@@ -41,7 +41,7 @@ public abstract class ReimbursementSummary {
 	
 	//for super() subclass construction
 	public ReimbursementSummary(BigDecimal calculatedWeeklyPayment, CompClaim claimSummary, BigDecimal amountNotPaid, ArrayList<WorkCompPaycheck> wcPayments) {
-		this.s = new Scanner(System.in);
+		//this.s = new Scanner(System.in);
 		this.claimSummary = claimSummary;
 		this.wcPayments = wcPayments;
 		this.sortWCPaymentsByDate();
@@ -50,7 +50,7 @@ public abstract class ReimbursementSummary {
 	}
 	
 	public ReimbursementSummary(ReimbursementSummary rsumm) {
-		this.s = new Scanner(System.in);
+		//this.s = new Scanner(System.in);
 		this.claimSummary = rsumm.claimSummary;
 		this.wcPayments = rsumm.wcPayments;
 		this.calculatedWeeklyPayment = rsumm.calculatedWeeklyPayment;

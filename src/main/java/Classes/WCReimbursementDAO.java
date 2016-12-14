@@ -741,8 +741,9 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
-	public Claimant selectClaimants(int id){
+	public Claimant selectClaimants(int id) {
 		PreparedStatement stmtSelectClaimants = null;
+		boolean exists = false;
 		try {
 			stmtSelectClaimants = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectClaimants());
 		} catch (SQLException e1) {
@@ -752,24 +753,54 @@ public class WCReimbursementDAO {
 		try{
 			stmtSelectClaimants.clearParameters();
 			stmtSelectClaimants.setInt(1, id);
-			results = stmtSelectClaimants.executeQuery();
+			exists = stmtSelectClaimants.execute();
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
+		if (!exists){
+			try {
+				stmtSelectClaimants.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+		try {
+			results = stmtSelectClaimants.getResultSet();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		
 		Claimant clmnt = new Claimant();
+		int row = -1;
 		try{
-            clmnt.setID(results.getInt(1));
-            clmnt.setLastName(results.getString(2));
-            clmnt.setFirstName(results.getString(3));
-            clmnt.setMiddleName(results.getString(4));
-            clmnt.setWorkPlace(results.getString(5));
-            clmnt.setState(results.getString(6));
+			while(results.next()){
+				row++;
+	            clmnt.setID(results.getInt(1));
+	            clmnt.setLastName(results.getString(2));
+	            clmnt.setFirstName(results.getString(3));
+	            clmnt.setMiddleName(results.getString(4));
+	            clmnt.setWorkPlace(results.getString(5));
+	            clmnt.setState(results.getString(6));
+			}
+			if (row < 0){
+				results.close();
+				stmtSelectClaimants.close();
+				return null;
+			}
 		} catch (SQLException e){
 			e.printStackTrace();
+			try {
+				results.close();
+				stmtSelectClaimants.close();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			return null;
 		}
+		
 		try{
 			results.close();
 			stmtSelectClaimants.close();
@@ -810,8 +841,10 @@ public class WCReimbursementDAO {
 		}
 		
 		ArrayList<Claimant> cList = new ArrayList<Claimant>();
+		int row = -1;
 		try{
 			while(results.next()){
+				row++;
 				Claimant clmnt = new Claimant();
 	            clmnt.setID(results.getInt(1));
 	            clmnt.setLastName(results.getString(2));
@@ -821,8 +854,16 @@ public class WCReimbursementDAO {
 	            clmnt.setState(results.getString(6));
 	            cList.add(cList.size(), clmnt);
 			}
+			if (row < 0){
+				results.close();
+				stmtSelectAllClaimants.close();
+				return null;
+			}
 		} catch (SQLException e){
 			e.printStackTrace();
+			results.close();
+			stmtSelectAllClaimants.close();
+			return null;
 		}
 		try{
 			results.close();
@@ -844,14 +885,11 @@ public class WCReimbursementDAO {
 		try{
 			stmtSelectClaimSummary.clearParameters();
 			stmtSelectClaimSummary.setInt(1, id);
-			if((results = stmtSelectClaimSummary.executeQuery()) == null){
-				try{
-					stmtSelectClaimSummary.close();
-				} catch (SQLException e){
-					e.printStackTrace();
-				}
+			if (!stmtSelectClaimSummary.execute()){
+				stmtSelectClaimSummary.close();
 				return null;
 			}
+			results = stmtSelectClaimSummary.getResultSet();
 			
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
@@ -866,34 +904,46 @@ public class WCReimbursementDAO {
 		}
 		
 		CompClaim clmSm = null;
+		
+		int row = -1;
 		try{
-			clmSm = new CompClaim(results.getDate(3),  this.stateLawCalculation);
-			try{
-				if (clmSm.getPriorWeekStart().getTime().compareTo(results.getDate(4)) != 0 || clmSm.getEarliestPriorWageDate().getTime().compareTo(results.getDate(5)) != 0){
-					throw new Exception("ClaimSummary computed dates and saved dates are not equal.");
+			while(results.next()){
+				row++;
+				clmSm = new CompClaim(results.getDate(3),  this.stateLawCalculation);
+				try{
+					if (clmSm.getPriorWeekStart().getTime().compareTo(results.getDate(4)) != 0 || clmSm.getEarliestPriorWageDate().getTime().compareTo(results.getDate(5)) != 0){
+						throw new Exception("ClaimSummary computed dates and saved dates are not equal.");
+					}
+				}
+				catch (Exception e){
+					JOptionPane.showMessageDialog(null, "Error: "+ e.getCause().getMessage());
+					try{
+						results.close();
+						stmtSelectClaimSummary.close();
+					} catch (SQLException se){
+						se.printStackTrace();
+					}
+				} finally {
+		            clmSm.setAvgPriorGrossWeeklyPayment(results.getBigDecimal(6));
+		            clmSm.setPriorWages(selectPaychecks(id, "PRIORWAGES"));
 				}
 			}
-			catch (Exception e){
-				JOptionPane.showMessageDialog(null, "Error: "+ e.getCause().getMessage());
-				try{
-					results.close();
-					stmtSelectClaimSummary.close();
-				} catch (SQLException se){
-					se.printStackTrace();
-				}
-			} finally {
-	            clmSm.setAvgPriorGrossWeeklyPayment(results.getBigDecimal(6));
-	            clmSm.setPriorWages(selectPaychecks(id, "PRIORWAGES"));
+			if (row < 0){
+				results.close();
+				stmtSelectClaimSummary.close();
+				return null;
 			}
 		} catch (SQLException e){
 			e.printStackTrace();
-			try{
+			try {
 				results.close();
 				stmtSelectClaimSummary.close();
-			} catch (SQLException se){
-				se.printStackTrace();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
 			}
+			return null;
 		}
+		
 		try{
 			results.close();
 			stmtSelectClaimSummary.close();
@@ -917,14 +967,11 @@ public class WCReimbursementDAO {
 			stmtSelectPaychecks.clearParameters();
 			stmtSelectPaychecks.setInt(1, id);
 			stmtSelectPaychecks.setString(2, pcType);
-			if((results = stmtSelectPaychecks.executeQuery()) == null){
-				try{
-					stmtSelectPaychecks.close();
-				} catch (SQLException e){
-					e.printStackTrace();
-				}
+			if (!stmtSelectPaychecks.execute()){
+				stmtSelectPaychecks.close();
 				return null;
-			}	
+			}
+			results = stmtSelectPaychecks.getResultSet();			
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
 		} catch (SQLException e){
@@ -937,8 +984,10 @@ public class WCReimbursementDAO {
 			return null;
 		}
 		
+		int row = -1;
 		try{
 			while(results.next()){
+				row++;
 				Paycheck p = new Paycheck();
 				p.setPaymentDate(results.getDate(4));
 				p.setPayPeriodStart(results.getDate(5));
@@ -946,13 +995,20 @@ public class WCReimbursementDAO {
 				p.setGrossAmount(results.getBigDecimal(7));
 				pcList.add(p);
 			}
+			if (row < 0){
+				results.close();
+				stmtSelectPaychecks.close();
+				return null;
+			}
 		} catch (SQLException e){
 			e.printStackTrace();
 			try{
 				results.close();
 				stmtSelectPaychecks.close();
+				return null;
 			} catch (SQLException se){
 				se.printStackTrace();
+				return null;
 			}
 		}
 		
@@ -979,14 +1035,11 @@ public class WCReimbursementDAO {
 			stmtSelectWCPaychecks.clearParameters();
 			stmtSelectWCPaychecks.setInt(1, id);
 			stmtSelectWCPaychecks.setString(2, wcpcType);
-			if((results = stmtSelectWCPaychecks.executeQuery()) == null){
-				try{
-					stmtSelectWCPaychecks.close();
-				} catch (SQLException e){
-					e.printStackTrace();
-				}
+			if (!stmtSelectWCPaychecks.execute()){
+				stmtSelectWCPaychecks.close();
 				return null;
 			}
+			results = stmtSelectWCPaychecks.getResultSet();
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
 		} catch (SQLException e){
@@ -999,8 +1052,10 @@ public class WCReimbursementDAO {
 			return null;
 		}
 		
+		int row = -1;
 		try{
 			while(results.next()){
+				row++;
 				WorkCompPaycheck wp = new WorkCompPaycheck();
 				wp.setIsContested(results.getBoolean(4));
 				wp.setIsLate(results.getBoolean(5));
@@ -1015,13 +1070,20 @@ public class WCReimbursementDAO {
 				wp.setStateLawCalculation(this.stateLawCalculation);
 				wcpcList.add(wp);
 			}
+			if (row < 0){
+				results.close();
+				stmtSelectWCPaychecks.close();
+				return null;
+			}
 		} catch (SQLException e){
 			e.printStackTrace();
 			try{
 				results.close();
 				stmtSelectWCPaychecks.close();
+				return null;
 			} catch (SQLException se){
 				se.printStackTrace();
+				return null;
 			}
 		}
 		
@@ -1050,14 +1112,11 @@ public class WCReimbursementDAO {
 			stmtSelectRSummary.clearParameters();
 			stmtSelectRSummary.setInt(1, id);
 			stmtSelectRSummary.setString(2, "TPD");
-			if((results = stmtSelectRSummary.executeQuery()) == null){
-				try{
-					stmtSelectRSummary.close();
-				} catch (SQLException e){
-					e.printStackTrace();
-				}
+			if (!stmtSelectRSummary.execute()){
+				stmtSelectRSummary.close();
 				return null;
 			}
+			results = stmtSelectRSummary.getResultSet();
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
 		} catch (SQLException e){
@@ -1071,17 +1130,28 @@ public class WCReimbursementDAO {
 		}
 		
 		TPDReimbursementSummary tpdRSumm = null;
+		int row = -1;
 		try{
-			tpdRSumm = new TPDReimbursementSummary(results.getBigDecimal(4), claimSum, results.getBigDecimal(5), tpdWCPay, workPay);
-		} catch (SQLException e){
-			try{
+			while(results.next()){
+				row++;
+				tpdRSumm = new TPDReimbursementSummary(results.getBigDecimal(4), claimSum, results.getBigDecimal(5), tpdWCPay, workPay);
+			}
+			if (row < 0){
 				results.close();
 				stmtSelectRSummary.close();
-			} catch (SQLException se){
-				se.printStackTrace();
+				return null;
 			}
+		} catch (SQLException e){
 			e.printStackTrace();
+			try {
+				results.close();
+				stmtSelectRSummary.close();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			return null;
 		}
+		
 		try{
 			results.close();
 			stmtSelectRSummary.close();
@@ -1106,14 +1176,11 @@ public class WCReimbursementDAO {
 			stmtSelectRSummary.clearParameters();
 			stmtSelectRSummary.setInt(1, id);
 			stmtSelectRSummary.setString(2, "TTD");
-			if((results = stmtSelectRSummary.executeQuery()) == null){
-				try{
-					stmtSelectRSummary.close();
-				} catch (SQLException e){
-					e.printStackTrace();
-				}
+			if (!stmtSelectRSummary.execute()){
+				stmtSelectRSummary.close();
 				return null;
 			}
+			results = stmtSelectRSummary.getResultSet();
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
 		} catch (SQLException e){
@@ -1126,18 +1193,28 @@ public class WCReimbursementDAO {
 		}
 		
 		TTDReimbursementSummary ttdRSumm = null;
+		int row = -1;
 		try{
-			ttdRSumm = new TTDReimbursementSummary(results.getBigDecimal(4), claimSum, results.getBigDecimal(5), ttdWCPay);
-		} catch (SQLException e){
-			try{
+			while(results.next()){
+				row++;
+				ttdRSumm = new TTDReimbursementSummary(results.getBigDecimal(4), claimSum, results.getBigDecimal(5), ttdWCPay);
+			}
+			if (row < 0){
 				results.close();
 				stmtSelectRSummary.close();
-			} catch (SQLException se){
-				se.printStackTrace();
+				return null;
 			}
+		} catch (SQLException e){
 			e.printStackTrace();
-
+			try {
+				results.close();
+				stmtSelectRSummary.close();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			return null;
 		}
+		
 		try{
 			results.close();
 			stmtSelectRSummary.close();
