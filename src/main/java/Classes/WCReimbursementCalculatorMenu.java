@@ -387,10 +387,21 @@ public class WCReimbursementCalculatorMenu {
 	public GregorianCalendar getCalendar(String message, String title, boolean isPayment, boolean isPPS){
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
+		boolean nulled = false;
 		JXMonthView mV = new JXMonthView();
+		mV.setTraversable(true);
 		JXDatePicker picker = new JXDatePicker();
 		ReimbursementOverview r = claimantList.getSelectedValue();
-		CompClaim cS = r.getTTDRSumm().getClaimSummary();
+		CompClaim cS = null;
+		try{
+    		nulled = (r.getTTDRSumm().getClaimSummary() == null);
+    	} catch (NullPointerException ne) {
+    		nulled = true;
+    	}
+		
+    	if(nulled){
+    		cS = r.getTTDRSumm().getClaimSummary();
+    	}
 		if(isPayment){
 			if(isPPS){
 				Calendar start = cS.getDateInjured();
@@ -424,6 +435,35 @@ public class WCReimbursementCalculatorMenu {
 		return selected;
 	}
 	
+	public GregorianCalendar getInjuryDateCalendar(String message, String title){
+		//long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
+		//long mWeek = mDay * 7;
+		//boolean nulled = false;
+		JXMonthView mV = new JXMonthView();
+		JXDatePicker picker = new JXDatePicker();
+		//ReimbursementOverview r = claimantList.getSelectedValue();
+		mV.setTraversable(true);
+		picker.setMonthView(mV);
+		
+		Object[] params = {message,picker};		
+		GregorianCalendar selected = new GregorianCalendar();
+		JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.PLAIN_MESSAGE);
+		selected.setTime(((JXDatePicker)params[1]).getDate());
+		/*
+		while(selected.compareTo(new GregorianCalendar()) == 0){
+			String m = "You must select a date within the dates provided in order to continue." +System.getProperty("line.separator")+
+					"If you do not wish to continue and would like to enter dates at a later time, click CANCEL, otherwise OK to select a date and proceed.";
+			if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, m, null, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.CANCEL_OPTION){
+				return null;
+			}
+			JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.PLAIN_MESSAGE);
+			selected.setTime(((JXDatePicker)params[1]).getDate());
+		}
+		*/
+		
+		return selected;
+	}
+	
 	public GregorianCalendar getPriorWageCalendar(String message, String title, CompClaim claimSumm, boolean ppS){
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
@@ -435,6 +475,7 @@ public class WCReimbursementCalculatorMenu {
 			Calendar end = claimSumm.getPriorWeekStart();
 			end.setTimeInMillis(end.getTimeInMillis() + (mWeek - mDay));
 			mV.addSelectionInterval(start.getTime(), end.getTime());
+			mV.setTraversable(true);
 			picker.setMonthView(mV);
 		}
 		else {
@@ -443,6 +484,7 @@ public class WCReimbursementCalculatorMenu {
 			Calendar end = claimSumm.getPriorWeekStart();
 			end.setTimeInMillis(end.getTimeInMillis() + (mWeek*2));
 			mV.addSelectionInterval(start.getTime(), end.getTime());
+			mV.setTraversable(true);
 			picker.setMonthView(mV);
 		}
 		
@@ -656,8 +698,9 @@ public class WCReimbursementCalculatorMenu {
 		dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", rs.getCalculatedWeeklyPayment(), rs.getAmountNotPaid());
 		for(WorkCompPaycheck p : rs.wcPayments){
 			dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TTD", p.getIsContested(),
-					p.getIsLate(), p.getFullTimeHours(), (Date)p.getPayReceivedDate().getTime(), (Date)p.getPaymentDate().getTime(),
-					(Date)p.getPayPeriodStart().getTime(), (Date)p.getPayPeriodEnd().getTime(), p.getGrossAmount(), p.getAmountStillOwed(), (Date)p.getContestResolutionDate().getTime());
+					p.getIsLate(), p.getFullTimeHours(),new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
+					new java.sql.Date(p.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(p.getPayPeriodEnd().getTimeInMillis()), p.getGrossAmount(), p.getAmountStillOwed(),
+					new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()));
 		}
 		return true;
 	}
@@ -741,7 +784,7 @@ public class WCReimbursementCalculatorMenu {
 						fD.setTimeInMillis(rs.getClaimSummary().getPriorWeekStart().getTimeInMillis() + mWeek);
 						SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 						formatter.setLenient(false);
-						Date day = (Date) fD.getTime();
+						Date day = new java.sql.Date(fD.getTimeInMillis());
 						System.out.println("Paycheck start day needs to be on or after the following date to be added: " +  formatter.format(day));
 					}
 				}
@@ -752,14 +795,16 @@ public class WCReimbursementCalculatorMenu {
 					exists = (p.getPayPeriodEnd().compareTo(pc.getPayPeriodEnd()) == 0);
 				}
 				if(!exists){
-					dataAccess.insertPaychecks(ro.getClaimant().getID(), "WORKPAYMENT", (Date)pc.getPaymentDate().getTime(), (Date)pc.getPayPeriodStart().getTime(), (Date)pc.getPayPeriodEnd().getTime(), pc.getGrossAmount());
+					dataAccess.insertPaychecks(ro.getClaimant().getID(), "WORKPAYMENT", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
+							new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
 				}
 				else{
 					message = "Paycheck with same period end date already exists."+eol+
 							"Select OK to Overwrite paycheck with same date, otherwise CANCEL to keep existing check with same date."+eol+ 
 							"(If this is a pay adjustment check for a previously entered pay period, CANCEL and add the Gross Amount from the two checks and enter them as one check with the corresponding dates of pay period)";
 					if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, message, "Overwrite Previous Pay Period Check?", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION){
-						dataAccess.updatePaychecks(ro.getClaimant().getID(), "WORKPAYMENT", (Date)pc.getPaymentDate().getTime(), (Date)pc.getPayPeriodStart().getTime(), (Date)pc.getPayPeriodEnd().getTime(), pc.getGrossAmount());
+						dataAccess.updatePaychecks(ro.getClaimant().getID(), "WORKPAYMENT", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
+								new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
 					}
 					else{
 						workPayments.remove(workPayments.size()-1);
@@ -780,8 +825,9 @@ public class WCReimbursementCalculatorMenu {
 		}
 		for(WorkCompPaycheck p : ro.tpdRSumm.wcPayments){
 			dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TPD", p.getIsContested(),
-					p.getIsLate(), p.getFullTimeHours(), (Date)p.getPayReceivedDate().getTime(), (Date)p.getPaymentDate().getTime(),
-					(Date)p.getPayPeriodStart().getTime(), (Date)p.getPayPeriodEnd().getTime(), p.getGrossAmount(), p.getAmountStillOwed(), (Date)p.getContestResolutionDate().getTime());
+					p.getIsLate(), p.getFullTimeHours(), new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
+					new java.sql.Date(p.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(p.getPayPeriodEnd().getTimeInMillis()), p.getGrossAmount(), p.getAmountStillOwed(),
+					new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()));
 		}
 		claimListModel.set(claimantList.getSelectedIndex(), ro);
 		return true;
@@ -821,19 +867,21 @@ public class WCReimbursementCalculatorMenu {
 						fD.setTimeInMillis(rs.getClaimSummary().getPriorWeekStart().getTimeInMillis() + mWeek);
 						SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 						formatter.setLenient(false);
-						Date day = (Date) fD.getTime();
+						Date day = new java.sql.Date(fD.getTimeInMillis());
 						System.out.println("Paycheck start day needs to be on or after the following date to be added: " +  formatter.format(day));
 					}
 				}
 	
-				dataAccess.insertPaychecks(ro.getClaimant().getID(), "WORKPAYMENT", (Date)pc.getPaymentDate().getTime(), (Date)pc.getPayPeriodStart().getTime(), (Date)pc.getPayPeriodEnd().getTime(), pc.getGrossAmount());
+				dataAccess.insertPaychecks(ro.getClaimant().getID(), "WORKPAYMENT", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
+						new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
 			}
 			else{
 				String message = "Paycheck with same period end date already exists."+eol+
 						"Select OK to Overwrite paycheck with same date, otherwise CANCEL to keep existing check with same date."+eol+ 
 						"(If this is a pay adjustment check for a previously entered pay period, CANCEL and add the Gross Amount from the two checks and enter them as one check with the corresponding dates of pay period)";
 				if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, message, "Overwrite Previous Pay Period Check?", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION){
-					dataAccess.updatePaychecks(ro.getClaimant().getID(), "WORKPAYMENT", (Date)pc.getPaymentDate().getTime(), (Date)pc.getPayPeriodStart().getTime(), (Date)pc.getPayPeriodEnd().getTime(), pc.getGrossAmount());
+					dataAccess.updatePaychecks(ro.getClaimant().getID(), "WORKPAYMENT", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
+							new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
 				}
 				else{
 					workPayments.remove(workPayments.size()-1);
@@ -922,10 +970,10 @@ public class WCReimbursementCalculatorMenu {
 			//int year = getPositiveInt("Enter Year of Injury: ", "Enter Year Injured");
 			//int month = getPositiveInt("Enter Month of Injury: ", "Enter Month Injured");
 			//int day = getPositiveInt("Enter Day of Month (i.e. 21 for January 21st) of Injury: ", "Enter Day Injured");
-			Calendar dateInjured = getCalendar("Select the Date of Injury", "Date Injured", false, false);
-			CompClaim cHist = new CompClaim((Date)dateInjured.getTime(), sLC);
-			dataAccess.insertClaimSummary(ro.getClaimant().getID(), (Date)dateInjured.getTime(), (Date)cHist.getPriorWeekStart().getTime(),
-					(Date)cHist.getEarliestPriorWageDate().getTime(), new BigDecimal("-1"), cHist.getDaysInjured(), cHist.getWeeksInjured());
+			Calendar dateInjured = getInjuryDateCalendar("Select the Date of Injury", "Date Injured");
+			CompClaim cHist = new CompClaim(new java.sql.Date(dateInjured.getTimeInMillis()), sLC);
+			dataAccess.insertClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
+					new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), cHist.getDaysInjured(), cHist.getWeeksInjured());
 			ro.setTTDRSumm(new TTDReimbursementSummary());
 			ro.ttdRSumm.setClaimSummary(cHist);
 			claimListModel.set(claimantList.getSelectedIndex(), ro);
@@ -938,14 +986,19 @@ public class WCReimbursementCalculatorMenu {
 				}
 				else{
 					priorWages = sLC.addAndTrimToPriorWages(pc, priorWages, cHist.getPriorWeekStart());
-					dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", (Date)pc.getPaymentDate().getTime(), (Date)pc.getPayPeriodStart().getTime(), (Date)pc.getPayPeriodEnd().getTime(), pc.getGrossAmount());
+					if (priorWages.size() <= 1){
+						return false;
+					}
+					pc = priorWages.get(priorWages.size() - 1);
+					dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
+							new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
 				}
 			}
 			if(sLC.priorWagesIsComplete(priorWages)){
 				ro.ttdRSumm.claimSummary.setPriorWagesAndComputeAPGWP(priorWages);
 				ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
-				dataAccess.updateClaimSummary(ro.getClaimant().getID(), (Date)dateInjured.getTime(), (Date)cHist.getPriorWeekStart().getTime(),
-						(Date)cHist.getEarliestPriorWageDate().getTime(), ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment(), 
+				dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
+						new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment(), 
 						ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
 				claimListModel.set(claimantList.getSelectedIndex(), ro);
 				return true;
@@ -953,8 +1006,8 @@ public class WCReimbursementCalculatorMenu {
 			else {
 				ro.ttdRSumm.claimSummary.setPriorWages(priorWages);
 				ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
-				dataAccess.updateClaimSummary(ro.getClaimant().getID(), (Date)dateInjured.getTime(), (Date)cHist.getPriorWeekStart().getTime(),
-						(Date)cHist.getEarliestPriorWageDate().getTime(), new BigDecimal("-1"), 
+				dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
+						new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), 
 						ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
 				claimListModel.set(claimantList.getSelectedIndex(), ro);
 				return false;
@@ -981,8 +1034,8 @@ public class WCReimbursementCalculatorMenu {
 				}
 				dataAccess.deletePaychecksFrmSingleClaim(ro.getClaimant().getID(), "PRIORWAGES");
 				CompClaim cHist = new CompClaim((Date)dateInjured.getTime(), sLC);
-				dataAccess.updateClaimSummary(ro.getClaimant().getID(), (Date)dateInjured.getTime(), (Date)cHist.getPriorWeekStart().getTime(),
-						(Date)cHist.getEarliestPriorWageDate().getTime(), new BigDecimal("-1"), cHist.getDaysInjured(), cHist.getWeeksInjured());
+				dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
+						new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), cHist.getDaysInjured(), cHist.getWeeksInjured());
 				ro.setTTDRSumm(new TTDReimbursementSummary());
 				ro.ttdRSumm.setClaimSummary(cHist);
 				claimListModel.set(claimantList.getSelectedIndex(), ro);
@@ -999,14 +1052,19 @@ public class WCReimbursementCalculatorMenu {
 					}
 					else{
 						priorWages = sLC.addAndTrimToPriorWages(pc, priorWages, cHist.getPriorWeekStart());
-						dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", (Date)pc.getPaymentDate().getTime(), (Date)pc.getPayPeriodStart().getTime(), (Date)pc.getPayPeriodEnd().getTime(), pc.getGrossAmount());
+						if (priorWages.size() <= 1){
+							return false;
+						}
+						pc = priorWages.get(priorWages.size() - 1);
+						dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
+								new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
 					}
 				}
 				if(sLC.priorWagesIsComplete(priorWages)){
 					ro.ttdRSumm.claimSummary.setPriorWagesAndComputeAPGWP(priorWages);
 					ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
-					dataAccess.updateClaimSummary(ro.getClaimant().getID(), (Date)dateInjured.getTime(), (Date)cHist.getPriorWeekStart().getTime(),
-							(Date)cHist.getEarliestPriorWageDate().getTime(), ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment(), 
+					dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
+							new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment(), 
 							ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
 					return true;
@@ -1014,8 +1072,8 @@ public class WCReimbursementCalculatorMenu {
 				else {
 					ro.ttdRSumm.claimSummary.setPriorWages(priorWages);
 					ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
-					dataAccess.updateClaimSummary(ro.getClaimant().getID(), (Date)dateInjured.getTime(), (Date)cHist.getPriorWeekStart().getTime(),
-							(Date)cHist.getEarliestPriorWageDate().getTime(), new BigDecimal("-1"), 
+					dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
+							new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), 
 							ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
 					return false;

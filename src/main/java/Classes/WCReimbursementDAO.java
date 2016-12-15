@@ -54,7 +54,7 @@ public class WCReimbursementDAO {
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
-			e.printStackTrace();
+			
 			if(!success){
 				try {
 		    		success = this.createDBAndEstablishConnection();
@@ -70,6 +70,7 @@ public class WCReimbursementDAO {
 	    				}
 		    		}
 				} catch (SQLException se) {
+					e.printStackTrace();
 					se.printStackTrace();
 				}
 			}
@@ -1252,9 +1253,12 @@ public class WCReimbursementDAO {
 			e.printStackTrace();
 		}
 		ArrayList<ReimbursementOverview> roList = new ArrayList<ReimbursementOverview>();
-		for (Claimant c : cList){
-			roList.add(this.selectReimbursementOverview(c));
+		if(cList != null){
+			for (Claimant c : cList){
+				roList.add(this.selectReimbursementOverview(c));
+			}
 		}
+		
 		return roList;
 	}
 }

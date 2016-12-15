@@ -40,7 +40,7 @@ public class MissouriCalculation implements StateLawCalculable {
 		long pcPPSDate = pcPPS.getTimeInMillis();
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
-		Date ePWD = (Date) this.computeEarliestPriorWageDate(priorWeekStart).getTime();
+		Date ePWD = new java.sql.Date(this.computeEarliestPriorWageDate(priorWeekStart).getTimeInMillis());
 		//Date dPPS = (Date) pcPPS.getTime();
 		 
 		long mPWeekEnd =  priorWeekStart.getTimeInMillis() + (mDay * 6);
@@ -48,7 +48,7 @@ public class MissouriCalculation implements StateLawCalculable {
 		priorWeekEnd.setTimeInMillis(mPWeekEnd);
 		Calendar pcPPE = pc.getPayPeriodEnd();
 		//Date dPPE = (Date) pcPPE.getTime();
-		Date dPWE = (Date) priorWeekEnd.getTime();
+		Date dPWE = new java.sql.Date(priorWeekEnd.getTimeInMillis());
 		
 
 		if(pcPPS.compareTo(priorWeekEnd) > 0){
