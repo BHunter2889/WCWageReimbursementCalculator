@@ -124,15 +124,15 @@ public class CompClaim {
 	public void setDateInjured(Date dateInjured){
 		TimeZone tz1 = TimeZone.getTimeZone("America/Chicago");
 		this.dateInjured = new GregorianCalendar(tz1);
-		this.dateInjured.setTime(dateInjured);;
+		this.dateInjured.setTimeInMillis(dateInjured.getTime());;
 	}
 	
 	public void setOrUpdatePriorWeekStart(){
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
 		long mDI = this.dateInjured.getTimeInMillis();
-		long injDOW = this.dateInjured.get(Calendar.DAY_OF_WEEK);
-		long mInjFDW = (mDI - ((injDOW - 1) * mDay)); 
+		long injDOW = (long) this.dateInjured.get(Calendar.DAY_OF_WEEK);
+		long mInjFDW = (long) (mDI - ((injDOW - Calendar.SUNDAY) * mDay)); 
 		long mPWS = mInjFDW - mWeek;
 		
 		this.priorWeekStart = new GregorianCalendar(TimeZone.getTimeZone("America/Chicago"));
