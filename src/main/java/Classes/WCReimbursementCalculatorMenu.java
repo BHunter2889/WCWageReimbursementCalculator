@@ -276,7 +276,7 @@ public class WCReimbursementCalculatorMenu {
 
 		
 		btnEditWageReimbursement = new JButton("Start Wage Reimbursement Details");
-		btnEntercompletePriorWage.setEnabled(false);
+		btnEditWageReimbursement.setEnabled(false);
 		btnEditWageReimbursement.setIconTextGap(10);
 		btnEditWageReimbursement.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
