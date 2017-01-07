@@ -572,7 +572,7 @@ public class WCReimbursementCalculatorMenu {
 			claimListModel.set(claimantList.getSelectedIndex(), ro);
 		}
 		if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, "Is the Injured Person able to work any hours?", "Able to Work?", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION){
-			if(dataAccess.selectTTDRSummary(ro.getClaimant().getID()) == null){
+			if(dataAccess.selectTTDRSummary(ro.getClaimant()) == null){
 				dataAccess.insertRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), new BigDecimal("0"));
 			}
 			else{
@@ -599,7 +599,7 @@ public class WCReimbursementCalculatorMenu {
 				ro.tpdRSumm.setAmountNotPaid(new BigDecimal("0"));
 				claimListModel.set(claimantList.getSelectedIndex(), ro);
 			}
-			if(dataAccess.selectTPDRSummary(ro.getClaimant().getID()) == null){
+			if(dataAccess.selectTPDRSummary(ro.getClaimant()) == null){
 				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTPDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid());
 			}
 			else{
@@ -817,7 +817,7 @@ public class WCReimbursementCalculatorMenu {
 		}
 		rs.computeAmountNotPaidAndAnyLateCompensation();
 		ro.setTPDRSumm(rs);
-		if(dataAccess.selectTPDRSummary(ro.getClaimant().getID()) == null){
+		if(dataAccess.selectTPDRSummary(ro.getClaimant()) == null){
 			dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", rs.getCalculatedWeeklyPayment(), rs.getAmountNotPaid());
 		}
 		else{
@@ -893,7 +893,7 @@ public class WCReimbursementCalculatorMenu {
 		rs.computeAmountNotPaidAndAnyLateCompensation();
 		ro.setTPDRSumm(rs);
 		claimListModel.set(claimantList.getSelectedIndex(), ro);
-		if(dataAccess.selectTPDRSummary(ro.getClaimant().getID()) == null){
+		if(dataAccess.selectTPDRSummary(ro.getClaimant()) == null){
 			dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", rs.getCalculatedWeeklyPayment(), rs.getAmountNotPaid());
 		}
 		else{

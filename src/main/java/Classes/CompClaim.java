@@ -112,6 +112,22 @@ public class CompClaim {
 	//methods
 	//uses sLC interface class to set ePWDate
 	public void setOrUpdateEarliestPriorWageDate(){
+		if(this.priorWeekStart == null){
+			try {
+				throw new Exception("Prior Week Start is Null");
+			} catch (Exception e) {
+				e.printStackTrace();
+				return;
+			}
+		}
+		else if(this.stateLawCalculation == null){
+			try {
+				throw new Exception("SLC is Null");
+			} catch (Exception e) {
+				e.printStackTrace();
+				return;
+			}
+		}
 		this.earliestPriorWageDate = this.stateLawCalculation.computeEarliestPriorWageDate(this.priorWeekStart);
 	}
 	
@@ -146,7 +162,13 @@ public class CompClaim {
 	}
 	
 	public void setPriorWages(ArrayList<Paycheck> priorWages){
+		if (priorWages == null){
+			return;
+		}
 		this.priorWages = priorWages;
+		if(this.priorWages.size() < 2){
+			return;
+		}
 		this.sortPaychecksByDate();
 	}
 /*

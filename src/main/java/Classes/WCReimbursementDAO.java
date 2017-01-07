@@ -845,6 +845,9 @@ public class WCReimbursementDAO {
 		int row = -1;
 		try{
 			while(results.next()){
+				if (results.getString(6) == null){
+					throw new SQLException("No State was saved for Claimant" + results.getInt(1));
+				}
 				row++;
 				Claimant clmnt = new Claimant();
 	            clmnt.setID(results.getInt(1));
@@ -875,7 +878,8 @@ public class WCReimbursementDAO {
 		return cList;
 	}
 	
-	public CompClaim selectClaimSummary(int id){
+	public CompClaim selectClaimSummary(Claimant clmnt){
+		int id = clmnt.getID();
 		PreparedStatement stmtSelectClaimSummary = null;
 		try {
 			stmtSelectClaimSummary = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectClaimSummary());
@@ -910,14 +914,15 @@ public class WCReimbursementDAO {
 		try{
 			while(results.next()){
 				row++;
-				clmSm = new CompClaim(results.getDate(3),  this.stateLawCalculation);
+				clmSm = new CompClaim(results.getDate(3),  this.getStateLawCalculation(clmnt.getState()));
 				try{
 					if (clmSm.getPriorWeekStart().getTime().compareTo(results.getDate(4)) != 0 || clmSm.getEarliestPriorWageDate().getTime().compareTo(results.getDate(5)) != 0){
-						throw new Exception("ClaimSummary computed dates and saved dates are not equal.");
+						throw new Exception("ClaimSummary computed dates and saved dates are not equal.");  //TODO : CHECK DATE COMPUTATION
+
 					}
 				}
 				catch (Exception e){
-					JOptionPane.showMessageDialog(null, "Error: "+ e.getCause().getMessage());
+					e.printStackTrace(); 
 					try{
 						results.close();
 						stmtSelectClaimSummary.close();
@@ -1098,8 +1103,9 @@ public class WCReimbursementDAO {
 	}
 	
 	//makes calls to selectClaimSummary, selectPaychecks, and selectWCPaychecks to return a fully formed TPDRSummary
-	public TPDReimbursementSummary selectTPDRSummary(int id){
-		CompClaim claimSum = this.selectClaimSummary(id);
+	public TPDReimbursementSummary selectTPDRSummary(Claimant clmnt){
+		int id = clmnt.getID();
+		CompClaim claimSum = this.selectClaimSummary(clmnt);
 		ArrayList<Paycheck> workPay = this.selectPaychecks(id, "WORKPAYMENTS");
 		ArrayList<WorkCompPaycheck> tpdWCPay = this.selectWorkCompPaychecks(id, "TPD");
 		PreparedStatement stmtSelectRSummary = null;
@@ -1163,8 +1169,9 @@ public class WCReimbursementDAO {
 	}
 	
 	//makes calls to selectClaimSummary and selectWCPaychecks to return a fully formed TTDRSummary
-	public TTDReimbursementSummary selectTTDRSummary(int id){
-		CompClaim claimSum = this.selectClaimSummary(id);
+	public TTDReimbursementSummary selectTTDRSummary(Claimant clmnt){
+		int id = clmnt.getID();
+		CompClaim claimSum = this.selectClaimSummary(clmnt);
 		ArrayList<WorkCompPaycheck> ttdWCPay = this.selectWorkCompPaychecks(id, "TTD");
 		PreparedStatement stmtSelectRSummary = null;
 		try {
@@ -1239,8 +1246,8 @@ public class WCReimbursementDAO {
 	public ReimbursementOverview selectReimbursementOverview(Claimant clmnt){
 		ReimbursementOverview ro = new ReimbursementOverview();
 		ro.setClaimant(clmnt);
-		ro.setTTDRSumm(this.selectTTDRSummary(clmnt.getID()));
-		ro.setTPDRSumm(this.selectTPDRSummary(clmnt.getID()));
+		ro.setTTDRSumm(this.selectTTDRSummary(clmnt));
+		ro.setTPDRSumm(this.selectTPDRSummary(clmnt));
 		return ro;
 	}
 	
@@ -1260,6 +1267,15 @@ public class WCReimbursementDAO {
 		}
 		
 		return roList;
+	}
+	
+	public StateLawCalculable getStateLawCalculation(String state){
+		for(StateLawCalculable s : (new StatesWithCalculations())){
+			if(state.compareTo(s.getStateName()) == 0){
+				return s;
+			}
+		}
+		return null;
 	}
 }
 
