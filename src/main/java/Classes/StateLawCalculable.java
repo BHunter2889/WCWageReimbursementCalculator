@@ -3,6 +3,7 @@ package Classes;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public interface StateLawCalculable {
 	
@@ -18,5 +19,6 @@ public interface StateLawCalculable {
 	public boolean determineAndSetIsLate(Calendar payPeriodEnd, Calendar payReceived); //WCPaycheck
 	public String getStateAbbrv();
 	public String getStateName();
+	public TimeZone getTimeZone();
 	public boolean priorWagesIsComplete(ArrayList<Paycheck> priorWages); //CompClaim
 }

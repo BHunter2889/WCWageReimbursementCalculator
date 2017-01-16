@@ -389,6 +389,7 @@ public class WCReimbursementCalculatorMenu {
 		long mWeek = mDay * 7;
 		boolean nulled = false;
 		JXMonthView mV = new JXMonthView();
+		mV.setTimeZone(sLC.getTimeZone());
 		mV.setTraversable(true);
 		JXDatePicker picker = new JXDatePicker();
 		ReimbursementOverview r = claimantList.getSelectedValue();
@@ -442,6 +443,7 @@ public class WCReimbursementCalculatorMenu {
 		JXMonthView mV = new JXMonthView();
 		JXDatePicker picker = new JXDatePicker();
 		//ReimbursementOverview r = claimantList.getSelectedValue();
+		mV.setTimeZone(this.sLC.getTimeZone());
 		mV.setTraversable(true);
 		picker.setMonthView(mV);
 		
@@ -468,6 +470,7 @@ public class WCReimbursementCalculatorMenu {
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
 		JXMonthView mV = new JXMonthView();
+		mV.setTimeZone(sLC.getTimeZone());
 		JXDatePicker picker = new JXDatePicker();
 		if(ppS){
 			Calendar start = claimSumm.getEarliestPriorWageDate();

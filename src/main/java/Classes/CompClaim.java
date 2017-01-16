@@ -94,11 +94,12 @@ public class CompClaim {
 	public CompClaim(Date dateInjured, StateLawCalculable sLC) {
 		//this.s = new Scanner(System.in);
 		this.priorWages = new ArrayList<Paycheck>();
+		
+		setStateLawCalculation(sLC);
+		
 		setDateInjured(dateInjured);
 
 		updateDaysAndWeeksInjured();
-		
-		setStateLawCalculation(sLC);
 		
 		setOrUpdatePriorWeekStart();
 
@@ -133,14 +134,12 @@ public class CompClaim {
 	
 	public void setDateInjured(int year, int month, int day){
 		this.dateInjured = new GregorianCalendar(year, month-1, day);
-		TimeZone tz1 = TimeZone.getTimeZone("America/Chicago");
-		this.dateInjured.setTimeZone(tz1);
+		this.dateInjured.setTimeZone(this.stateLawCalculation.getTimeZone());
 	}
 	
 	public void setDateInjured(Date dateInjured){
-		TimeZone tz1 = TimeZone.getTimeZone("America/Chicago");
-		this.dateInjured = new GregorianCalendar(tz1);
-		this.dateInjured.setTimeInMillis(dateInjured.getTime());;
+		this.dateInjured = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
+		this.dateInjured.setTimeInMillis(dateInjured.getTime());
 	}
 	
 	public void setOrUpdatePriorWeekStart(){
@@ -151,7 +150,7 @@ public class CompClaim {
 		long mInjFDW = (long) (mDI - ((injDOW - Calendar.SUNDAY) * mDay)); 
 		long mPWS = mInjFDW - mWeek;
 		
-		this.priorWeekStart = new GregorianCalendar(TimeZone.getTimeZone("America/Chicago"));
+		this.priorWeekStart = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
 		this.priorWeekStart.setTimeInMillis(mPWS);
 	}
 	
@@ -519,8 +518,7 @@ public class CompClaim {
 	}
 
 	public void updateDaysAndWeeksInjured(){
-		TimeZone tz1 = TimeZone.getTimeZone("America/Chicago");
-		Calendar current = new GregorianCalendar(tz1);
+		Calendar current = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
 		
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;

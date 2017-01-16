@@ -320,6 +320,7 @@ public class MissouriCalculation implements StateLawCalculable {
 		return MissouriCalculation.stateWPP;
 	}
 	
+	@Override
 	public TimeZone getTimeZone(){
 		return MissouriCalculation.timeZone;
 	}
