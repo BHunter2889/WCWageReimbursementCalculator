@@ -15,7 +15,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
 import java.util.ArrayList;
-import javax.swing.JOptionPane;
 
 import org.apache.derby.tools.ij;
 
@@ -916,9 +915,20 @@ public class WCReimbursementDAO {
 				row++;
 				clmSm = new CompClaim(results.getDate(3),  this.getStateLawCalculation(clmnt.getState()));
 				try{
-					if (clmSm.getPriorWeekStart().getTime().compareTo(results.getDate(4)) != 0 || clmSm.getEarliestPriorWageDate().getTime().compareTo(results.getDate(5)) != 0){
+					if (clmSm.getPriorWeekStart().getTime().compareTo(results.getDate(4)) != 0 && clmSm.getEarliestPriorWageDate().getTime().compareTo(results.getDate(5)) != 0){
 						throw new Exception("ClaimSummary computed dates and saved dates are not equal.");  //TODO : CHECK DATE COMPUTATION
-
+					}
+					else if (clmSm.getPriorWeekStart().getTime().compareTo(results.getDate(4)) != 0){
+						throw new Exception("ClaimSummary computed PriorWeekStart date and saved date are not equal.");  
+					}
+					else if (clmSm.getEarliestPriorWageDate().getTime().compareTo(results.getDate(5)) != 0){
+						long mDay = (1000 * 60 * 60 * 24);
+						long diff = clmSm.getEarliestPriorWageDate().getTimeInMillis() - results.getDate(5).getTime();
+						long days = 0;
+						if (diff > mDay){
+							days = diff/mDay;
+						}
+						throw new Exception("ClaimSummary computed EarliestPriorWage date and saved date are not equal. Difference is: "+diff+"ms or "+days+" days.");  
 					}
 				}
 				catch (Exception e){
