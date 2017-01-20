@@ -4,8 +4,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
-//import java.util.Scanner;
-import java.util.TimeZone;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.math.BigDecimal;
@@ -94,6 +92,7 @@ public class CompClaim {
 	public CompClaim(Date dateInjured, StateLawCalculable sLC) {
 		//this.s = new Scanner(System.in);
 		this.priorWages = new ArrayList<Paycheck>();
+		this.avgPriorGrossWeeklyPayment = null;
 		
 		setStateLawCalculation(sLC);
 		
@@ -588,21 +587,21 @@ public class CompClaim {
 	public String toStringDateInjured(){
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
-		Date dI = (Date) this.dateInjured.getTime();
+		java.util.Date dI = this.dateInjured.getTime();
 		return formatter.format(dI);
 	}
 	
 	public String toStringPriorWeekStart(){
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
-		Date pWS = (Date) this.priorWeekStart.getTime();
+		java.util.Date pWS = this.priorWeekStart.getTime();
 		return formatter.format(pWS);
 	}
 	
 	public String toStringEarliestPriorWageDate(){
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
-		Date ePWD = (Date) this.earliestPriorWageDate.getTime();
+		java.util.Date ePWD = this.earliestPriorWageDate.getTime();
 		return formatter.format(ePWD);
 	}
 	
@@ -615,8 +614,10 @@ public class CompClaim {
 	}
 	
 	public String toTableString(){
-		return "Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+
-				" | Average Prior Gross Weekly Payment: $"+this.avgPriorGrossWeeklyPayment.toPlainString();
+		return (this.avgPriorGrossWeeklyPayment != null) ? "Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+
+				" | Average Prior Gross Weekly Payment: $"+this.avgPriorGrossWeeklyPayment.toPlainString() : 
+				"Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+
+				" | Average Prior Gross Weekly Payment: Not Yet Completed.";
 	}
 	
 }

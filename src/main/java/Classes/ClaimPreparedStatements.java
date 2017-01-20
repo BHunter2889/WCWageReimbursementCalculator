@@ -161,7 +161,7 @@ public class ClaimPreparedStatements {
 	
 	public void setStmtSelectClaimants(){
 			this.stmtSelectClaimants = 
-				"SELECT * FROM APP.CLAIMANTS" + 
+				"SELECT * FROM APP.CLAIMANTS " + 
 				"where ID = ?";
 	}
 	

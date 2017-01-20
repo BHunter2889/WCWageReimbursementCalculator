@@ -420,7 +420,7 @@ public class WCReimbursementCalculatorMenu {
 		}
 		
 		Object[] params = {message,picker};		
-		GregorianCalendar selected = new GregorianCalendar();
+		GregorianCalendar selected = new GregorianCalendar(this.sLC.getTimeZone());
 		JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.PLAIN_MESSAGE);
 		selected.setTime(((JXDatePicker)params[1]).getDate());
 		while(selected.compareTo(new GregorianCalendar()) == 0){
@@ -433,11 +433,13 @@ public class WCReimbursementCalculatorMenu {
 			selected.setTime(((JXDatePicker)params[1]).getDate());
 		}
 		
+		long mDayStart = selected.getTimeInMillis() - (selected.getTimeInMillis() % mDay);
+		selected.setTimeInMillis(mDayStart);
 		return selected;
 	}
 	
 	public GregorianCalendar getInjuryDateCalendar(String message, String title){
-		//long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
+		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		//long mWeek = mDay * 7;
 		//boolean nulled = false;
 		JXMonthView mV = new JXMonthView();
@@ -448,7 +450,7 @@ public class WCReimbursementCalculatorMenu {
 		picker.setMonthView(mV);
 		
 		Object[] params = {message,picker};		
-		GregorianCalendar selected = new GregorianCalendar();
+		GregorianCalendar selected = new GregorianCalendar(this.sLC.getTimeZone());
 		JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.PLAIN_MESSAGE);
 		selected.setTime(((JXDatePicker)params[1]).getDate());
 		/*
@@ -462,7 +464,8 @@ public class WCReimbursementCalculatorMenu {
 			selected.setTime(((JXDatePicker)params[1]).getDate());
 		}
 		*/
-		
+		long mDayStart = selected.getTimeInMillis() - (selected.getTimeInMillis() % mDay);
+		selected.setTimeInMillis(mDayStart);
 		return selected;
 	}
 	
@@ -492,10 +495,10 @@ public class WCReimbursementCalculatorMenu {
 		}
 		
 		Object[] params = {message,picker};		
-		GregorianCalendar selected = new GregorianCalendar();
+		GregorianCalendar selected = new GregorianCalendar(this.sLC.getTimeZone());
 		JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.PLAIN_MESSAGE);
 		selected.setTime(((JXDatePicker)params[1]).getDate());
-		while(selected.compareTo(new GregorianCalendar()) == 0){
+		while(selected.compareTo(new GregorianCalendar(this.sLC.getTimeZone())) == 0){
 			String m = "You must select a date within the dates provided in order to continue." +System.getProperty("line.separator")+
 					"If you do not wish to continue and would like to add paychecks at a later time, click CANCEL, otherwise OK to select a date and proceed.";
 			if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, m, null, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.CANCEL_OPTION){
@@ -505,6 +508,8 @@ public class WCReimbursementCalculatorMenu {
 			selected.setTime(((JXDatePicker)params[1]).getDate());
 		}	
 		
+		long mDayStart = selected.getTimeInMillis() - (selected.getTimeInMillis() % mDay);
+		selected.setTimeInMillis(mDayStart);
 		return selected;
 	}
 	
