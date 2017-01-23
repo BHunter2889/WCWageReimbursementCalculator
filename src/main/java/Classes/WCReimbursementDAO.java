@@ -14,8 +14,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Properties;
 
 import org.apache.derby.tools.ij;
@@ -905,6 +907,7 @@ public class WCReimbursementDAO {
 	}
 	
 	public CompClaim selectClaimSummary(Claimant clmnt){
+		StateLawCalculable sLC = this.getStateLawCalculation(clmnt.getState());
 		
 		int id = clmnt.getID();
 		PreparedStatement stmtSelectClaimSummary = null;
@@ -936,9 +939,8 @@ public class WCReimbursementDAO {
 		}
 		
 		CompClaim clmSm = null;
-		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
 		
-		int row = -1;
+		int row = 0;
 		try{
 			while(results.next()){
 				row++;
@@ -949,23 +951,63 @@ public class WCReimbursementDAO {
 				} catch (NullPointerException e){
 					e.printStackTrace();
 				}
-				clmSm = new CompClaim(results.getDate(3, tZ), this.getStateLawCalculation(clmnt.getState()));
+				clmSm = new CompClaim(results.getDate(3), sLC);
 				try{
-					if (clmSm.getPriorWeekStart().getTime().compareTo(results.getDate(4, tZ)) != 0 
-					&& clmSm.getEarliestPriorWageDate().getTime().compareTo(results.getDate(5, tZ)) != 0){
-						throw new Exception("ClaimSummary computed dates and saved dates are not equal."); 
+					Calendar pWS = new GregorianCalendar(sLC.getTimeZone());
+					pWS.setTimeInMillis(results.getDate(4).getTime());
+					
+					Calendar ePW = new GregorianCalendar(sLC.getTimeZone());
+					ePW.setTimeInMillis(results.getDate(5).getTime());
+					
+					if (clmSm.getPriorWeekStart().get(Calendar.DATE) != pWS.get(Calendar.DATE)
+					&& clmSm.getEarliestPriorWageDate().get(Calendar.DATE) != ePW.get(Calendar.DATE)){
+						String eol = System.getProperty("line.separator");
+						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						formatter.setLenient(false);
+						formatter.setTimeZone(sLC.getTimeZone());
+						java.util.Date sqlPWS = new java.util.Date(results.getDate(4).getTime());
+						java.util.Date sqlEPW = new java.util.Date(results.getDate(5).getTime());
+						java.util.Date sqlDI = new java.util.Date(results.getDate(3).getTime());
+						throw new Exception("ClaimSummary computed dates and saved dates are not equal."+eol+
+								"sqlPWSDATE: "+formatter.format(sqlPWS)+" / CCPWSDATE: "+formatter.format(clmSm.getPriorWeekStart().getTime())+
+								"sqlEPWDATE: "+formatter.format(sqlEPW)+" / CCEPWDATE: "+formatter.format(clmSm.getEarliestPriorWageDate().getTime())+
+								" sqlInjDATE: "+formatter.format(sqlDI)+" CCInjDATE: "+formatter.format(clmSm.getDateInjured().getTime()));
 					}
-					else if (clmSm.getPriorWeekStart().getTime().compareTo(results.getDate(4, tZ)) != 0){
-						throw new Exception("ClaimSummary computed PriorWeekStart date and saved date are not equal.");  
-					}
-					else if (clmSm.getEarliestPriorWageDate().getTime().compareTo(results.getDate(5, tZ)) != 0){  //TODO : CHECK DATE COMPUTATION error is Here
+					else if (clmSm.getPriorWeekStart().get(Calendar.DATE) != pWS.get(Calendar.DATE)){  //TODO : CHECK DATE COMPUTATION error is Here (check Date Injured is set same way)
 						long mDay = (1000 * 60 * 60 * 24);
-						long diff = clmSm.getEarliestPriorWageDate().getTimeInMillis() - results.getDate(5, tZ).getTime(); 
+						String eol = System.getProperty("line.separator");
+						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						formatter.setLenient(false);
+						formatter.setTimeZone(sLC.getTimeZone());
+						java.util.Date sqlPWS = new java.util.Date(results.getDate(4).getTime());
+						java.util.Date sqlDI = new java.util.Date(results.getDate(3).getTime());
+						
+						long diff = clmSm.getPriorWeekStart().getTimeInMillis() - results.getDate(4).getTime(); 
 						long days = 0;
-						if (diff > mDay){
+						if (diff >= mDay){
 							days = diff/mDay;
 						}
-						throw new Exception("ClaimSummary computed EarliestPriorWage date and saved date are not equal. Difference is: "+diff+"ms or "+days+" days.");  
+						throw new Exception("ClaimSummary computed PriorWeekStart date and saved date are not equal. Difference is: "+diff+"ms / "+days+" days. / "+eol+
+								"sqlDATE: "+formatter.format(sqlPWS)+" / CCDATE: "+formatter.format(clmSm.getPriorWeekStart().getTime())+
+								" sqlInjDATE: "+formatter.format(sqlDI)+" CCInjDATE: "+formatter.format(clmSm.getDateInjured().getTime()));  
+					}
+					else if (clmSm.getEarliestPriorWageDate().get(Calendar.DATE) != ePW.get(Calendar.DATE)){  
+						long mDay = (1000 * 60 * 60 * 24);
+						String eol = System.getProperty("line.separator");
+						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						formatter.setLenient(false);
+						formatter.setTimeZone(sLC.getTimeZone());
+						java.util.Date sqlEPW = new java.util.Date(results.getDate(5).getTime());
+						java.util.Date sqlDI = new java.util.Date(results.getDate(3).getTime());
+						
+						long diff = clmSm.getEarliestPriorWageDate().getTimeInMillis() - results.getDate(5).getTime(); 
+						long days = 0;
+						if (diff >= mDay){
+							days = diff/mDay;
+						}
+						throw new Exception("ClaimSummary computed EarliestPriorWage date and saved date are not equal. Difference is: "+diff+"ms / "+days+" days. / "+eol+
+								"sqlDATE: "+formatter.format(sqlEPW)+" / CCDATE: "+formatter.format(clmSm.getEarliestPriorWageDate().getTime())+
+								" sqlInjDATE: "+formatter.format(sqlDI)+" CCInjDATE: "+formatter.format(clmSm.getDateInjured().getTime()));  
 					}
 				}
 				catch (Exception e){
@@ -976,15 +1018,21 @@ public class WCReimbursementDAO {
 					} catch (SQLException se){
 						se.printStackTrace();
 					}
+					return null;
 				} finally {
 		            clmSm.setAvgPriorGrossWeeklyPayment(results.getBigDecimal(6));
 		            clmSm.setPriorWages(selectPaychecks(id, "PRIORWAGES"));
 				}
 			}
-			if (row < 0){
-				results.close();
-				stmtSelectClaimSummary.close();
-				return null;
+			if (row < 0){	
+				try{
+					throw new Exception("Error setting CompClaim");
+				} catch (Exception e){
+					e.printStackTrace();
+					results.close();
+					stmtSelectClaimSummary.close();
+				}
+					return null;
 			}
 		} catch (SQLException e){
 			e.printStackTrace();

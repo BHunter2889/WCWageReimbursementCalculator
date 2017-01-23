@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.sql.Date;
 import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.util.SimpleTimeZone;
 
 public class WorkCompPaycheck extends Paycheck {
 	//additional fields
@@ -251,9 +251,11 @@ public class WorkCompPaycheck extends Paycheck {
 	}
 
 	public void setPayRecievedDate(Date payReceived) {
-		this.payReceivedDate = new GregorianCalendar(TimeZone.getTimeZone("America/Chicago"));
-		this.payReceivedDate.setTime(payReceived);
-		
+		SimpleTimeZone tZ = new SimpleTimeZone(0, "Standard");
+		tZ.setDSTSavings(0);
+		GregorianCalendar pRD = new GregorianCalendar(tZ);
+		pRD.setTime(payReceived);
+		this.payReceivedDate = new MissouriCalculation().normalizeCalendarTime(pRD);
 	}
 	
 	public void setContestResolutionDate(GregorianCalendar contestResolved){
@@ -261,8 +263,11 @@ public class WorkCompPaycheck extends Paycheck {
 	}
 	
 	public void setContestResolutionDate(Date contestResolved) {
-		this.payReceivedDate = new GregorianCalendar(TimeZone.getTimeZone("America/Chicago"));
-		this.payReceivedDate.setTime(contestResolved);
+		SimpleTimeZone tZ = new SimpleTimeZone(0, "Standard");
+		tZ.setDSTSavings(0);
+		GregorianCalendar pRD = new GregorianCalendar(tZ);
+		pRD.setTime(contestResolved);
+		this.payReceivedDate = new MissouriCalculation().normalizeCalendarTime(pRD); //Does not rely on any TimeZone or locale information, so Missouri was used arbitrarily
 		
 	}
 	

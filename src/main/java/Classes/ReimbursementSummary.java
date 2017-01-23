@@ -10,7 +10,6 @@ import java.util.Comparator;
 import java.sql.Date;
 import java.util.GregorianCalendar;
 //import java.util.Scanner;
-import java.util.TimeZone;
 
 public abstract class ReimbursementSummary {
 	//fields
@@ -152,7 +151,6 @@ public abstract class ReimbursementSummary {
 		WorkCompPaycheck pc = new WorkCompPaycheck(grossAmount, payReceivedDate, payPeriodStart, payPeriodEnd, isContested);
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
-		TimeZone tz1 = TimeZone.getTimeZone("America/Chicago");
 		sortWCPaymentsByDate();
 		
 		//Calendar wcPRD = pc.getPaymentDate();
@@ -162,9 +160,10 @@ public abstract class ReimbursementSummary {
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
 		long mEPPS = this.claimSummary.priorWeekStart.getTimeInMillis() + mWeek;
-		Calendar ePPS = new GregorianCalendar(tz1);
+		GregorianCalendar ePPSt = new GregorianCalendar();
 		Date epcPPS = new Date(mEPPS);
-		ePPS.setTime(epcPPS);
+		ePPSt.setTime(epcPPS);
+		Calendar ePPS = this.stateLawCalculation.normalizeCalendarTime(ePPSt);
 		//Date dPPS = pcPPS.getTime();
 
 		//Calendar pcPPE = pc.getPayPeriodEnd();
@@ -184,7 +183,6 @@ public abstract class ReimbursementSummary {
 		WorkCompPaycheck pc = new WorkCompPaycheck(grossAmount, payReceivedDate, payPeriodStart, isContested);
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
-		TimeZone tz1 = TimeZone.getTimeZone("America/Chicago");
 		sortWCPaymentsByDate();
 		
 		//Calendar wcPRD = pc.getPaymentDate();
@@ -194,9 +192,10 @@ public abstract class ReimbursementSummary {
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
 		long mEPPS = this.claimSummary.priorWeekStart.getTimeInMillis() + mWeek;
-		Calendar ePPS = new GregorianCalendar(tz1);
+		GregorianCalendar ePPSt = new GregorianCalendar();
 		Date epcPPS = new Date(mEPPS);
-		ePPS.setTime(epcPPS);
+		ePPSt.setTime(epcPPS);
+		Calendar ePPS = this.stateLawCalculation.normalizeCalendarTime(ePPSt);
 		//Date dPPS = pcPPS.getTime();
 
 		//Calendar pcPPE = pc.getPayPeriodEnd();

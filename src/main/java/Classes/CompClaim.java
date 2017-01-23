@@ -137,8 +137,9 @@ public class CompClaim {
 	}
 	
 	public void setDateInjured(Date dateInjured){
-		this.dateInjured = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
-		this.dateInjured.setTimeInMillis(dateInjured.getTime());
+		GregorianCalendar dI = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
+		dI.setTimeInMillis(dateInjured.getTime());
+		this.dateInjured = this.stateLawCalculation.normalizeCalendarTime(dI);
 	}
 	
 	public void setOrUpdatePriorWeekStart(){
@@ -146,11 +147,11 @@ public class CompClaim {
 		long mWeek = mDay * 7;
 		long mDI = this.dateInjured.getTimeInMillis();
 		long injDOW = (long) this.dateInjured.get(Calendar.DAY_OF_WEEK);
-		long mInjFDW = (long) (mDI - ((injDOW - Calendar.SUNDAY) * mDay)); 
-		long mPWS = mInjFDW - mWeek;
-		
-		this.priorWeekStart = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
-		this.priorWeekStart.setTimeInMillis(mPWS);
+		long mInjFDW = (long) (mDI - ((injDOW - Calendar.SUNDAY) * mDay) + 1); 
+		long mPWS = mInjFDW - mWeek + 1 ;
+		GregorianCalendar pWS = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
+		pWS.setTimeInMillis(mPWS);
+		this.priorWeekStart = this.stateLawCalculation.normalizeCalendarTime(pWS);
 	}
 	
 	public void setPriorWagesAndComputeAPGWP(ArrayList<Paycheck> priorWages){
@@ -587,6 +588,7 @@ public class CompClaim {
 	public String toStringDateInjured(){
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
+		formatter.setTimeZone(this.stateLawCalculation.getTimeZone());
 		java.util.Date dI = this.dateInjured.getTime();
 		return formatter.format(dI);
 	}
@@ -594,6 +596,7 @@ public class CompClaim {
 	public String toStringPriorWeekStart(){
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
+		formatter.setTimeZone(this.stateLawCalculation.getTimeZone());
 		java.util.Date pWS = this.priorWeekStart.getTime();
 		return formatter.format(pWS);
 	}
@@ -601,6 +604,7 @@ public class CompClaim {
 	public String toStringEarliestPriorWageDate(){
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
+		formatter.setTimeZone(this.stateLawCalculation.getTimeZone());
 		java.util.Date ePWD = this.earliestPriorWageDate.getTime();
 		return formatter.format(ePWD);
 	}
@@ -614,9 +618,10 @@ public class CompClaim {
 	}
 	
 	public String toTableString(){
-		return (this.avgPriorGrossWeeklyPayment != null) ? "Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+
+		String eol = System.getProperty("line.separator");
+		return (this.avgPriorGrossWeeklyPayment != null) ? "Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+eol+
 				" | Average Prior Gross Weekly Payment: $"+this.avgPriorGrossWeeklyPayment.toPlainString() : 
-				"Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+
+				"Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+eol+
 				" | Average Prior Gross Weekly Payment: Not Yet Completed.";
 	}
 	

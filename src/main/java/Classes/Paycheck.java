@@ -3,7 +3,7 @@ package Classes;
 import java.util.Calendar;
 import java.sql.Date;
 import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.util.SimpleTimeZone;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
@@ -29,15 +29,11 @@ public class Paycheck implements Comparable<Calendar> {
 		BigDecimal gA = new BigDecimal(grossAmount);
 		this.grossAmount = gA.setScale(2, RoundingMode.HALF_EVEN);
 		
-		TimeZone tz1 = TimeZone.getTimeZone("America/Chicago");
 		this.paymentDate = new GregorianCalendar(iYear, iMonth-1, iDay);
-		this.paymentDate.setTimeZone(tz1);
 		
 		this.payPeriodStart = new GregorianCalendar(sYear, sMonth-1, sDay);
-		this.payPeriodStart.setTimeZone(tz1);
 
 		this.payPeriodEnd = new GregorianCalendar (iYear, iMonth-1, iDay);
-		this.payPeriodEnd.setTimeZone(tz1);
 		
 	}
 
@@ -46,15 +42,11 @@ public class Paycheck implements Comparable<Calendar> {
 		BigDecimal gA = new BigDecimal(grossAmount);
 		this.grossAmount = gA.setScale(2, RoundingMode.HALF_EVEN);
 		
-		TimeZone tz1 = TimeZone.getTimeZone("America/Chicago");
 		this.paymentDate = new GregorianCalendar(iYear, iMonth-1, iDay);
-		this.paymentDate.setTimeZone(tz1);
 		
 		this.payPeriodStart = new GregorianCalendar(sYear, sMonth-1, sDay);
-		this.payPeriodStart.setTimeZone(tz1);
 
 		this.payPeriodEnd = new GregorianCalendar (eYear, eMonth-1, eDay);
-		this.payPeriodEnd.setTimeZone(tz1);
 		
 	}
 	
@@ -173,17 +165,26 @@ public class Paycheck implements Comparable<Calendar> {
 	}
 
 	public void setPaymentDate(Date payDate) {
-		this.paymentDate = new GregorianCalendar(TimeZone.getTimeZone("America/Chicago"));
-		this.paymentDate.setTime(payDate);
+		SimpleTimeZone tZ = new SimpleTimeZone(0, "Standard");
+		tZ.setDSTSavings(0);
+		GregorianCalendar pD = new GregorianCalendar(tZ);
+		pD.setTime(payDate);
+		this.paymentDate = new MissouriCalculation().normalizeCalendarTime(pD); 
 	}
 	
 	public void setPayPeriodStart(Date payPS) {
-		this.payPeriodStart = new GregorianCalendar(TimeZone.getTimeZone("America/Chicago"));
-		this.payPeriodStart.setTime(payPS);
+		SimpleTimeZone tZ = new SimpleTimeZone(0, "Standard");
+		tZ.setDSTSavings(0);
+		GregorianCalendar pPS = new GregorianCalendar(tZ);
+		pPS.setTime(payPS);
+		this.payPeriodStart = new MissouriCalculation().normalizeCalendarTime(pPS);
 	}
 	
 	public void setPayPeriodEnd(Date payPE) {
-		this.payPeriodEnd = new GregorianCalendar(TimeZone.getTimeZone("America/Chicago"));
-		this.payPeriodEnd.setTime(payPE);
+		SimpleTimeZone tZ = new SimpleTimeZone(0, "Standard");
+		tZ.setDSTSavings(0);
+		GregorianCalendar pPE = new GregorianCalendar(tZ);
+		pPE.setTime(payPE);
+		this.payPeriodEnd = new MissouriCalculation().normalizeCalendarTime(pPE);
 	}
 }

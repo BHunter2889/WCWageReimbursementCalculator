@@ -3,6 +3,7 @@ package Classes;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 public interface StateLawCalculable {
@@ -17,6 +18,7 @@ public interface StateLawCalculable {
 	public Calendar computeEarliestPriorWageDate(Calendar priorWeekStart); //CompClaim
 	public BigDecimal computeWCSupplementalPayment(Paycheck workPayment, BigDecimal avgPriorGrossWeeklyPayment);
 	public boolean determineAndSetIsLate(Calendar payPeriodEnd, Calendar payReceived); //WCPaycheck
+	public GregorianCalendar normalizeCalendarTime(GregorianCalendar calendar);
 	public String getStateAbbrv();
 	public String getStateName();
 	public TimeZone getTimeZone();

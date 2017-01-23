@@ -33,6 +33,7 @@ import javax.swing.SwingConstants;
 import java.awt.Component;
 import javax.swing.JTextPane;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -170,6 +171,25 @@ public class WCReimbursementCalculatorMenu {
 				return columnEditables[column];
 			}
 		});
+		
+		// set column 1 font size to smaller - adapted from: http://stackoverflow.com/a/16118913/6867420
+		DefaultTableCellRenderer r = new DefaultTableCellRenderer() {
+			private static final long serialVersionUID = 1L;
+			Font font = new Font("SansSerif", Font.PLAIN, 12);
+
+		    @Override
+		    public Component getTableCellRendererComponent(JTable table,
+		            Object value, boolean isSelected, boolean hasFocus,
+		            int row, int column) {
+		        super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
+		                row, column);
+		        setFont(font);
+		        return this;
+		    }
+
+		};
+		table.getColumnModel().getColumn(1).setCellRenderer(r);
+		
 		table.getColumnModel().getColumn(0).setResizable(false);
 		table.getColumnModel().getColumn(0).setPreferredWidth(188);
 		table.getColumnModel().getColumn(1).setResizable(false);
@@ -407,13 +427,13 @@ public class WCReimbursementCalculatorMenu {
 			if(isPPS){
 				Calendar start = cS.getDateInjured();
 				start.setTimeInMillis(start.getTimeInMillis() - mWeek);
-				Calendar end = new GregorianCalendar();
+				Calendar end = new GregorianCalendar(sLC.getTimeZone());
 				mV.addSelectionInterval(start.getTime(), end.getTime());
 				picker.setMonthView(mV);
 			}
 			else{
 				Calendar start = cS.getDateInjured();
-				Calendar end = new GregorianCalendar();
+				Calendar end = new GregorianCalendar(sLC.getTimeZone());
 				mV.addSelectionInterval(start.getTime(), end.getTime());
 				picker.setMonthView(mV);
 			}
@@ -423,7 +443,7 @@ public class WCReimbursementCalculatorMenu {
 		GregorianCalendar selected = new GregorianCalendar(this.sLC.getTimeZone());
 		JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.PLAIN_MESSAGE);
 		selected.setTime(((JXDatePicker)params[1]).getDate());
-		while(selected.compareTo(new GregorianCalendar()) == 0){
+		while(selected.compareTo(new GregorianCalendar(sLC.getTimeZone())) == 0){
 			String m = "You must select a date within the dates provided in order to continue." +System.getProperty("line.separator")+
 					"If you do not wish to continue and would like to enter dates at a later time, click CANCEL, otherwise OK to select a date and proceed.";
 			if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, m, null, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.CANCEL_OPTION){
@@ -433,13 +453,11 @@ public class WCReimbursementCalculatorMenu {
 			selected.setTime(((JXDatePicker)params[1]).getDate());
 		}
 		
-		long mDayStart = selected.getTimeInMillis() - (selected.getTimeInMillis() % mDay);
-		selected.setTimeInMillis(mDayStart);
-		return selected;
+		return sLC.normalizeCalendarTime(selected);
 	}
 	
 	public GregorianCalendar getInjuryDateCalendar(String message, String title){
-		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
+		//long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		//long mWeek = mDay * 7;
 		//boolean nulled = false;
 		JXMonthView mV = new JXMonthView();
@@ -464,9 +482,9 @@ public class WCReimbursementCalculatorMenu {
 			selected.setTime(((JXDatePicker)params[1]).getDate());
 		}
 		*/
-		long mDayStart = selected.getTimeInMillis() - (selected.getTimeInMillis() % mDay);
-		selected.setTimeInMillis(mDayStart);
-		return selected;
+		//long mDayStart = selected.getTimeInMillis() - (selected.getTimeInMillis() % mDay);
+		//selected.setTimeInMillis(mDayStart);
+		return sLC.normalizeCalendarTime(selected);
 	}
 	
 	public GregorianCalendar getPriorWageCalendar(String message, String title, CompClaim claimSumm, boolean ppS){
@@ -508,9 +526,9 @@ public class WCReimbursementCalculatorMenu {
 			selected.setTime(((JXDatePicker)params[1]).getDate());
 		}	
 		
-		long mDayStart = selected.getTimeInMillis() - (selected.getTimeInMillis() % mDay);
-		selected.setTimeInMillis(mDayStart);
-		return selected;
+		//long mDayStart = selected.getTimeInMillis() - (selected.getTimeInMillis() % mDay);
+		//selected.setTimeInMillis(mDayStart);
+		return sLC.normalizeCalendarTime(selected);
 	}
 	
 	public Paycheck createPriorWagePaycheck(CompClaim claimSumm){

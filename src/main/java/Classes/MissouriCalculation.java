@@ -7,8 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.SimpleTimeZone;
 import java.util.TimeZone;
-
 import javax.swing.JOptionPane;
 
 
@@ -17,7 +17,7 @@ public class MissouriCalculation implements StateLawCalculable {
 	private static final String stateAbbrv = "MO";
 	private static final BigDecimal stateWPP = new BigDecimal("13.0"); 
 	private static final int stateDaysToLate = 30; 
-	private static final TimeZone timeZone = TimeZone.getTimeZone("America/Chicago");
+	private static final SimpleTimeZone timeZone = new SimpleTimeZone(0, "Standard");
 
 	public MissouriCalculation() {
 	}
@@ -44,8 +44,9 @@ public class MissouriCalculation implements StateLawCalculable {
 		//Date dPPS = (Date) pcPPS.getTime();
 		 
 		long mPWeekEnd =  priorWeekStart.getTimeInMillis() + (mDay * 6);
-		Calendar priorWeekEnd = new GregorianCalendar(timeZone);
-		priorWeekEnd.setTimeInMillis(mPWeekEnd);
+		GregorianCalendar pWeekEnd = new GregorianCalendar(timeZone);
+		pWeekEnd.setTimeInMillis(mPWeekEnd);
+		GregorianCalendar priorWeekEnd = this.normalizeCalendarTime(pWeekEnd);
 		Calendar pcPPE = pc.getPayPeriodEnd();
 		//Date dPPE = (Date) pcPPE.getTime();
 		Date dPWE = new java.sql.Date(priorWeekEnd.getTimeInMillis());
@@ -159,8 +160,9 @@ public class MissouriCalculation implements StateLawCalculable {
 		//Date dPPS = (Date) pcPPS.getTime();
 		 
 		long mPWeekEnd =  priorWeekStart.getTimeInMillis() + (mDay * 6);
-		Calendar priorWeekEnd = new GregorianCalendar(timeZone);
-		priorWeekEnd.setTimeInMillis(mPWeekEnd);
+		GregorianCalendar pWeekEnd = new GregorianCalendar(timeZone);
+		pWeekEnd.setTimeInMillis(mPWeekEnd);
+		GregorianCalendar priorWeekEnd = this.normalizeCalendarTime(pWeekEnd);
 		Calendar pcPPE = pc.getPayPeriodEnd();
 		//Date dPPE = (Date) pcPPE.getTime();
 		//Date dPWE = (Date) priorWeekEnd.getTime();
@@ -193,9 +195,10 @@ public class MissouriCalculation implements StateLawCalculable {
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
 		long mEPPS = priorWeekStart.getTimeInMillis() + mWeek;
-		Calendar ePPS = new GregorianCalendar(timeZone);
+		GregorianCalendar ePPSt = new GregorianCalendar(timeZone);
 		Date epcPPS = new Date(mEPPS);
-		ePPS.setTime(epcPPS);
+		ePPSt.setTime(epcPPS);
+		GregorianCalendar ePPS = this.normalizeCalendarTime(ePPSt);
 		//Date dPPS = pcPPS.getTime();
 
 		//Calendar pcPPE = pc.getPayPeriodEnd();
@@ -264,9 +267,9 @@ public class MissouriCalculation implements StateLawCalculable {
 		
 		//based on Missouri Law (13 weeks of paychecks starting with the week immediately preceding the week injured)
 		long mEPW = (mPWS - (mWeek * 12));
-		Calendar ePWDate = new GregorianCalendar(timeZone);
-		ePWDate.setTimeInMillis(mEPW);		
-		return ePWDate;
+		GregorianCalendar ePWDate = new GregorianCalendar(timeZone);
+		ePWDate.setTimeInMillis(mEPW);
+		return this.normalizeCalendarTime(ePWDate);
 	}
 
 	@Override
@@ -301,6 +304,73 @@ public class MissouriCalculation implements StateLawCalculable {
 			isLate = false;
 		}		
 		return isLate;
+	}
+	
+	//ensures Calendar time is set to 00:00 on same date
+	@Override
+	public GregorianCalendar normalizeCalendarTime(GregorianCalendar calendar) {
+		if (calendar.get(Calendar.HOUR) == 0 && calendar.get(Calendar.HOUR_OF_DAY) == 0 && calendar.get(Calendar.MINUTE) == 0 && calendar.get(Calendar.SECOND) == 0 && calendar.get(Calendar.MILLISECOND) == 0){
+			return calendar;
+		}
+		GregorianCalendar newCal = new GregorianCalendar(timeZone);
+		//long dstOffSet = calendar.get(Calendar.DST_OFFSET);
+		
+		
+		int year = calendar.get(Calendar.YEAR);
+		int month = calendar.get(Calendar.MONTH);
+		int date =  calendar.get(Calendar.DATE);
+		long offSet = calendar.getTimeZone().getOffset(calendar.getTimeInMillis());
+		calendar.setTimeInMillis(calendar.getTimeInMillis() + offSet);
+		if (calendar.get(Calendar.YEAR) != year){
+			calendar.set(Calendar.YEAR, year);
+		}
+		if (calendar.get(Calendar.MONTH) != month){
+			calendar.set(Calendar.MONTH, month);
+		}
+		if (calendar.get(Calendar.DATE) != date){
+			calendar.set(Calendar.DATE, date);
+		}
+		
+	    newCal.setLenient(false);
+	    newCal.set(Calendar.YEAR, year);
+	    newCal.set(Calendar.MONTH, month);
+	    newCal.set(Calendar.DATE, date);
+	    newCal.set(Calendar.AM_PM, Calendar.AM);
+	    newCal.set(Calendar.HOUR, 0);
+	    newCal.set(Calendar.HOUR_OF_DAY, 0);
+	    newCal.set(Calendar.MINUTE, 0);
+	    newCal.set(Calendar.SECOND, 0);
+	    newCal.set(Calendar.MILLISECOND, 0);
+	    
+	    /*
+	    long newOffset = newCal.getTimeZone().getOffset(newCal.getTimeInMillis());
+	    if (newOffset != 0){
+	    	newCal.setTimeInMillis(newCal.getTimeInMillis() + newOffset);
+	    	if (newCal.get(Calendar.YEAR) != year){
+				newCal.set(Calendar.YEAR, year);
+			}
+			if (newCal.get(Calendar.MONTH) != month){
+				newCal.set(Calendar.MONTH, month);
+			}
+			if (newCal.get(Calendar.DATE) != date){
+				newCal.set(Calendar.DATE, date);
+			}
+			newCal.set(Calendar.AM_PM, Calendar.AM);
+		    newCal.set(Calendar.HOUR, 0);
+		    newCal.set(Calendar.HOUR_OF_DAY, 0);
+		    newCal.set(Calendar.MINUTE, 0);
+		    newCal.set(Calendar.SECOND, 0);
+		    newCal.set(Calendar.MILLISECOND, 0);
+	    }
+	    
+	    
+	    long dstOffSet = newCal.get(Calendar.DST_OFFSET);
+	    if (newCal.get(Calendar.HOUR) != 0 || newCal.get(Calendar.HOUR_OF_DAY) != 0){
+	    	newCal.setTimeInMillis(newCal.getTimeInMillis() - dstOffSet);
+	    }
+	    */
+	  
+	    return newCal;
 	}
 
 	@Override
