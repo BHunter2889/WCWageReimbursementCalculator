@@ -233,7 +233,7 @@ public class WCReimbursementCalculatorMenu {
 		notCreate.add(btnEditPersonalInfo);
 		
 		this.claimListModel = new DefaultListModel<ReimbursementOverview>();
-		loadExistingData();
+		boolean data = loadExistingData();
 		
 		JPanel panel_1 = new JPanel();
 		FlowLayout flowLayout_1 = (FlowLayout) panel_1.getLayout();
@@ -247,12 +247,14 @@ public class WCReimbursementCalculatorMenu {
 		claimantList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		claimantList.setBorder(UIManager.getBorder("List.focusCellHighlightBorder"));
 		claimantList.setBounds(207, 11, 467, 151);
-		frmWorkersCompensationLost.getContentPane().add(claimantList);
+		claimantList.setValueIsAdjusting(false);
 		
 		listSelectionModel = claimantList.getSelectionModel();
 		listSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         listSelectionModel.addListSelectionListener(
                 new SharedListSelectionHandler());
+		//claimantList.addListSelectionListener(new SharedListSelectionHandler()); // TODO Does this work here?
+		claimantList.setSelectionModel(listSelectionModel);
 		
         btnEditClaimHistory = new JButton("Begin Claim History");
 		btnEditClaimHistory.addActionListener(new ActionListener() {
@@ -268,7 +270,6 @@ public class WCReimbursementCalculatorMenu {
 		btnEditClaimHistory.setEnabled(false);
 		panel.add(btnEditClaimHistory);
 		notCreate.add(btnEditClaimHistory);
-
 		
 		btnChangeInjuryDate = new JButton("Change Injury Date");
 		btnChangeInjuryDate.addActionListener(new ActionListener() {
@@ -293,7 +294,6 @@ public class WCReimbursementCalculatorMenu {
 		btnEntercompletePriorWage.setEnabled(false);
 		panel_1.add(btnEntercompletePriorWage);
 		notCreate.add(btnEntercompletePriorWage);
-
 		
 		btnEditWageReimbursement = new JButton("Start Wage Reimbursement Details");
 		btnEditWageReimbursement.setEnabled(false);
@@ -309,7 +309,6 @@ public class WCReimbursementCalculatorMenu {
 		btnEditWageReimbursement.setHorizontalTextPosition(SwingConstants.CENTER);
 		panel_1.add(btnEditWageReimbursement);
 		notCreate.add(btnEditWageReimbursement);
-
 		
 		btnAddWorkComp = new JButton("Add Work Comp Payments");
 		btnAddWorkComp.setEnabled(false);
@@ -325,7 +324,6 @@ public class WCReimbursementCalculatorMenu {
 		btnAddWorkComp.setPreferredSize(new Dimension(180, 30));
 		panel_1.add(btnAddWorkComp);
 		notCreate.add(btnAddWorkComp);
-
 		
 		btnAddTtdWork = new JButton("Add TTD Work Comp Payments");
 		btnAddTtdWork.addActionListener(new ActionListener() {
@@ -347,8 +345,7 @@ public class WCReimbursementCalculatorMenu {
 		btnAddTpdWork.setFont(new Font("Dialog", Font.BOLD, 12));
 		btnAddTpdWork.setEnabled(false);
 		panel_1.add(btnAddTpdWork);
-		notCreate.add(btnAddTpdWork);
-		
+		notCreate.add(btnAddTpdWork);		
 				
 		btnAddLightDuty = new JButton("Add Light Duty Work Payment");
 		btnAddLightDuty.setIconTextGap(10);
@@ -362,7 +359,6 @@ public class WCReimbursementCalculatorMenu {
 		btnAddLightDuty.setEnabled(false);
 		panel_1.add(btnAddLightDuty);
 		notCreate.add(btnAddLightDuty);
-
 		
 		btnViewClaimDetails = new JButton("View Claim Details");
 		btnViewClaimDetails.setIconTextGap(20);
@@ -378,6 +374,9 @@ public class WCReimbursementCalculatorMenu {
 		overviewText.setEditable(false);
 		overviewText.setBounds(6, 291, 672, 401);
 		frmWorkersCompensationLost.getContentPane().add(overviewText);
+		
+		frmWorkersCompensationLost.getContentPane().add(claimantList);
+		if(data) claimantList.setSelectedIndex(0);
 	}
 	
 	public StateLawCalculable selectStateLawCalculable(){
@@ -974,11 +973,14 @@ public class WCReimbursementCalculatorMenu {
 		return s;
 	}
 	
-	public void loadExistingData(){
+	public boolean loadExistingData(){
 		ArrayList<ReimbursementOverview> roList = dataAccess.selectAllReimbursementOverviews();
+		if(roList.isEmpty()) return false;
+		
 		for(ReimbursementOverview r : roList){
 			this.claimListModel.add(claimListModel.size(), r);
 		}
+		return true;
 	}
 	
 	public boolean editClaimSummary(ReimbursementOverview ro, boolean create, boolean dInjOnly, boolean pcOnly){
@@ -1000,6 +1002,7 @@ public class WCReimbursementCalculatorMenu {
 			CompClaim cHist = new CompClaim(new java.sql.Date(dateInjured.getTimeInMillis()), sLC);
 			dataAccess.insertClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
 					new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), cHist.getDaysInjured(), cHist.getWeeksInjured());
+			dataAccess.insertRSummary(ro.getClaimant().getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"));
 			ro.setTTDRSumm(new TTDReimbursementSummary());
 			ro.ttdRSumm.setClaimSummary(cHist);
 			claimListModel.set(claimantList.getSelectedIndex(), ro);
@@ -1260,6 +1263,7 @@ public class WCReimbursementCalculatorMenu {
             	try{
             		nulled = (claimantList.getSelectedValue().getTTDRSumm().getClaimSummary() == null);
             	} catch (NullPointerException ne) {
+            		ne.printStackTrace();
             		nulled = true;
             	}
             	if(nulled){

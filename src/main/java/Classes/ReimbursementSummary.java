@@ -42,8 +42,9 @@ public abstract class ReimbursementSummary {
 	public ReimbursementSummary(BigDecimal calculatedWeeklyPayment, CompClaim claimSummary, BigDecimal amountNotPaid, ArrayList<WorkCompPaycheck> wcPayments) {
 		//this.s = new Scanner(System.in);
 		this.claimSummary = claimSummary;
+		this.stateLawCalculation = this.claimSummary.stateLawCalculation;
 		this.wcPayments = wcPayments;
-		this.sortWCPaymentsByDate();
+		if(!this.wcPayments.isEmpty())this.sortWCPaymentsByDate();
 		this.calculatedWeeklyPayment = calculatedWeeklyPayment;
 		this.amountNotPaid = amountNotPaid;
 	}
@@ -51,6 +52,7 @@ public abstract class ReimbursementSummary {
 	public ReimbursementSummary(ReimbursementSummary rsumm) {
 		//this.s = new Scanner(System.in);
 		this.claimSummary = rsumm.claimSummary;
+		this.stateLawCalculation = this.claimSummary.stateLawCalculation;
 		this.wcPayments = rsumm.wcPayments;
 		this.calculatedWeeklyPayment = rsumm.calculatedWeeklyPayment;
 		this.amountNotPaid = rsumm.amountNotPaid;
@@ -271,6 +273,7 @@ public abstract class ReimbursementSummary {
 	
 	public void setClaimSummary(CompClaim cS){
 		this.claimSummary = cS;
+		this.stateLawCalculation = cS.stateLawCalculation;
 	}
 	
 	public void setCalculatedWeeklyPayment(BigDecimal cWP){
@@ -284,6 +287,7 @@ public abstract class ReimbursementSummary {
 	public void setWCPayments(ArrayList<WorkCompPaycheck> wcP){
 		this.wcPayments = wcP;
 	}
+	
 	
 	// TODO: Setters and Getters and calcWP method taking interface class
 	

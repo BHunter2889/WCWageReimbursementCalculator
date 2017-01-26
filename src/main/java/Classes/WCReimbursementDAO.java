@@ -860,7 +860,7 @@ public class WCReimbursementDAO {
 			e.printStackTrace();
 			try {
 				stmtSelectAllClaimants.close();
-				SQLException se = new SQLException(".execute returns False, but .executeQuery() ln 792 does not return valid ResultSet");
+				SQLException se = new SQLException(".execute returns False, but .executeQuery() does not return valid ResultSet");
 				throw se;
 			} catch (SQLException e1) {
 				e1.printStackTrace();
@@ -884,7 +884,7 @@ public class WCReimbursementDAO {
 	            clmnt.setMiddleName(results.getString(4));
 	            clmnt.setWorkPlace(results.getString(5));
 	            clmnt.setState(results.getString(6));
-	            cList.add(cList.size(), clmnt);
+	            cList.add(clmnt);
 			}
 			if (row < 0){
 				results.close();
@@ -922,9 +922,22 @@ public class WCReimbursementDAO {
 			stmtSelectClaimSummary.setInt(1, id);
 			if (!stmtSelectClaimSummary.execute()){
 				stmtSelectClaimSummary.close();
+				try{
+					throw new NullPointerException("Null ClaimSummary returned from Query.");
+				} catch(NullPointerException ne){
+					ne.printStackTrace();
+				}
 				return null;
 			}
 			results = stmtSelectClaimSummary.getResultSet();
+			if(results == null){
+				try{
+					throw new SQLException("Null ClaimSummary ResultSet for:"+clmnt.toString());
+				} catch (SQLException e){
+					e.printStackTrace();
+					stmtSelectClaimSummary.close();
+				}
+			}
 			
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
@@ -937,13 +950,27 @@ public class WCReimbursementDAO {
 			}
 			return null;
 		}
-		
+		try{
+			if(results.getFetchSize() < 1){
+				throw new SQLException("No Results Returned for ClaimSummary Query. Size: "+String.valueOf(results.getFetchSize()));
+			}
+		} catch (SQLException e){
+			e.printStackTrace();
+			try {
+				results.close();
+				stmtSelectClaimSummary.close();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			return null;
+		}
 		CompClaim clmSm = null;
 		
-		int row = 0;
+		//int row = -1;
 		try{
 			while(results.next()){
-				row++;
+				//row++;
+				System.out.println("In ClaimSumm while.next()");
 				try{
 					if (results.getDate(3) == null){
 						throw new NullPointerException("No Value selected for DateInjured.");
@@ -952,7 +979,11 @@ public class WCReimbursementDAO {
 					e.printStackTrace();
 				}
 				clmSm = new CompClaim(results.getDate(3), sLC);
+				
 				try{
+					if(clmSm.getEarliestPriorWageDate() == null){
+						throw new Exception("ClaimSummary Null After Attempting Construction.");
+					}
 					Calendar pWS = new GregorianCalendar(sLC.getTimeZone());
 					pWS.setTimeInMillis(results.getDate(4).getTime());
 					
@@ -1024,9 +1055,10 @@ public class WCReimbursementDAO {
 		            clmSm.setPriorWages(selectPaychecks(id, "PRIORWAGES"));
 				}
 			}
-			if (row < 0){	
+
+			if (clmSm == null){	
 				try{
-					throw new Exception("Error setting CompClaim");
+					throw new Exception("Error setting CompClaim: Could not Access ResultSet data for Claimant: "+clmnt.toString());
 				} catch (Exception e){
 					e.printStackTrace();
 					results.close();
@@ -1072,7 +1104,8 @@ public class WCReimbursementDAO {
 				stmtSelectPaychecks.close();
 				return null;
 			}
-			results = stmtSelectPaychecks.getResultSet();			
+			results = stmtSelectPaychecks.getResultSet();
+
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
 		} catch (SQLException e){
@@ -1142,6 +1175,9 @@ public class WCReimbursementDAO {
 				return null;
 			}
 			results = stmtSelectWCPaychecks.getResultSet();
+			if (results == null){
+				return wcpcList;
+			}
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
 		} catch (SQLException e){
@@ -1177,7 +1213,7 @@ public class WCReimbursementDAO {
 			if (row < 0){
 				results.close();
 				stmtSelectWCPaychecks.close();
-				return null;
+				return wcpcList;
 			}
 		} catch (SQLException e){
 			e.printStackTrace();
@@ -1222,6 +1258,8 @@ public class WCReimbursementDAO {
 				return null;
 			}
 			results = stmtSelectRSummary.getResultSet();
+			
+
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
 		} catch (SQLException e){
@@ -1270,6 +1308,14 @@ public class WCReimbursementDAO {
 	public TTDReimbursementSummary selectTTDRSummary(Claimant clmnt){
 		int id = clmnt.getID();
 		CompClaim claimSum = this.selectClaimSummary(clmnt);
+		try{
+			if (claimSum == null){
+				throw new NullPointerException("No ClaimSummary for: "+clmnt.toString());
+			}
+		} catch (NullPointerException ne){
+			ne.printStackTrace();
+			return null;
+		}
 		ArrayList<WorkCompPaycheck> ttdWCPay = this.selectWorkCompPaychecks(id, "TTD");
 		PreparedStatement stmtSelectRSummary = null;
 		try {
@@ -1284,12 +1330,27 @@ public class WCReimbursementDAO {
 			stmtSelectRSummary.setString(2, "TTD");
 			if (!stmtSelectRSummary.execute()){
 				stmtSelectRSummary.close();
+				try{
+					throw new Exception("Could not Execute TTDRS Query.");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				return null;
 			}
 			results = stmtSelectRSummary.getResultSet();
+			if(results == null){
+				try{
+					throw new SQLException("Null ClaimSummary ResultSet for:"+clmnt.toString());
+				} catch (SQLException e){
+					e.printStackTrace();
+					stmtSelectRSummary.close();
+				}
+			}
+			
 			//ResultSetMetaData rsmd = results.getMetaData();
             //int numberCols = rsmd.getColumnCount();
 		} catch (SQLException e){
+			e.printStackTrace();
 			try{
 				stmtSelectRSummary.close();
 			} catch (SQLException se){
@@ -1299,13 +1360,37 @@ public class WCReimbursementDAO {
 		}
 		
 		TTDReimbursementSummary ttdRSumm = null;
-		int row = -1;
+		//int row = -1;
 		try{
 			while(results.next()){
-				row++;
+				System.out.println("In TTDRS while.next()");
+				//row++;
 				ttdRSumm = new TTDReimbursementSummary(results.getBigDecimal(4), claimSum, results.getBigDecimal(5), ttdWCPay);
+				System.out.println("TTDRS & Claim Summary for Claimant: "+clmnt.toString()+" Added.");
+
 			}
-			if (row < 0){
+			if (ttdRSumm == null && claimSum != null){
+				try{
+					this.insertRSummary(clmnt.getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"));
+				} catch (Exception e){
+					e.printStackTrace();
+					try{
+						throw new Exception("Error setting TTDRS: Could not Access ResultSet data for Claimant: "+clmnt.toString()+" ClaimSummary added to new empty TTDRS");
+					} catch (Exception ex){
+						ex.printStackTrace();
+					}
+					results.close();
+					stmtSelectRSummary.close();
+				}
+				ttdRSumm = new TTDReimbursementSummary();
+				ttdRSumm.setClaimSummary(claimSum);
+			}
+			else if(ttdRSumm == null){
+				try{
+					throw new Exception("Error setting TTDRS: Could not Access ResultSet data for Claimant: "+clmnt.toString()+" ClaimSummary added to new empty TTDRS");
+				} catch (Exception ex){
+					ex.printStackTrace();
+				}
 				results.close();
 				stmtSelectRSummary.close();
 				return null;
@@ -1315,6 +1400,7 @@ public class WCReimbursementDAO {
 			try {
 				results.close();
 				stmtSelectRSummary.close();
+
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
@@ -1342,9 +1428,15 @@ public class WCReimbursementDAO {
 	}
 	
 	public ReimbursementOverview selectReimbursementOverview(Claimant clmnt){
+		System.out.println("Adding ReimbursementOverview for Claimant: "+clmnt.toString()+"...");
+
 		ReimbursementOverview ro = new ReimbursementOverview();
 		ro.setClaimant(clmnt);
 		ro.setTTDRSumm(this.selectTTDRSummary(clmnt));
+		if(ro.getTTDRSumm() != null){
+			System.out.println("TTDRS & ClaimSummar for: "+clmnt.toString()+" Added: "+ro.ttdRSumm.toString());
+			System.out.println("TTDRS & ClaimSummar for: "+clmnt.toString()+" Added: "+ro.ttdRSumm.claimSummary.toString());
+		}
 		ro.setTPDRSumm(this.selectTPDRSummary(clmnt));
 		return ro;
 	}
@@ -1361,6 +1453,7 @@ public class WCReimbursementDAO {
 		if(cList != null){
 			for (Claimant c : cList){
 				roList.add(this.selectReimbursementOverview(c));
+				System.out.println("RO for Claimant: "+c.toString()+" Added.");
 			}
 		}
 		

@@ -59,7 +59,7 @@ public class Claimant{
 		return this.lastName;
 	}
 	
-	public String getFirsttName(){
+	public String getFirstName(){
 		return this.firstName;
 	}
 	
@@ -73,5 +73,10 @@ public class Claimant{
 	
 	public String getState(){
 		return this.state;
+	}
+	
+	@Override
+	public String toString(){
+		return String.valueOf(this.getID())+" "+this.getFirstName()+" "+this.getMiddleName()+" "+this.getLastName()+" "+this.getWorkPlace()+" "+this.getState();
 	}
 }
