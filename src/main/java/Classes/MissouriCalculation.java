@@ -23,10 +23,11 @@ public class MissouriCalculation implements StateLawCalculable {
 	}
 
 	@Override
-	public ArrayList<Paycheck> addAndTrimToPriorWages(Paycheck pc, ArrayList<Paycheck> pchecks, Calendar priorWeekStart) {
+	public ArrayList<Paycheck> addAndTrimToPriorWages(Paycheck pc, ArrayList<Paycheck> pchecks, CompClaim cHist) {
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		//long mWeek = mDay * 7;
 		String message = "";
+		String eol = System.getProperty("line.separator");
 		boolean unaddable = priorWagesIsComplete(pchecks);
 		if(unaddable){
 			message ="Paycheck cannot be added. Total time period of prior wages entered meets Missouri Law criteria.";
@@ -36,11 +37,16 @@ public class MissouriCalculation implements StateLawCalculable {
 		
 		//Calendar pcPD = pc.getPaymentDate();
 		//long pcPDate = pcPD.getTimeInMillis();
+		Calendar priorWeekStart = cHist.getPriorWeekStart();
+		Calendar earliestPriorWageDate = cHist.getEarliestPriorWageDate();
 		Calendar pcPPS = pc.getPayPeriodStart();
 		long pcPPSDate = pcPPS.getTimeInMillis();
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
-		Date ePWD = new java.sql.Date(this.computeEarliestPriorWageDate(priorWeekStart).getTimeInMillis());
+		formatter.setTimeZone(timeZone);
+		java.util.Date ePWD = earliestPriorWageDate.getTime();
+		System.out.println("EPW Date: "+formatter.format(ePWD));
+		System.out.println("PWS Date: "+formatter.format(priorWeekStart.getTime()));
 		//Date dPPS = (Date) pcPPS.getTime();
 		 
 		long mPWeekEnd =  priorWeekStart.getTimeInMillis() + (mDay * 6);
@@ -49,25 +55,26 @@ public class MissouriCalculation implements StateLawCalculable {
 		GregorianCalendar priorWeekEnd = this.normalizeCalendarTime(pWeekEnd);
 		Calendar pcPPE = pc.getPayPeriodEnd();
 		//Date dPPE = (Date) pcPPE.getTime();
-		Date dPWE = new java.sql.Date(priorWeekEnd.getTimeInMillis());
+		java.util.Date dPWE = priorWeekEnd.getTime();
 		
 
 		if(pcPPS.compareTo(priorWeekEnd) > 0){
-			message = "Invalid paycheck start date. Pay Period Start Date must be before the end of the week immediately prior to week of injury.";
+			message = "Invalid paycheck start date. Pay Period Start Date must be before the end of the week immediately prior to week of injury."+eol+
+					"Date Entered: "+formatter.format(pcPPS.getTime());
 			JOptionPane.showMessageDialog(null, message);
 			return pchecks;
 		}
-		else if(pcPPS.compareTo(this.computeEarliestPriorWageDate(priorWeekStart)) < 0){
+		else if(pcPPS.compareTo(earliestPriorWageDate) < 0){
 			
 
 			//if period overlaps ePWD, alter the paycheck to represent only applicable portion (days after ePWD)
-			if (pcPPE.compareTo(this.computeEarliestPriorWageDate(priorWeekStart)) > 0){
+			if (pcPPE.compareTo(earliestPriorWageDate) > 0){
 				long pcE = pcPPE.getTimeInMillis();
-				long mEPW = this.computeEarliestPriorWageDate(priorWeekStart).getTimeInMillis();
-				long mNewPP = (pcE - mEPW);
+				long mEPW = earliestPriorWageDate.getTimeInMillis();
+				long mNewPP = (pcE - mEPW)+mDay;
 				int PPDays = (int) Math.ceil(mNewPP / mDay);
 
-				pc.setPayPeriodStart(this.computeEarliestPriorWageDate(priorWeekStart));
+				pc.setPayPeriodStart(earliestPriorWageDate);
 				String pG = String.valueOf(mNewPP / (pcE - pcPPSDate));
 				BigDecimal percentGross = new BigDecimal(pG);
 				BigDecimal gA = pc.getGrossAmount();
@@ -75,7 +82,7 @@ public class MissouriCalculation implements StateLawCalculable {
 				BigDecimal nG = pGAMult.setScale(2, RoundingMode.HALF_EVEN);
 				String newGross = String.valueOf(nG);
 				pc.setGrossAmount(newGross);
-				message = "Only last " + PPDays + " Days of submitted Pay Check entered and calculated for Gross Amount due to earliest accepted date for prior wages relative to date of injury";
+				message = "Only last " + String.valueOf(PPDays) + " Days of submitted Pay Check entered and calculated for Gross Amount due to earliest accepted date for prior wages relative to date of injury";
 				JOptionPane.showMessageDialog(null, message);
 				//System.out.print("If work hours used to calculate pay during this period were not evenly distributed for the above number of days,");
 				//System.out.print("please manually enter Gross Income ONLY for the hours worked this pay period STARTING on " + formatter.format(ePWD) +".");
@@ -98,6 +105,7 @@ public class MissouriCalculation implements StateLawCalculable {
 			}
 			else{
 				message = "Invalid paycheck end date. Pay Period End Date must be after " + formatter.format(ePWD) + " based on date of injury in accordance with State law.";
+				System.out.println("Invalid PPE Date: MOCalc - first condition. Date: "+formatter.format(pcPPE.getTime()));
 				JOptionPane.showMessageDialog(null, message);
 				return pchecks;
 			}	
@@ -107,7 +115,7 @@ public class MissouriCalculation implements StateLawCalculable {
 			if (pcPPS.compareTo(priorWeekEnd) < 0){
 				long pcE = pcPPE.getTimeInMillis();
 				
-				long mNewPP = (mPWeekEnd - pcPPSDate);
+				long mNewPP = (mPWeekEnd - pcPPSDate)+mDay;
 				int PPDays = (int) Math.ceil(mNewPP / mDay);
 				pc.setPayPeriodEnd(priorWeekEnd);
 				String pG = String.valueOf(mNewPP / (pcE - pcPPSDate));
@@ -117,7 +125,7 @@ public class MissouriCalculation implements StateLawCalculable {
 				BigDecimal nG = pGAMult.setScale(2, RoundingMode.HALF_EVEN);
 				String newGross = String.valueOf(nG);
 				pc.setGrossAmount(newGross);
-				message = "Only first " + PPDays + " Days of entered Pay Check entered and calculated for Gross Amount due to last accepted date for prior wages relative to date of injury (end of prior week)";
+				message = "Only first " + String.valueOf(PPDays) + " Days of entered Pay Check entered and calculated for Gross Amount due to last accepted date for prior wages relative to date of injury (end of prior week)";
 				JOptionPane.showMessageDialog(null, message);
 				/*System.out.println("If work hours used to calculate pay during this period were not evenly distributed for the above number of days,");
 				System.out.println("please manually enter Gross Income ONLY for the hours worked this pay period STARTING on " + formatter.format(dPPS) + " through " + formatter.format(dPWE) + ".");
@@ -140,12 +148,15 @@ public class MissouriCalculation implements StateLawCalculable {
 			}
 			else{
 				message = "Invalid paycheck start date. Pay Period Start Date must be before " + formatter.format(dPWE) + " based on date of injury in accordance with State law.";
+				System.out.println("Invalid PPS Date: MOCalc - last condition. Date: "+formatter.format(pcPPS.getTime()));
 				JOptionPane.showMessageDialog(null, message);
 				return pchecks;
 			}	
 		}
 		
 		pchecks.add(pc);
+		cHist.setPriorWages(pchecks);
+		System.out.println(cHist.listPriorWages());
 		return pchecks;
 	}
 

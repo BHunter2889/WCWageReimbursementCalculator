@@ -8,7 +8,7 @@ import java.util.TimeZone;
 
 public interface StateLawCalculable {
 	
-	public ArrayList<Paycheck> addAndTrimToPriorWages(Paycheck pc, ArrayList<Paycheck> pchecks, Calendar priorWeekStart); //CompClaim
+	public ArrayList<Paycheck> addAndTrimToPriorWages(Paycheck pc, ArrayList<Paycheck> pchecks, CompClaim cHist); //CompClaim
 	public ArrayList<Paycheck> addTPDWorkPaycheck(Paycheck pc, ArrayList<Paycheck> pchecks, Calendar priorWeekStart) throws Exception; //TPDRSummary
 	public ArrayList<WorkCompPaycheck> addWCPaycheck(WorkCompPaycheck wcPC, ArrayList<WorkCompPaycheck> wcPayments, Calendar priorWeekStart); //ReimbursementSummary
 	public BigDecimal computeAnyLatePaymentCompensation(BigDecimal grossAmnt, BigDecimal calculatedWeeklyPayment); //WCPaycheck

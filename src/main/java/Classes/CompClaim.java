@@ -257,7 +257,7 @@ public class CompClaim {
 	}*/
 	
 	public void addPaycheck(Paycheck pc, StateLawCalculable stateLawCalc){
-		this.priorWages = stateLawCalc.addAndTrimToPriorWages(pc, this.priorWages, this.priorWeekStart);
+		this.priorWages = stateLawCalc.addAndTrimToPriorWages(pc, this.priorWages, this);
 		this.sortPaychecksByDate();
 	}
 	/*

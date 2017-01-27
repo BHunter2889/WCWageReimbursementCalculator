@@ -212,7 +212,7 @@ public class ClaimPreparedStatements {
 	}
 	
 	public String getStmtUpdateClaimSummary(){
-		return this.getStmtUpdateClaimSummary();
+		return this.stmtUpdateClaimSummary;
 	}
 
 	public String getStmtUpdatePaychecks(){

@@ -147,10 +147,11 @@ public class Paycheck implements Comparable<Calendar> {
 	public String toString(){
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM/dd/yyyy");
 		formatter.setLenient(false);
+		formatter.setTimeZone(new SimpleTimeZone(0, "Standard"));
 		
-		Date payD = (Date) this.paymentDate.getTime();
-		Date payPS = (Date) this.payPeriodStart.getTime();
-		Date payPE = (Date) this.payPeriodEnd.getTime();
+		java.util.Date payD = this.paymentDate.getTime();
+		java.util.Date payPS = this.payPeriodStart.getTime();
+		java.util.Date payPE = this.payPeriodEnd.getTime();
 		
 		return formatter.format(payPS) + " - " + formatter.format(payPE) + ": $" + this.getGrossAmount() + " paid on " + formatter.format(payD) + ".";
 		
@@ -166,7 +167,6 @@ public class Paycheck implements Comparable<Calendar> {
 
 	public void setPaymentDate(Date payDate) {
 		SimpleTimeZone tZ = new SimpleTimeZone(0, "Standard");
-		tZ.setDSTSavings(0);
 		GregorianCalendar pD = new GregorianCalendar(tZ);
 		pD.setTime(payDate);
 		this.paymentDate = new MissouriCalculation().normalizeCalendarTime(pD); 
@@ -174,7 +174,6 @@ public class Paycheck implements Comparable<Calendar> {
 	
 	public void setPayPeriodStart(Date payPS) {
 		SimpleTimeZone tZ = new SimpleTimeZone(0, "Standard");
-		tZ.setDSTSavings(0);
 		GregorianCalendar pPS = new GregorianCalendar(tZ);
 		pPS.setTime(payPS);
 		this.payPeriodStart = new MissouriCalculation().normalizeCalendarTime(pPS);
@@ -182,7 +181,6 @@ public class Paycheck implements Comparable<Calendar> {
 	
 	public void setPayPeriodEnd(Date payPE) {
 		SimpleTimeZone tZ = new SimpleTimeZone(0, "Standard");
-		tZ.setDSTSavings(0);
 		GregorianCalendar pPE = new GregorianCalendar(tZ);
 		pPE.setTime(payPE);
 		this.payPeriodEnd = new MissouriCalculation().normalizeCalendarTime(pPE);
