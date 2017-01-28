@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+
 import javax.swing.ButtonGroup;
 import javax.swing.ListSelectionModel;
 import java.awt.FlowLayout;
@@ -33,8 +34,9 @@ import javax.swing.SwingConstants;
 import java.awt.Component;
 import javax.swing.JTextPane;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 public class WCReimbursementCalculatorMenu {
@@ -141,12 +143,29 @@ public class WCReimbursementCalculatorMenu {
 		table.setFillsViewportHeight(true);
 		table.setRowHeight(100);
 		table.setRowSelectionAllowed(false);
+		/*MultiLineTableCellRenderer r = new MultiLineTableCellRenderer(){
+			private static final long serialVersionUID = 1L;
+			Font font = new Font("SansSerif", Font.PLAIN, 12);
+
+		    @Override
+		    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+		    	
+		        if (value instanceof String[]) {
+		            setListData((String[]) value);
+		        }
+		        table.setValueAt(value, row, column);
+		        setFont(font);
+		        return this;
+		    }
+		};
+		*/
+		
 		table.setModel(new DefaultTableModel(
 			new Object[][] {
 				{"Claim History", null},
 				{"Temp. Total Disability", null},
 				{"Temp. Partial Disability", null},
-				{"Reimbursement Overview", ""},
+				{"Reimbursement Overview", null},
 			},
 			new String[] {
 				"", ""
@@ -170,8 +189,24 @@ public class WCReimbursementCalculatorMenu {
 			public boolean isCellEditable(int row, int column) {
 				return columnEditables[column];
 			}
+			/*
+			@SuppressWarnings("unchecked")
+			@Override
+			public void setValueAt(Object value, int row, int col)
+			{
+			    
+				Vector<Object> column = (Vector<Object>) this.dataVector.elementAt(row);
+				column.setElementAt(value, col);
+				this.dataVector.setElementAt(column, row);
+			    fireTableCellUpdated(row,col);
+			}
+			*/
 		});
 		
+		LineWrapCellRenderer r = new LineWrapCellRenderer();
+		//table.setDefaultRenderer(String[].class, r);
+		
+		/*
 		// set column 1 font size to smaller - adapted from: http://stackoverflow.com/a/16118913/6867420
 		DefaultTableCellRenderer r = new DefaultTableCellRenderer() {
 			private static final long serialVersionUID = 1L;
@@ -188,6 +223,8 @@ public class WCReimbursementCalculatorMenu {
 		    }
 
 		};
+		*/
+		//table.setDefaultRenderer(String[].class, r);
 		table.getColumnModel().getColumn(1).setCellRenderer(r);
 		
 		table.getColumnModel().getColumn(0).setResizable(false);
@@ -1264,6 +1301,53 @@ public class WCReimbursementCalculatorMenu {
 	    return button;
 	}
 	
+	//enable JTable to display multi-line Strings
+	public class MultiLineTableCellRenderer extends JList<String> implements TableCellRenderer {
+		private static final long serialVersionUID = 1L;
+		Font font = new Font("SansSerif", Font.PLAIN, 12);
+
+	    @Override
+	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	    	
+	        if (value instanceof String[]) {
+	            setListData((String[]) value);
+	        }
+	        
+	        setFont(font);
+	        return this;
+	    }
+	}
+	
+	public class LineWrapCellRenderer extends JTextArea implements TableCellRenderer {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+		        int row, int column) {
+			String text = String.valueOf(value);
+			Font font = new Font("SansSerif", Font.PLAIN, 14);
+			this.setFont(font);
+		    this.setText(text);
+		    this.setWrapStyleWord(true);
+		    this.setLineWrap(true);
+		    /*
+		    int fontHeight = this.getFontMetrics(this.getFont()).getHeight();
+		    int textLength = this.getText().length();
+		    int lines = textLength / this.getColumnWidth();
+		    if (lines == 0) {
+		        lines = 1;
+		    }
+	
+		    int height = fontHeight * lines;
+		    table.setRowHeight(row, height);
+			*/
+		    return this;
+		 }
+
+		
+
+	}
+	
 	public class SharedListSelectionHandler implements ListSelectionListener {
 		@Override
         public void valueChanged(ListSelectionEvent e) {
@@ -1295,7 +1379,11 @@ public class WCReimbursementCalculatorMenu {
         			}
         		}
             	try{
-            		nulled = (claimantList.getSelectedValue().getTTDRSumm().getClaimSummary() == null);
+            		nulled = !claimantList.getSelectedValue().containsTTD();
+            		if(!nulled){
+            			nulled = !claimantList.getSelectedValue().getTTDRSumm().containsCompClaim();
+            		}
+            		
             	} catch (NullPointerException ne) {
             		ne.printStackTrace();
             		nulled = true;
@@ -1338,7 +1426,7 @@ public class WCReimbursementCalculatorMenu {
 		            	table.setModel(tm);
             		}
             		else{
-            			if(claimantList.getSelectedValue().getTTDRSumm().getWCPayments().size() < 1 && claimantList.getSelectedValue().getTPDRSumm().getWCPayments().size() < 1){
+            			if(claimantList.getSelectedValue().getTTDRSumm().getWCPayments().isEmpty() && claimantList.getSelectedValue().getTPDRSumm().getWCPayments().isEmpty()){
             				btnEditPersonalInfo.setEnabled(true);
         	            	btnEditClaimHistory.setEnabled(true);
         	            	btnChangeInjuryDate.setEnabled(true);

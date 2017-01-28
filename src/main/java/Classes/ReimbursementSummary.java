@@ -288,8 +288,11 @@ public abstract class ReimbursementSummary {
 		this.wcPayments = wcP;
 	}
 	
+	public boolean containsCompClaim(){
+		return this.claimSummary != null;
+	}
 	
-	// TODO: Setters and Getters and calcWP method taking interface class
+	
 	
 
 }

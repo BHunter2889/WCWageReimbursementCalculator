@@ -53,6 +53,14 @@ public class ReimbursementOverview {
 		return this.getTTDRSumm().getWCPayToDate().add(this.getTPDRSumm().getWCPayToDate());
 	}
 	
+	public boolean containsTTD(){
+		return this.ttdRSumm != null;
+	}
+	
+	public boolean containsTPD(){
+		return this.tpdRSumm != null;
+	}
+	
 	public String getTotalString(){
 		return "Total Not Paid: $"+this.getTotalNotPaid().toPlainString()+" | Total Work Comp Pay-To-Date: $"+this.getTotalWCPayToDate().toPlainString();
 	}
