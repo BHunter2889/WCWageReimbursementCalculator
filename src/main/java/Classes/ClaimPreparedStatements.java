@@ -8,6 +8,8 @@ public class ClaimPreparedStatements {
 	protected Connection dbConnection;
 	protected String stmtDeleteClaimRecord;
 	protected String stmtDeletePaychecksFrmSingleClaim;
+	protected String stmtDeleteSinglePaycheck;
+	protected String stmtDeleteSingleWCPaycheck;
 	protected String stmtUpdateClaimants;
 	protected String stmtUpdateRSummary;
 	protected String stmtUpdateClaimSummary;
@@ -29,6 +31,8 @@ public class ClaimPreparedStatements {
 		this.dbConnection = dbConnection;
 		setStmtDeleteClaimRecord();
 		setStmtDeletePaychecksFrmSingleClaim();
+		setStmtDeleteSinglePaycheck();
+		setStmtDeleteSingleWCPaycheck();
 		setStmtUpdateClaimants();
 		setStmtUpdateRSummary();
 		setStmtUpdateClaimSummary();
@@ -60,6 +64,18 @@ public class ClaimPreparedStatements {
 			        "where ID = ? AND PC_TYPE = ?";
 	}
 	
+	public void setStmtDeleteSinglePaycheck(){
+			this.stmtDeleteSinglePaycheck = 
+					"DELETE FROM APP.PAYCHECKS " +
+					"where ID = ? AND PAY_DATE = ?";
+	}
+	
+	public void setStmtDeleteSingleWCPaycheck(){
+			this.stmtDeleteSingleWCPaycheck = 
+				"DELETE FROM APP.WC_PAYCHECKS " +
+				"where ID = ? AND PAY_DATE = ?";
+	}
+	
 	public void setStmtUpdateClaimants(){
 			this.stmtUpdateClaimants =
 			    "UPDATE APP.CLAIMANTS " +
@@ -89,7 +105,7 @@ public class ClaimPreparedStatements {
 			    "    EARLIEST_PW = ?, " +
 			    "    BD_AVG_PGWP = ?, " +
 			    "    DAYS_INJ = ?, " +
-			    "    WEEKS_INJ = ?, " +
+			    "    WEEKS_INJ = ? " +
 			    "where CLAIM_ID = ?";
 	}
 	
@@ -100,7 +116,7 @@ public class ClaimPreparedStatements {
 			    "    PAY_DATE = ?, " +
 			    "    PAY_START = ?, " +
 			    "    PAY_END = ?, " +
-			    "    BD_GROSS_AMNT = ?, " +
+			    "    BD_GROSS_AMNT = ? " +
 			    "where CLAIM_ID = ? " +
 			    "AND PC_TYPE = ?" +
 			    "AND PAY_END = ?";
@@ -119,7 +135,7 @@ public class ClaimPreparedStatements {
 			    "    PAY_END = ?, " +
 			    "    BD_GROSS_AMNT = ?, " +
 			    "    BD_AMNT_OWED = ?, " +
-			    "    CONTEST_RSLVD = ?, " +
+			    "    CONTEST_RSLVD = ? " +
 			    "where CLAIM_ID = ? " +
 			    "AND WC_PC_TYPE = ?";
 	}
@@ -201,6 +217,14 @@ public class ClaimPreparedStatements {
 	
 	public String getStmtDeletePaychecksFrmSingleClaim(){
 		return this.stmtDeletePaychecksFrmSingleClaim;
+	}
+	
+	public String getStmtDeleteSinglePaycheck(){
+			return this.stmtDeleteSinglePaycheck;
+	}
+	
+	public String getStmtDeleteSingleWCPaycheck(){
+		return this.stmtDeleteSingleWCPaycheck;
 	}
 	
 	public String getStmtUpdateClaimants(){

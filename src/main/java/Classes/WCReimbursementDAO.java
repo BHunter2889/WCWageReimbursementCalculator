@@ -417,6 +417,60 @@ public class WCReimbursementDAO {
 		return deleted;
 	}
 	
+	public boolean deleteSinglePaycheck(int id, Date payDate){
+		boolean deleted = false;
+		PreparedStatement stmtDeleteSinglePC = null;
+		try {
+			stmtDeleteSinglePC = this.dbConnection.prepareStatement(this.preparedStatements.getStmtDeleteSinglePaycheck());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		try{
+			stmtDeleteSinglePC.clearParameters();
+			stmtDeleteSinglePC.setInt(1, id);
+			stmtDeleteSinglePC.setDate(2, payDate);
+			stmtDeleteSinglePC.executeUpdate();
+			deleted = true;
+		} catch (SQLException sqle) {
+	        sqle.printStackTrace();
+	    } finally {
+	    	try {
+	    		stmtDeleteSinglePC.close();
+	    	} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+
+		return deleted;
+	}
+	
+	public boolean deleteSingleWCPaycheck(int id, Date payDate){
+		boolean deleted = false;
+		PreparedStatement stmtDeleteSingleWCPC = null;
+		try {
+			stmtDeleteSingleWCPC = this.dbConnection.prepareStatement(this.preparedStatements.getStmtDeleteSingleWCPaycheck());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		try{
+			stmtDeleteSingleWCPC.clearParameters();
+			stmtDeleteSingleWCPC.setInt(1, id);
+			stmtDeleteSingleWCPC.setDate(2, payDate);
+			stmtDeleteSingleWCPC.executeUpdate();
+			deleted = true;
+		} catch (SQLException sqle) {
+	        sqle.printStackTrace();
+	    } finally {
+	    	try {
+	    		stmtDeleteSingleWCPC.close();
+	    	} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+
+		return deleted;
+	}
+	
 	public boolean updateClaimants(int id, String lastname, String firstname, String middlename, String workplace, String state){
 		boolean updated = false;
 		PreparedStatement stmtUpdateClaimants = null;

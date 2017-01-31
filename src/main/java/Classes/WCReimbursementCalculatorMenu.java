@@ -59,6 +59,7 @@ public class WCReimbursementCalculatorMenu {
 	private JButton btnAddLightDuty;
 	private JButton btnAddTtdWork;
 	private JButton btnAddTpdWork;
+	private JButton btnDeleteAPaycheck;
 	private JButton btnViewClaimDetails;
 	private JTable table;
 
@@ -406,6 +407,16 @@ public class WCReimbursementCalculatorMenu {
 		btnAddLightDuty.setEnabled(false);
 		panel_1.add(btnAddLightDuty);
 		notCreate.add(btnAddLightDuty);
+		
+		btnDeleteAPaycheck = new JButton("Delete A Paycheck");
+		btnDeleteAPaycheck.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				deleteAPaycheck(claimantList.getSelectedValue());
+			}
+		});
+		btnDeleteAPaycheck.setFont(new Font("SansSerif", Font.BOLD, 12));
+    	btnDeleteAPaycheck.setEnabled(false);
+		panel_1.add(btnDeleteAPaycheck);
 		
 		btnViewClaimDetails = new JButton("View Claim Details");
 		btnViewClaimDetails.setIconTextGap(20);
@@ -1270,6 +1281,141 @@ public class WCReimbursementCalculatorMenu {
 			}
 		}
 	}
+	
+	public boolean deleteAPaycheck(ReimbursementOverview ro){
+		int selected = 0;
+		boolean deleted = false;
+		boolean tpd = this.btnEditWageReimbursement.isEnabled();
+		if(tpd){
+			String eol = System.getProperty("line.separator");
+			String message = "Delete a Paycheck from Employer or Work Comp?"+eol+
+					"NOTE: Employer issued paychecks include Payments prior to Injury and TPD Work Payments.";
+			String[] options = {"Employer", "Work Comp", "Cancel"};
+			selected = JOptionPane.showOptionDialog(frmWorkersCompensationLost, message, "From Employer or Work Comp?", JOptionPane.YES_NO_CANCEL_OPTION,
+					JOptionPane.QUESTION_MESSAGE, null, options, null);
+		}
+		
+		long mDay = (1000*60*60*24);
+		
+		if(selected == 0){
+			String message = "Please select the Paycheck you would like to Delete: ";
+			ArrayList<Paycheck> paychecksDB = dataAccess.selectPaychecks(ro.getClaimant().getID(), "PRIORWAGES");
+			paychecksDB.addAll(dataAccess.selectPaychecks(ro.getClaimant().getID(), "WORKPAYMENTS"));
+			Paycheck toDelete = (Paycheck) JOptionPane.showInternalInputDialog(frmWorkersCompensationLost.getContentPane(), 
+					message, 
+					"Select Paycheck to Delete", 
+					JOptionPane.PLAIN_MESSAGE, null, paychecksDB.toArray(), null);
+			deleted = dataAccess.deleteSinglePaycheck(ro.getClaimant().getID(), new Date(toDelete.getPaymentDate().getTimeInMillis()));
+			if (deleted){
+				if(toDelete.getPayPeriodStart().compareTo(ro.getTTDRSumm().getClaimSummary().getDateInjured()) < 0){
+					ArrayList<Paycheck> priorWages = ro.ttdRSumm.claimSummary.priorWages;
+					for(Paycheck p : priorWages){
+						if (Math.abs(p.getPaymentDate().getTimeInMillis() - toDelete.getPaymentDate().getTimeInMillis()) < mDay){
+							try{
+								priorWages.remove(p);
+								ro.ttdRSumm.claimSummary.setPriorWages(priorWages);
+								ro.tpdRSumm.claimSummary.setPriorWages(priorWages);
+								CompClaim cHist = ro.getTTDRSumm().getClaimSummary();
+								dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(cHist.getDateInjured().getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
+										new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment(), 
+										ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
+								ro.ttdRSumm.setClaimSummary(cHist);
+								ro.tpdRSumm.setClaimSummary(cHist);
+								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.tpdRSumm.getCalculatedWeeklyPayment(), ro.tpdRSumm.getAmountNotPaid());
+								claimListModel.set(claimantList.getSelectedIndex(), ro);
+								return deleted;
+							} catch (Exception e){
+								e.printStackTrace();
+								try{
+									throw new Exception("Paycheck deleted from database but not from loaded Client side data.");
+								} catch (Exception ex){
+									ex.printStackTrace();
+								}
+							}
+						}
+					}
+				}
+				else{
+					ArrayList<Paycheck> workPay = ro.tpdRSumm.receivedWorkPayments;
+					for(Paycheck p : workPay){
+						if (Math.abs(p.getPaymentDate().getTimeInMillis() - toDelete.getPaymentDate().getTimeInMillis()) < mDay){
+							try{
+								workPay.remove(p);
+								ro.tpdRSumm.setReceivedWorkPayments(workPay);
+								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.tpdRSumm.getCalculatedWeeklyPayment(), ro.tpdRSumm.getAmountNotPaid());
+								claimListModel.set(claimantList.getSelectedIndex(), ro);
+								return deleted;
+							} catch (Exception e){
+								e.printStackTrace();
+								try{
+									throw new Exception("Paycheck deleted from database but not from loaded Client side data.");
+								} catch (Exception ex){
+									ex.printStackTrace();
+								}
+							}
+						}
+					}
+					
+				}
+			}
+		}
+		else if(selected == 1){
+			String message = "Please select the Work Comp Paycheck you would like to Delete: ";
+			ArrayList<WorkCompPaycheck> wcPaychecksDB = dataAccess.selectWorkCompPaychecks(ro.getClaimant().getID(), "TTD");
+			wcPaychecksDB.addAll(dataAccess.selectWorkCompPaychecks(ro.getClaimant().getID(), "TPD"));
+			WorkCompPaycheck toDelete = (WorkCompPaycheck) JOptionPane.showInternalInputDialog(frmWorkersCompensationLost.getContentPane(), 
+					message, 
+					"Select Work Comp Paycheck to Delete", 
+					JOptionPane.PLAIN_MESSAGE, null, wcPaychecksDB.toArray(), null);
+			deleted = dataAccess.deleteSingleWCPaycheck(ro.getClaimant().getID(), new Date(toDelete.getPaymentDate().getTimeInMillis()));
+			if (deleted){
+				ArrayList<WorkCompPaycheck> wcTTDPay = ro.ttdRSumm.wcPayments;
+				
+				for(WorkCompPaycheck p : wcTTDPay){
+					if (Math.abs(p.getPaymentDate().getTimeInMillis() - toDelete.getPaymentDate().getTimeInMillis()) < mDay){
+						try{
+							wcTTDPay.remove(p);
+							ro.ttdRSumm.setWCPayments(wcTTDPay);
+							dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.tpdRSumm.getCalculatedWeeklyPayment(), ro.tpdRSumm.getAmountNotPaid());
+							claimListModel.set(claimantList.getSelectedIndex(), ro);
+							return deleted;
+						} catch (Exception e){
+							e.printStackTrace();
+							try{
+								throw new Exception("Paycheck deleted from database but not from loaded Client side data.");
+							} catch (Exception ex){
+								ex.printStackTrace();
+							}
+						}
+					}
+				}
+				
+				ArrayList<WorkCompPaycheck> wcTPDPay = ro.tpdRSumm.wcPayments;
+				
+				for(WorkCompPaycheck p : wcTPDPay){
+					if (Math.abs(p.getPaymentDate().getTimeInMillis() - toDelete.getPaymentDate().getTimeInMillis()) < mDay){
+						try{
+							wcTPDPay.remove(p);
+							ro.tpdRSumm.setWCPayments(wcTPDPay);
+							dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.tpdRSumm.getCalculatedWeeklyPayment(), ro.tpdRSumm.getAmountNotPaid());
+							claimListModel.set(claimantList.getSelectedIndex(), ro);
+							return deleted;
+						} catch (Exception e){
+							e.printStackTrace();
+							try{
+								throw new Exception("Paycheck deleted from database but not from loaded Client side data.");
+							} catch (Exception ex){
+								ex.printStackTrace();
+							}
+						}
+					}
+				}			
+			}
+		}
+		
+		return deleted;
+	}
+	
 	// Ensure Button Text Fits - adapted from: http://stackoverflow.com/a/19194949/6867420
 	public JButton setButtonTextFit(JButton button, String text) {
 		// Get the original Font from client properties
@@ -1325,6 +1471,7 @@ public class WCReimbursementCalculatorMenu {
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 		        int row, int column) {
 			String text = String.valueOf(value);
+			if (value == null || text == null) text = "";
 			Font font = new Font("SansSerif", Font.PLAIN, 14);
 			this.setFont(font);
 		    this.setText(text);
@@ -1364,6 +1511,7 @@ public class WCReimbursementCalculatorMenu {
             	btnAddTtdWork.setEnabled(false);
             	btnAddTpdWork.setEnabled(false);
             	btnViewClaimDetails.setEnabled(false);
+            	btnDeleteAPaycheck.setEnabled(false);
             	TableModel tm = table.getModel();
             	tm.setValueAt("No Claim Selected.", 0, 1);
             	tm.setValueAt("No Claim Selected.", 1, 1);
@@ -1418,6 +1566,7 @@ public class WCReimbursementCalculatorMenu {
 		            	btnAddTtdWork.setEnabled(false);
 		            	btnAddTpdWork.setEnabled(false);
     	            	btnViewClaimDetails.setEnabled(true);
+    	            	btnDeleteAPaycheck.setEnabled(true);
     	            	TableModel tm = table.getModel();
 		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
 		            	tm.setValueAt("Not Completed.", 1, 1);
@@ -1425,7 +1574,7 @@ public class WCReimbursementCalculatorMenu {
 		            	tm.setValueAt("Not Completed.", 3, 1);
 		            	table.setModel(tm);
             		}
-            		else{
+            		else{ //TODO first determine if TPD exists (ro.containsTPD), then see if it is empty (add an else if)
             			if(claimantList.getSelectedValue().getTTDRSumm().getWCPayments().isEmpty() && claimantList.getSelectedValue().getTPDRSumm().getWCPayments().isEmpty()){
             				btnEditPersonalInfo.setEnabled(true);
         	            	btnEditClaimHistory.setEnabled(true);
@@ -1437,6 +1586,7 @@ public class WCReimbursementCalculatorMenu {
 			            	btnAddTtdWork.setEnabled(false);
 			            	btnAddTpdWork.setEnabled(false);
 			            	btnViewClaimDetails.setEnabled(true);
+	    	            	btnDeleteAPaycheck.setEnabled(true);
 			            	TableModel tm = table.getModel();
     		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
 			            	tm.setValueAt("Not Completed.", 1, 1);
@@ -1456,6 +1606,7 @@ public class WCReimbursementCalculatorMenu {
 				            	btnAddTtdWork.setEnabled(true);
 				            	btnAddTpdWork.setEnabled(false);
 				            	btnViewClaimDetails.setEnabled(true);
+		    	            	btnDeleteAPaycheck.setEnabled(true);
 				            	TableModel tm = table.getModel();
 	    		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
 				            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toString(), 1, 1);
@@ -1474,6 +1625,7 @@ public class WCReimbursementCalculatorMenu {
             	            	btnAddTtdWork.setEnabled(true);
             	            	btnAddTpdWork.setEnabled(true);
             	            	btnViewClaimDetails.setEnabled(true);
+            	            	btnDeleteAPaycheck.setEnabled(true);
             	            	TableModel tm = table.getModel();
 	    		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
 				            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toString(), 1, 1);

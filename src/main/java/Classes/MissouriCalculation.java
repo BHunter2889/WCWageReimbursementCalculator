@@ -37,10 +37,13 @@ public class MissouriCalculation implements StateLawCalculable {
 		
 		//Calendar pcPD = pc.getPaymentDate();
 		//long pcPDate = pcPD.getTimeInMillis();
-		Calendar priorWeekStart = cHist.getPriorWeekStart();
-		Calendar earliestPriorWageDate = cHist.getEarliestPriorWageDate();
-		Calendar pcPPS = pc.getPayPeriodStart();
-		long pcPPSDate = pcPPS.getTimeInMillis();
+		Calendar priorWeekStart = new GregorianCalendar(timeZone);
+		priorWeekStart.setTime(cHist.getPriorWeekStart().getTime());
+		Calendar earliestPriorWageDate =  new GregorianCalendar(timeZone);
+		earliestPriorWageDate.setTime(cHist.getEarliestPriorWageDate().getTime());
+		Calendar pcPPS = new GregorianCalendar(timeZone);
+		pcPPS.setTime(pc.getPayPeriodStart().getTime());
+		long mPCPPS = pcPPS.getTimeInMillis();
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
 		formatter.setTimeZone(timeZone);
@@ -53,7 +56,8 @@ public class MissouriCalculation implements StateLawCalculable {
 		GregorianCalendar pWeekEnd = new GregorianCalendar(timeZone);
 		pWeekEnd.setTimeInMillis(mPWeekEnd);
 		GregorianCalendar priorWeekEnd = this.normalizeCalendarTime(pWeekEnd);
-		Calendar pcPPE = pc.getPayPeriodEnd();
+		Calendar pcPPE = new GregorianCalendar(timeZone);
+		pcPPE.setTime(pc.getPayPeriodEnd().getTime());
 		//Date dPPE = (Date) pcPPE.getTime();
 		java.util.Date dPWE = priorWeekEnd.getTime();
 		
@@ -75,8 +79,8 @@ public class MissouriCalculation implements StateLawCalculable {
 				int PPDays = (int) Math.ceil(mNewPP / mDay);
 
 				pc.setPayPeriodStart(earliestPriorWageDate);
-				String pG = String.valueOf(mNewPP / (pcE - pcPPSDate));
-				BigDecimal percentGross = new BigDecimal(pG);
+				//String pG = String.valueOf(mNewPP / (pcE - mPCPPS));
+				BigDecimal percentGross = new BigDecimal(String.valueOf(mNewPP)).divide(new BigDecimal(String.valueOf(pcE)).subtract(new BigDecimal(String.valueOf(mPCPPS))));
 				BigDecimal gA = pc.getGrossAmount();
 				BigDecimal pGAMult = gA.multiply(percentGross);
 				BigDecimal nG = pGAMult.setScale(2, RoundingMode.HALF_EVEN);
@@ -115,11 +119,11 @@ public class MissouriCalculation implements StateLawCalculable {
 			if (pcPPS.compareTo(priorWeekEnd) < 0){
 				long pcE = pcPPE.getTimeInMillis();
 				
-				long mNewPP = (mPWeekEnd - pcPPSDate)+mDay;
+				long mNewPP = (mPWeekEnd - mPCPPS)+mDay;
 				int PPDays = (int) Math.ceil(mNewPP / mDay);
 				pc.setPayPeriodEnd(priorWeekEnd);
-				String pG = String.valueOf(mNewPP / (pcE - pcPPSDate));
-				BigDecimal percentGross = new BigDecimal(pG);
+				//String pG = String.valueOf(mNewPP / (pcE - mPCPPS));
+				BigDecimal percentGross = new BigDecimal(String.valueOf(mNewPP)).divide(new BigDecimal(String.valueOf(pcE)).subtract(new BigDecimal(String.valueOf(mPCPPS))));
 				BigDecimal gA = pc.getGrossAmount();
 				BigDecimal pGAMult = gA.multiply(percentGross);
 				BigDecimal nG = pGAMult.setScale(2, RoundingMode.HALF_EVEN);
