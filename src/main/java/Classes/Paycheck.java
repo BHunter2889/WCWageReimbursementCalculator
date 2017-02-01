@@ -64,7 +64,7 @@ public class Paycheck implements Comparable<Calendar> {
 	}
 	
 	//Caldendar constructor, pPE and pD are different
-	public Paycheck(String grossAmount, GregorianCalendar paymentDate, GregorianCalendar payPeriodStart, GregorianCalendar payPeriodEnd) {
+	public Paycheck(String grossAmount, Calendar paymentDate, Calendar payPeriodStart, Calendar payPeriodEnd) {
 		BigDecimal gA = new BigDecimal(grossAmount);
 		this.grossAmount = gA.setScale(2, RoundingMode.HALF_EVEN);
 		

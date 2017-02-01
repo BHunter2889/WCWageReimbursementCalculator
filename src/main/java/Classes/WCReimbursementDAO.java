@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Properties;
 
 import org.apache.derby.tools.ij;
@@ -417,7 +418,7 @@ public class WCReimbursementDAO {
 		return deleted;
 	}
 	
-	public boolean deleteSinglePaycheck(int id, Date payDate){
+	public boolean deleteSinglePaycheck(int id, int rowID){
 		boolean deleted = false;
 		PreparedStatement stmtDeleteSinglePC = null;
 		try {
@@ -428,9 +429,10 @@ public class WCReimbursementDAO {
 		try{
 			stmtDeleteSinglePC.clearParameters();
 			stmtDeleteSinglePC.setInt(1, id);
-			stmtDeleteSinglePC.setDate(2, payDate);
-			stmtDeleteSinglePC.executeUpdate();
+			stmtDeleteSinglePC.setInt(2, rowID);
+			int rows = stmtDeleteSinglePC.executeUpdate();
 			deleted = true;
+			System.out.println(String.valueOf(rows)+" rows successfully Deleted from Paychecks.");
 		} catch (SQLException sqle) {
 	        sqle.printStackTrace();
 	    } finally {
@@ -444,7 +446,7 @@ public class WCReimbursementDAO {
 		return deleted;
 	}
 	
-	public boolean deleteSingleWCPaycheck(int id, Date payDate){
+	public boolean deleteSingleWCPaycheck(int id, int rowID){
 		boolean deleted = false;
 		PreparedStatement stmtDeleteSingleWCPC = null;
 		try {
@@ -455,7 +457,7 @@ public class WCReimbursementDAO {
 		try{
 			stmtDeleteSingleWCPC.clearParameters();
 			stmtDeleteSingleWCPC.setInt(1, id);
-			stmtDeleteSingleWCPC.setDate(2, payDate);
+			stmtDeleteSingleWCPC.setInt(2, rowID);
 			stmtDeleteSingleWCPC.executeUpdate();
 			deleted = true;
 		} catch (SQLException sqle) {
@@ -1156,7 +1158,7 @@ public class WCReimbursementDAO {
 			stmtSelectPaychecks.setString(2, pcType);
 			if (!stmtSelectPaychecks.execute()){
 				stmtSelectPaychecks.close();
-				return null;
+				return pcList;
 			}
 			results = stmtSelectPaychecks.getResultSet();
 
@@ -1169,7 +1171,7 @@ public class WCReimbursementDAO {
 			} catch (SQLException se){
 				se.printStackTrace();
 			}
-			return null;
+			return pcList;
 		}
 		Claimant clmnt = this.selectClaimants(id);
 		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
@@ -1187,17 +1189,87 @@ public class WCReimbursementDAO {
 			if (row < 0){
 				results.close();
 				stmtSelectPaychecks.close();
-				return null;
+				return pcList;
 			}
 		} catch (SQLException e){
 			e.printStackTrace();
 			try{
 				results.close();
 				stmtSelectPaychecks.close();
-				return null;
+				return pcList;
 			} catch (SQLException se){
 				se.printStackTrace();
-				return null;
+				return pcList;
+			}
+		}
+		
+		try{
+			results.close();
+			stmtSelectPaychecks.close();
+		} catch (SQLException e){
+			e.printStackTrace();
+		}
+		return pcList;
+	}
+	
+	public HashMap<Paycheck, Integer> selectPaychecksHashMap(int id, String pcType){
+		HashMap<Paycheck, Integer> pcList = new HashMap<Paycheck, Integer>();
+		PreparedStatement stmtSelectPaychecks = null;
+		try {
+			stmtSelectPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectPCType());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		ResultSet results = null;
+		
+		try{
+			stmtSelectPaychecks.clearParameters();
+			stmtSelectPaychecks.setInt(1, id);
+			stmtSelectPaychecks.setString(2, pcType);
+			if (!stmtSelectPaychecks.execute()){
+				stmtSelectPaychecks.close();
+				return pcList;
+			}
+			results = stmtSelectPaychecks.getResultSet();
+
+			//ResultSetMetaData rsmd = results.getMetaData();
+            //int numberCols = rsmd.getColumnCount();
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				stmtSelectPaychecks.close();
+			} catch (SQLException se){
+				se.printStackTrace();
+			}
+			return pcList;
+		}
+		Claimant clmnt = this.selectClaimants(id);
+		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		int row = -1;
+		try{
+			while(results.next()){
+				row++;
+				Paycheck p = new Paycheck();
+				p.setPaymentDate(results.getDate(4, tZ));
+				p.setPayPeriodStart(results.getDate(5, tZ));
+				p.setPayPeriodEnd(results.getDate(6, tZ));
+				p.setGrossAmount(results.getBigDecimal(7));
+				pcList.put(p, results.getInt(1));
+			}
+			if (row < 0){
+				results.close();
+				stmtSelectPaychecks.close();
+				return pcList;
+			}
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				results.close();
+				stmtSelectPaychecks.close();
+				return pcList;
+			} catch (SQLException se){
+				se.printStackTrace();
+				return pcList;
 			}
 		}
 		
@@ -1226,7 +1298,7 @@ public class WCReimbursementDAO {
 			stmtSelectWCPaychecks.setString(2, wcpcType);
 			if (!stmtSelectWCPaychecks.execute()){
 				stmtSelectWCPaychecks.close();
-				return null;
+				return wcpcList;
 			}
 			results = stmtSelectWCPaychecks.getResultSet();
 			if (results == null){
@@ -1241,7 +1313,7 @@ public class WCReimbursementDAO {
 			} catch (SQLException se){
 				se.printStackTrace();
 			}
-			return null;
+			return wcpcList;
 		}
 		
 		Claimant clmnt = this.selectClaimants(id);
@@ -1274,10 +1346,90 @@ public class WCReimbursementDAO {
 			try{
 				results.close();
 				stmtSelectWCPaychecks.close();
-				return null;
+				return wcpcList;
 			} catch (SQLException se){
 				se.printStackTrace();
-				return null;
+				return wcpcList;
+			}
+		}
+		
+		try{
+			results.close();
+			stmtSelectWCPaychecks.close();
+		} catch (SQLException e){
+			e.printStackTrace();
+		}
+		return wcpcList;
+	}
+	
+	public HashMap<WorkCompPaycheck, Integer> selectWorkCompPaychecksHashMap(int id, String wcpcType){
+		HashMap<WorkCompPaycheck, Integer> wcpcList = new HashMap<WorkCompPaycheck, Integer>();
+		PreparedStatement stmtSelectWCPaychecks = null;
+		try {
+			stmtSelectWCPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectWCPCType());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		ResultSet results = null;
+		
+		try{
+			stmtSelectWCPaychecks.clearParameters();
+			stmtSelectWCPaychecks.setInt(1, id);
+			stmtSelectWCPaychecks.setString(2, wcpcType);
+			if (!stmtSelectWCPaychecks.execute()){
+				stmtSelectWCPaychecks.close();
+				return wcpcList;
+			}
+			results = stmtSelectWCPaychecks.getResultSet();
+			if (results == null){
+				return wcpcList;
+			}
+			//ResultSetMetaData rsmd = results.getMetaData();
+            //int numberCols = rsmd.getColumnCount();
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				stmtSelectWCPaychecks.close();
+			} catch (SQLException se){
+				se.printStackTrace();
+			}
+			return wcpcList;
+		}
+		
+		Claimant clmnt = this.selectClaimants(id);
+		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		int row = -1;
+		try{
+			while(results.next()){
+				row++;
+				WorkCompPaycheck wp = new WorkCompPaycheck();
+				wp.setIsContested(results.getBoolean(4));
+				wp.setIsLate(results.getBoolean(5));
+				wp.setFullTimeHours(results.getBoolean(6));
+				wp.setPayRecievedDate(results.getDate(7, tZ));
+				wp.setPaymentDate(results.getDate(8, tZ));
+				wp.setPayPeriodStart(results.getDate(9, tZ));
+				wp.setPayPeriodEnd(results.getDate(10, tZ));
+				wp.setGrossAmount(results.getBigDecimal(11));
+				wp.setAmountStillOwed(results.getBigDecimal(12));
+				wp.setContestResolutionDate(results.getDate(13, tZ));
+				wp.setStateLawCalculation(this.stateLawCalculation);
+				wcpcList.put(wp, results.getInt(1));
+			}
+			if (row < 0){
+				results.close();
+				stmtSelectWCPaychecks.close();
+				return wcpcList;
+			}
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				results.close();
+				stmtSelectWCPaychecks.close();
+				return wcpcList;
+			} catch (SQLException se){
+				se.printStackTrace();
+				return wcpcList;
 			}
 		}
 		

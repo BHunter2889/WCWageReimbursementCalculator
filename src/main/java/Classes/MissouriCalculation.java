@@ -34,7 +34,7 @@ public class MissouriCalculation implements StateLawCalculable {
 			JOptionPane.showMessageDialog(null, message);
 			return pchecks;
 		}
-		
+		Paycheck newPC = null;
 		//Calendar pcPD = pc.getPaymentDate();
 		//long pcPDate = pcPD.getTimeInMillis();
 		Calendar priorWeekStart = new GregorianCalendar(timeZone);
@@ -80,7 +80,8 @@ public class MissouriCalculation implements StateLawCalculable {
 
 				pc.setPayPeriodStart(earliestPriorWageDate);
 				//String pG = String.valueOf(mNewPP / (pcE - mPCPPS));
-				BigDecimal percentGross = new BigDecimal(String.valueOf(mNewPP)).divide(new BigDecimal(String.valueOf(pcE)).subtract(new BigDecimal(String.valueOf(mPCPPS))));
+				BigDecimal pcPeriod = new BigDecimal(String.valueOf(pcE)).subtract(new BigDecimal(String.valueOf(mPCPPS)));
+				BigDecimal percentGross = new BigDecimal(String.valueOf(mNewPP)).divide(pcPeriod, 4, RoundingMode.HALF_EVEN);
 				BigDecimal gA = pc.getGrossAmount();
 				BigDecimal pGAMult = gA.multiply(percentGross);
 				BigDecimal nG = pGAMult.setScale(2, RoundingMode.HALF_EVEN);
@@ -121,14 +122,16 @@ public class MissouriCalculation implements StateLawCalculable {
 				
 				long mNewPP = (mPWeekEnd - mPCPPS)+mDay;
 				int PPDays = (int) Math.ceil(mNewPP / mDay);
-				pc.setPayPeriodEnd(priorWeekEnd);
+				//pc.setPayPeriodEnd(priorWeekEnd);
 				//String pG = String.valueOf(mNewPP / (pcE - mPCPPS));
-				BigDecimal percentGross = new BigDecimal(String.valueOf(mNewPP)).divide(new BigDecimal(String.valueOf(pcE)).subtract(new BigDecimal(String.valueOf(mPCPPS))));
+				BigDecimal pcPeriod = new BigDecimal(String.valueOf(pcE)).subtract(new BigDecimal(String.valueOf(mPCPPS)));
+				BigDecimal percentGross = new BigDecimal(String.valueOf(mNewPP)).divide(pcPeriod, 4, RoundingMode.HALF_EVEN);
 				BigDecimal gA = pc.getGrossAmount();
 				BigDecimal pGAMult = gA.multiply(percentGross);
 				BigDecimal nG = pGAMult.setScale(2, RoundingMode.HALF_EVEN);
 				String newGross = String.valueOf(nG);
-				pc.setGrossAmount(newGross);
+				//pc.setGrossAmount(newGross);
+				newPC = new Paycheck(newGross, pc.getPaymentDate(), pc.getPayPeriodStart(), priorWeekEnd);
 				message = "Only first " + String.valueOf(PPDays) + " Days of entered Pay Check entered and calculated for Gross Amount due to last accepted date for prior wages relative to date of injury (end of prior week)";
 				JOptionPane.showMessageDialog(null, message);
 				/*System.out.println("If work hours used to calculate pay during this period were not evenly distributed for the above number of days,");
@@ -158,7 +161,7 @@ public class MissouriCalculation implements StateLawCalculable {
 			}	
 		}
 		
-		pchecks.add(pc);
+		pchecks.add(newPC);
 		cHist.setPriorWages(pchecks);
 		System.out.println(cHist.listPriorWages());
 		return pchecks;
@@ -418,7 +421,7 @@ public class MissouriCalculation implements StateLawCalculable {
 		for (Paycheck p1 : priorWages){
 			long mP1S = p1.getPayPeriodStart().getTimeInMillis();
 			long mP1E = p1.getPayPeriodEnd().getTimeInMillis();
-			mPeriod += (mP1E - mP1S);
+			mPeriod += (mP1E - mP1S)+mDay;
 		}
 		if (stateWPP.compareTo(BigDecimal.valueOf(Math.ceil(mPeriod / mWeek))) > 0){
 			return false;

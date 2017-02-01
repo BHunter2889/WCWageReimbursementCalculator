@@ -67,13 +67,13 @@ public class ClaimPreparedStatements {
 	public void setStmtDeleteSinglePaycheck(){
 			this.stmtDeleteSinglePaycheck = 
 					"DELETE FROM APP.PAYCHECKS " +
-					"where ID = ? AND PAY_DATE = ?";
+					"where CLAIM_ID = ? AND ID = ?";
 	}
 	
 	public void setStmtDeleteSingleWCPaycheck(){
 			this.stmtDeleteSingleWCPaycheck = 
 				"DELETE FROM APP.WC_PAYCHECKS " +
-				"where ID = ? AND PAY_DATE = ?";
+				"where CLAIM_ID = ? AND ID = ?";
 	}
 	
 	public void setStmtUpdateClaimants(){
@@ -92,7 +92,7 @@ public class ClaimPreparedStatements {
 			    "UPDATE APP.R_SUMMARY " +
 			    "SET TD_TYPE = ?, " +
 			    "    BD_CALCWEEKPAY = ?, " +
-			    "    BD_ANOTPAID = ?, " +
+			    "    BD_ANOTPAID = ? " +
 			    "where CLAIM_ID = ? " + //This AND statement may throw an error
 			    "AND TD_TYPE = ?";
 	}
