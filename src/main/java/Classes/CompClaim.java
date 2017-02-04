@@ -169,6 +169,7 @@ public class CompClaim {
 			return;
 		}
 		this.sortPaychecksByDate();
+		this.computeAvgPriorGrossWeeklyPayment();
 	}
 /*
 	public void setPriorWages(){
@@ -259,6 +260,7 @@ public class CompClaim {
 	public void addPaycheck(Paycheck pc, StateLawCalculable stateLawCalc){
 		this.priorWages = stateLawCalc.addAndTrimToPriorWages(pc, this.priorWages, this);
 		this.sortPaychecksByDate();
+		this.computeAvgPriorGrossWeeklyPayment();
 	}
 	/*
 	//if payment date is same as period end date
@@ -505,6 +507,10 @@ public class CompClaim {
 
 	//Super method. Can be altered for other states in child classes.
 	public void computeAvgPriorGrossWeeklyPayment(){
+		if(!this.priorWagesIsComplete()){
+			this.avgPriorGrossWeeklyPayment = new BigDecimal("0");
+			return;
+		}
 		BigDecimal aPGWP = this.stateLawCalculation.computeAvgPriorGrossWeeklyPayment(this.priorWages);
 		if (aPGWP.scale() != 2){
 			this.avgPriorGrossWeeklyPayment = aPGWP.setScale(2, RoundingMode.HALF_EVEN);
@@ -529,14 +535,7 @@ public class CompClaim {
 	}
 	
 	public void sortPaychecksByDate(){
-		Collections.sort(this.priorWages, new Comparator<Paycheck>(){
-			@Override
-			public int compare(Paycheck p1, Paycheck p2) {
-				
-				return p1.compareTo(p2.getPayPeriodStart());
-			}
-			
-		});
+		Collections.sort(this.priorWages, Paycheck.PPS_COMPARATOR);
 	}
 	
 	public boolean priorWagesIsComplete(){

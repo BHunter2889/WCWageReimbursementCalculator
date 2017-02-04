@@ -66,19 +66,13 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 	}
 	
 	public void sortPaychecksByDate(){
-		Collections.sort(this.receivedWorkPayments, new Comparator<Paycheck>(){
-			@Override
-			public int compare(Paycheck p1, Paycheck p2) {
-				
-				return p1.compareTo(p2.getPayPeriodStart());
-			}
-			
-		});
+		Collections.sort(this.receivedWorkPayments, Paycheck.PPS_COMPARATOR);
 	}
 	
 	public void addPaycheck(Paycheck pc){
 		this.receivedWorkPayments.add(pc);
 		this.sortPaychecksByDate();
+		this.computeAmountNotPaidAndAnyLateCompensation();
 	}
 	
 	public Paycheck trimFirstWorkPayment(Paycheck pc, String bdTotalHrsWorked, String bdWeekInjHrsWorked){
@@ -101,6 +95,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 	public void updateReceivedWorkPayments(ArrayList<Paycheck> pchecks){
 		this.receivedWorkPayments = pchecks;
 		this.sortPaychecksByDate();
+		this.computeAmountNotPaidAndAnyLateCompensation();
 	}
 	
 	public BigDecimal getWorkPayToDate(){

@@ -177,6 +177,7 @@ public abstract class ReimbursementSummary {
 		}
 		
 		this.wcPayments.add(pc);
+		this.computeAmountNotPaidAndAnyLateCompensation();
 		return true;
 		
 	}
@@ -209,6 +210,7 @@ public abstract class ReimbursementSummary {
 		}
 		
 		this.wcPayments.add(pc);
+		this.computeAmountNotPaidAndAnyLateCompensation();
 		return true;
 		
 	}
@@ -229,14 +231,7 @@ public abstract class ReimbursementSummary {
 	}
 	
 	public void sortWCPaymentsByDate(){
-		Collections.sort(this.wcPayments, new Comparator<WorkCompPaycheck>(){
-			@Override
-			public int compare(WorkCompPaycheck p1, WorkCompPaycheck p2) {
-				
-				return p1.compareTo(p2.getPayPeriodStart());
-			}
-			
-		});
+		Collections.sort(this.wcPayments, WorkCompPaycheck.PPS_COMPARATOR);
 	}
 	
 	public void calculateAndSetWeeklyPayment(){
@@ -274,6 +269,9 @@ public abstract class ReimbursementSummary {
 	public void setClaimSummary(CompClaim cS){
 		this.claimSummary = cS;
 		this.stateLawCalculation = cS.stateLawCalculation;
+		if (cS.priorWagesIsComplete()){
+			this.calculateAndSetWeeklyPayment();
+		}
 	}
 	
 	public void setCalculatedWeeklyPayment(BigDecimal cWP){
@@ -286,6 +284,7 @@ public abstract class ReimbursementSummary {
 	
 	public void setWCPayments(ArrayList<WorkCompPaycheck> wcP){
 		this.wcPayments = wcP;
+		this.computeAmountNotPaidAndAnyLateCompensation();
 	}
 	
 	public boolean containsCompClaim(){
