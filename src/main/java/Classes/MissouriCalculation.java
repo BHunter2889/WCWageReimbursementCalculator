@@ -165,10 +165,16 @@ public class MissouriCalculation implements StateLawCalculable {
 				return pchecks;
 			}	
 		}
-		
-		pchecks.add(newPC);
+		if (newPC != null){
+			pchecks.add(newPC);
+			System.out.println(newPC.toString());
+		}
+		else{
+			pchecks.add(pc);
+			System.out.println(pc.toString());
+		}
 		cHist.setPriorWages(pchecks);
-		System.out.println(cHist.listPriorWages());
+		System.out.println("Prior Wages: "+eol+cHist.listPriorWages());
 		return pchecks;
 	}
 

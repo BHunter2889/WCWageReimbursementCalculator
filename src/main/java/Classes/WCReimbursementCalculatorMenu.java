@@ -1048,6 +1048,7 @@ public class WCReimbursementCalculatorMenu {
 	
 	public String getPositiveBigDecimalString(String message, String title){
 		String s = JOptionPane.showInputDialog(frmWorkersCompensationLost, message, title, JOptionPane.PLAIN_MESSAGE);
+		if (s == null) return "";
 		while(Double.parseDouble(s) < 1){
 			s = JOptionPane.showInputDialog(frmWorkersCompensationLost, message + "(Enter only Positive numerical value)", title, JOptionPane.PLAIN_MESSAGE);
 		}
@@ -1170,7 +1171,11 @@ public class WCReimbursementCalculatorMenu {
 						if (priorWages.isEmpty()){
 							return false;
 						}
-						pc = priorWages.get(priorWages.size() - 1);
+						label:for (Paycheck p : priorWages){
+							if(p.getPaymentDate().compareTo(pc.getPaymentDate()) == 0) pc = p;
+							break label;
+						}
+
 						dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
 								new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
 						ro.ttdRSumm.claimSummary.setPriorWages(priorWages);

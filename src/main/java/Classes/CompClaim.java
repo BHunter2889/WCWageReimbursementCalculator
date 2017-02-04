@@ -2,7 +2,6 @@ package Classes;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -161,9 +160,6 @@ public class CompClaim {
 	}
 	
 	public void setPriorWages(ArrayList<Paycheck> priorWages){
-		if (priorWages == null){
-			return;
-		}
 		this.priorWages = priorWages;
 		if(this.priorWages.size() < 2){
 			return;
@@ -259,6 +255,9 @@ public class CompClaim {
 	
 	public void addPaycheck(Paycheck pc, StateLawCalculable stateLawCalc){
 		this.priorWages = stateLawCalc.addAndTrimToPriorWages(pc, this.priorWages, this);
+		if(this.priorWages.size() < 2){
+			return;
+		}
 		this.sortPaychecksByDate();
 		this.computeAvgPriorGrossWeeklyPayment();
 	}
@@ -572,6 +571,9 @@ public class CompClaim {
 	
 	//sorts Prior Wages by date and then returns them on newlines in the format "#) pPS - pPE: $grossAmount paid on pD"
 	public String listPriorWages(){
+		if (this.priorWages.isEmpty()) return "No Prior Wages Set.";
+		if (this.priorWages.size() == 1) return "1) " + this.priorWages.get(priorWages.size()-1).toString();
+		
 		sortPaychecksByDate();
 		String eol = System.getProperty("line.separator");
 		String list = "";
@@ -618,8 +620,11 @@ public class CompClaim {
 	
 	public String toTableString(){
 		String eol = System.getProperty("line.separator");
-		String completed = "Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+eol+
+		String completed = "";
+		if (this.priorWagesIsComplete()){
+			completed = "Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+eol+
 				"Average Prior Gross Weekly Payment: $"+this.avgPriorGrossWeeklyPayment.toPlainString();
+		}
 		String notCompleted = "Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+eol+
 				"Average Prior Gross Weekly Payment: Not Yet Completed.";
 		return (this.avgPriorGrossWeeklyPayment.compareTo(new BigDecimal("0")) > 0) ?  completed: notCompleted;
