@@ -1,6 +1,7 @@
 package Classes;
 
 import java.util.Calendar;
+import java.util.Comparator;
 import java.sql.Date;
 import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
@@ -15,6 +16,13 @@ public class Paycheck implements Comparable<Calendar> {
 	protected Calendar paymentDate;
 	protected Calendar payPeriodStart;
 	protected Calendar payPeriodEnd;
+	protected static final Comparator<Paycheck> PPS_COMPARATOR = new Comparator<Paycheck>(){
+		@Override
+		public int compare(Paycheck p1, Paycheck p2) {
+	
+			return p1.compareTo(p2.getPayPeriodStart());
+		}
+	};
 
 	//null constructor
 	public Paycheck(){
@@ -88,6 +96,7 @@ public class Paycheck implements Comparable<Calendar> {
 			return 0;
 		}
 	}
+	
 	
 	public BigDecimal getGrossAmount(){
 		return this.grossAmount;

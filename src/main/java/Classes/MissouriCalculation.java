@@ -6,9 +6,14 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.GregorianCalendar;
+import java.util.Map;
 import java.util.SimpleTimeZone;
+import java.util.SortedMap;
 import java.util.TimeZone;
+import java.util.TreeMap;
+
 import javax.swing.JOptionPane;
 
 
@@ -389,6 +394,55 @@ public class MissouriCalculation implements StateLawCalculable {
 	    */
 	  
 	    return newCal;
+	}
+	@Override
+	public SortedMap<Paycheck, Integer> sortPCHashMapByDate(Map<Paycheck, Integer> pcMap){
+		//HashMap<Paycheck, Integer> result = new HashMap<Paycheck, Integer>();
+		
+		SortedMap<Paycheck, Integer> map =
+		        new TreeMap<Paycheck, Integer>(new Comparator<Paycheck>(){
+		        		@Override
+	        			public int compare(Paycheck p1, Paycheck p2) {
+    				
+    				return p1.compareTo(p2.getPayPeriodStart());
+            	}});
+		map.putAll(pcMap);
+        //sort by PPS Date of key
+        /*pcMap.entrySet().stream().sorted(Map.Entry.<Paycheck, Integer>comparingByKey(new Comparator<Paycheck>(){
+                	@Override
+        			public int compare(Paycheck p1, Paycheck p2) {
+        				
+        				return p1.compareTo(p2.getPayPeriodStart());
+                	}}))
+                .forEachOrdered(x -> result.put(x.getKey(), x.getValue()));
+        */
+        return map;
+	}
+	
+	@Override
+	public SortedMap<WorkCompPaycheck, Integer> sortWCPCHashMapByDate(Map<WorkCompPaycheck, Integer> wcpcMap){
+		//HashMap<WorkCompPaycheck, Integer> result = new HashMap<WorkCompPaycheck, Integer>();
+		
+		SortedMap<WorkCompPaycheck, Integer> map =
+		        new TreeMap<WorkCompPaycheck, Integer>(new Comparator<WorkCompPaycheck>(){
+		        		@Override
+	        			public int compare(WorkCompPaycheck p1, WorkCompPaycheck p2) {
+    				
+    				return p1.compareTo(p2.getPayPeriodStart());
+            	}});
+		map.putAll(wcpcMap);
+		
+		//sort by PPS Date of key
+		/*wcpcMap.entrySet().stream().sorted(Map.Entry.<WorkCompPaycheck, Integer>comparingByKey(new Comparator<WorkCompPaycheck>(){
+        	@Override
+			public int compare(WorkCompPaycheck p1, WorkCompPaycheck p2) {
+				
+				return p1.compareTo(p2.getPayPeriodStart());
+        	}}))
+        .forEachOrdered(x -> result.put(x.getKey(), x.getValue()));
+		*/
+		
+		return map;
 	}
 
 	@Override

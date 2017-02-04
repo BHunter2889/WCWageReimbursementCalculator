@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.sql.Date;
 import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
@@ -18,6 +19,13 @@ public class WorkCompPaycheck extends Paycheck {
 	protected boolean fullTimeHours;
 	protected Calendar contestResolvedDate = null;
 	protected StateLawCalculable stateLawCalculation;//defaults to false
+	protected static final Comparator<WorkCompPaycheck> PPS_COMPARATOR = new Comparator<WorkCompPaycheck>(){
+		@Override
+		public int compare(WorkCompPaycheck p1, WorkCompPaycheck p2) {
+	
+			return p1.compareTo(p2.getPayPeriodStart());
+		}
+	};
 	
 /* NOT using these two constructors at the moment due to unwieldy parameters, using Calendar constructors instead.
  * Will either delete or implement later...

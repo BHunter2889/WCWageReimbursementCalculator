@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Map;
+import java.util.SortedMap;
 import java.util.TimeZone;
 
 public interface StateLawCalculable {
@@ -22,5 +24,7 @@ public interface StateLawCalculable {
 	public String getStateAbbrv();
 	public String getStateName();
 	public TimeZone getTimeZone();
+	public SortedMap<Paycheck, Integer> sortPCHashMapByDate(Map<Paycheck, Integer> pcList);
+	public SortedMap<WorkCompPaycheck, Integer> sortWCPCHashMapByDate(Map<WorkCompPaycheck, Integer> wcpcList);
 	public boolean priorWagesIsComplete(ArrayList<Paycheck> priorWages); //CompClaim
 }

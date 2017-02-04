@@ -21,7 +21,7 @@ import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
+import java.util.SortedMap;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ListSelectionModel;
@@ -1306,9 +1306,11 @@ public class WCReimbursementCalculatorMenu {
 		
 		if(selected == 0){
 			String message = "Please select the Paycheck you would like to Delete: ";
-			HashMap<Paycheck, Integer> paychecksDB = new HashMap<Paycheck, Integer>(dataAccess.selectPaychecksHashMap(ro.getClaimant().getID(), "PRIORWAGES"));
-			HashMap<Paycheck, Integer> workPayments = new HashMap<Paycheck, Integer>(dataAccess.selectPaychecksHashMap(ro.getClaimant().getID(), "WORKPAYMENTS"));
-			if(!workPayments.isEmpty()) paychecksDB.putAll(workPayments);
+			SortedMap<Paycheck, Integer> paychecksDB = dataAccess.selectPaychecksHashMap(ro.getClaimant().getID(), "PRIORWAGES");
+			SortedMap<Paycheck, Integer> workPayments = dataAccess.selectPaychecksHashMap(ro.getClaimant().getID(), "WORKPAYMENTS");
+			if(!workPayments.isEmpty()){
+				paychecksDB.putAll(workPayments);
+			}
 
 			Paycheck toDelete = (Paycheck) JOptionPane.showInternalInputDialog(frmWorkersCompensationLost.getContentPane(), 
 					message, 
@@ -1388,9 +1390,11 @@ public class WCReimbursementCalculatorMenu {
 		}
 		else if(selected == 1){
 			String message = "Please select the Work Comp Paycheck you would like to Delete: ";
-			HashMap<WorkCompPaycheck, Integer> wcPaychecksDB = new HashMap<WorkCompPaycheck, Integer>(dataAccess.selectWorkCompPaychecksHashMap(ro.getClaimant().getID(), "TTD"));
-			HashMap<WorkCompPaycheck, Integer> wcPaychecksDB2 = new HashMap<WorkCompPaycheck, Integer>(dataAccess.selectWorkCompPaychecksHashMap(ro.getClaimant().getID(), "TPD"));
-			if (!wcPaychecksDB2.isEmpty())wcPaychecksDB.putAll(wcPaychecksDB2);
+			SortedMap<WorkCompPaycheck, Integer> wcPaychecksDB = dataAccess.selectWorkCompPaychecksHashMap(ro.getClaimant().getID(), "TTD");
+			SortedMap<WorkCompPaycheck, Integer> wcPaychecksDB2 = dataAccess.selectWorkCompPaychecksHashMap(ro.getClaimant().getID(), "TPD");
+			if (!wcPaychecksDB2.isEmpty()){
+				wcPaychecksDB.putAll(wcPaychecksDB2);
+			}
 			
 			WorkCompPaycheck toDelete = (WorkCompPaycheck) JOptionPane.showInternalInputDialog(frmWorkersCompensationLost.getContentPane(), 
 					message, 

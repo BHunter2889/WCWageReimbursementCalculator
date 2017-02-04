@@ -18,8 +18,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.Properties;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.derby.tools.ij;
 
@@ -1212,8 +1213,8 @@ public class WCReimbursementDAO {
 		return pcList;
 	}
 	
-	public HashMap<Paycheck, Integer> selectPaychecksHashMap(int id, String pcType){
-		HashMap<Paycheck, Integer> pcList = new HashMap<Paycheck, Integer>();
+	public SortedMap<Paycheck, Integer> selectPaychecksHashMap(int id, String pcType){
+		SortedMap<Paycheck, Integer> pcList = new TreeMap<Paycheck, Integer>(Paycheck.PPS_COMPARATOR);
 		PreparedStatement stmtSelectPaychecks = null;
 		try {
 			stmtSelectPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectPCType());
@@ -1244,11 +1245,10 @@ public class WCReimbursementDAO {
 			return pcList;
 		}
 		Claimant clmnt = this.selectClaimants(id);
-		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
-		int row = -1;
+		StateLawCalculable sLC = this.getStateLawCalculation(clmnt.getState());
+		Calendar tZ = Calendar.getInstance(sLC.getTimeZone());
 		try{
 			while(results.next()){
-				row++;
 				Paycheck p = new Paycheck();
 				p.setPaymentDate(results.getDate(4, tZ));
 				p.setPayPeriodStart(results.getDate(5, tZ));
@@ -1256,11 +1256,7 @@ public class WCReimbursementDAO {
 				p.setGrossAmount(results.getBigDecimal(7));
 				pcList.put(p, results.getInt(1));
 			}
-			if (row < 0){
-				results.close();
-				stmtSelectPaychecks.close();
-				return pcList;
-			}
+			
 		} catch (SQLException e){
 			e.printStackTrace();
 			try{
@@ -1279,6 +1275,7 @@ public class WCReimbursementDAO {
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
+		//SortedMap<Paycheck, Integer> newPCList = sLC.sortPCHashMapByDate(pcList);
 		return pcList;
 	}
 	
@@ -1362,8 +1359,8 @@ public class WCReimbursementDAO {
 		return wcpcList;
 	}
 	
-	public HashMap<WorkCompPaycheck, Integer> selectWorkCompPaychecksHashMap(int id, String wcpcType){
-		HashMap<WorkCompPaycheck, Integer> wcpcList = new HashMap<WorkCompPaycheck, Integer>();
+	public SortedMap<WorkCompPaycheck, Integer> selectWorkCompPaychecksHashMap(int id, String wcpcType){
+		SortedMap<WorkCompPaycheck, Integer> wcpcList = new TreeMap<WorkCompPaycheck, Integer>(Paycheck.PPS_COMPARATOR);
 		PreparedStatement stmtSelectWCPaychecks = null;
 		try {
 			stmtSelectWCPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectWCPCType());
@@ -1397,11 +1394,10 @@ public class WCReimbursementDAO {
 		}
 		
 		Claimant clmnt = this.selectClaimants(id);
-		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
-		int row = -1;
+		StateLawCalculable sLC = this.getStateLawCalculation(clmnt.getState());
+		Calendar tZ = Calendar.getInstance(sLC.getTimeZone());
 		try{
 			while(results.next()){
-				row++;
 				WorkCompPaycheck wp = new WorkCompPaycheck();
 				wp.setIsContested(results.getBoolean(4));
 				wp.setIsLate(results.getBoolean(5));
@@ -1416,20 +1412,15 @@ public class WCReimbursementDAO {
 				wp.setStateLawCalculation(this.stateLawCalculation);
 				wcpcList.put(wp, results.getInt(1));
 			}
-			if (row < 0){
-				results.close();
-				stmtSelectWCPaychecks.close();
-				return wcpcList;
-			}
 		} catch (SQLException e){
 			e.printStackTrace();
 			try{
 				results.close();
 				stmtSelectWCPaychecks.close();
-				return wcpcList;
+				return (SortedMap<WorkCompPaycheck, Integer>) wcpcList;
 			} catch (SQLException se){
 				se.printStackTrace();
-				return wcpcList;
+				return (SortedMap<WorkCompPaycheck, Integer>) wcpcList;
 			}
 		}
 		
@@ -1439,6 +1430,8 @@ public class WCReimbursementDAO {
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
+		//SortedMap<WorkCompPaycheck, Integer> newWCPCList = sLC.sortWCPCHashMapByDate(wcpcList);
+		
 		return wcpcList;
 	}
 	
