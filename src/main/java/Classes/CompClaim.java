@@ -614,8 +614,14 @@ public class CompClaim {
 	public String toString(){
 		String eol = System.getProperty("line.separator");
 		String list = this.listPriorWages();
-		return "Date Injured: "+this.toStringDateInjured()+eol+"Days Injured: "+this.daysInjured+eol+"Weeks Injured: "+this.weeksInjured+eol+
+		if (this.priorWagesIsComplete()){
+			return "Date Injured: "+this.toStringDateInjured()+eol+"Days Injured: "+this.daysInjured+eol+"Weeks Injured: "+this.weeksInjured+eol+
 				"Average Prior Gross Weekly Payment: $"+this.avgPriorGrossWeeklyPayment.toPlainString()+eol+"Prior Wage Paychecks: "+eol+list;
+		}
+		else{
+			return "Date Injured: "+this.toStringDateInjured()+eol+"Days Injured: "+this.daysInjured+eol+"Weeks Injured: "+this.weeksInjured+eol+
+					"Average Prior Gross Weekly Payment: Not Yet Completed."+eol+"Prior Wage Paychecks: "+eol+list;
+		}
 	}
 	
 	public String toTableString(){
