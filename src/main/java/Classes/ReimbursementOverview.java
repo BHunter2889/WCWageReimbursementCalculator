@@ -1,24 +1,28 @@
 package Classes;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 
 public class ReimbursementOverview {
 	
 	protected Claimant claimant;
 	protected TTDReimbursementSummary ttdRSumm;
 	protected TPDReimbursementSummary tpdRSumm;
+	protected Calendar fullDutyReturnDate;
 	
 
-	public ReimbursementOverview(Claimant clmnt, TTDReimbursementSummary ttdRSumm, TPDReimbursementSummary tpdRSumm) {
+	public ReimbursementOverview(Claimant clmnt, TTDReimbursementSummary ttdRSumm, TPDReimbursementSummary tpdRSumm, Calendar fullDutyReturnDate) {
 		this.claimant = clmnt;
 		this.ttdRSumm = ttdRSumm;
 		this.tpdRSumm = tpdRSumm;
+		this.fullDutyReturnDate = fullDutyReturnDate;
 	}
 	
 	public ReimbursementOverview(){
 		this.claimant = null;
 		this.ttdRSumm = null;
 		this.tpdRSumm = null;
+		this.fullDutyReturnDate = null;
 	}
 	
 	public void setClaimant(Claimant clmnt){
@@ -31,6 +35,10 @@ public class ReimbursementOverview {
 	
 	public void setTPDRSumm(TPDReimbursementSummary tpdRSumm){
 		this.tpdRSumm = tpdRSumm;
+	}
+	
+	public void setFullDutyReturnDate(Calendar fullDutyReturnDate){
+		this.fullDutyReturnDate = fullDutyReturnDate;
 	}
 	
 	public Claimant getClaimant(){
@@ -53,12 +61,20 @@ public class ReimbursementOverview {
 		return this.getTTDRSumm().getWCPayToDate().add(this.getTPDRSumm().getWCPayToDate());
 	}
 	
+	public Calendar getFullDutyReturnDate(){
+		return this.fullDutyReturnDate;
+	}
+	
 	public boolean containsTTD(){
 		return this.ttdRSumm != null;
 	}
 	
 	public boolean containsTPD(){
 		return this.tpdRSumm != null;
+	}
+	
+	public boolean isFullDuty(){
+		return this.fullDutyReturnDate != null;
 	}
 	
 	public String getTotalString(){

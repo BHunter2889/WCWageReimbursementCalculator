@@ -117,6 +117,7 @@ public class WorkCompPaycheck extends Paycheck {
 		this.fullTimeHours = false;
 		this.isLate = false;
 		this.amountStillOwed = new BigDecimal("0");
+		this.contestResolvedDate = payPeriodEnd;
 	}
 	
 	public WorkCompPaycheck() {
@@ -125,8 +126,9 @@ public class WorkCompPaycheck extends Paycheck {
 		this.isLate = false;
 		this.amountStillOwed = new BigDecimal("0");
 		this.fullTimeHours = false;
-		this.payReceivedDate = null;
+		this.payReceivedDate = new GregorianCalendar(new SimpleTimeZone(0, "Standard"));
 		this.stateLawCalculation = null;
+		this.contestResolvedDate = this.payPeriodEnd;
 		
 	}
 

@@ -506,7 +506,7 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
-	public boolean updateRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid){
+	public boolean updateRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid, Date fullDutyDate){
 		boolean updated = false;
 		PreparedStatement stmtUpdateRSummary = null;
 		try {
@@ -514,13 +514,17 @@ public class WCReimbursementDAO {
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
+		Claimant clmnt = this.selectClaimants(id);
+		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
 		try {
 			stmtUpdateRSummary.clearParameters();
 			stmtUpdateRSummary.setString(1, tdType);
 			stmtUpdateRSummary.setBigDecimal(2, bdCalcWeekPay);
 			stmtUpdateRSummary.setBigDecimal(3, bdAmntNotPaid);
-			stmtUpdateRSummary.setInt(4, id);
-			stmtUpdateRSummary.setString(5, tdType);
+			if (fullDutyDate == null) stmtUpdateRSummary.setNull(4, java.sql.Types.DATE);
+			else stmtUpdateRSummary.setDate(4, fullDutyDate, tZ);
+			stmtUpdateRSummary.setInt(5, id);
+			stmtUpdateRSummary.setString(6, tdType);	
 			stmtUpdateRSummary.executeUpdate();
 			updated = true;
 		} catch (SQLException e) {
@@ -683,7 +687,7 @@ public class WCReimbursementDAO {
 		return id;
 	}
 	
-	public boolean insertRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid){
+	public boolean insertRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid, Date fullDutyDate){
 		boolean updated = false;
 		PreparedStatement stmtInsertRSummary = null;
 		try {
@@ -691,12 +695,16 @@ public class WCReimbursementDAO {
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
+		Claimant clmnt = this.selectClaimants(id);
+		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
 		try {
 			stmtInsertRSummary.clearParameters();
 			stmtInsertRSummary.setInt(1, id);
 			stmtInsertRSummary.setString(2, tdType);
 			stmtInsertRSummary.setBigDecimal(3, bdCalcWeekPay);
 			stmtInsertRSummary.setBigDecimal(4, bdAmntNotPaid);
+			if (fullDutyDate == null) stmtInsertRSummary.setNull(5, java.sql.Types.DATE);
+			else stmtInsertRSummary.setDate(5, fullDutyDate, tZ);
 			stmtInsertRSummary.executeUpdate();
 			updated = true;
 		} catch (SQLException e) {
@@ -1570,7 +1578,7 @@ public class WCReimbursementDAO {
 			}
 			if (ttdRSumm == null && claimSum != null){
 				try{
-					this.insertRSummary(clmnt.getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"));
+					this.insertRSummary(clmnt.getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"), null);
 				} catch (Exception e){
 					e.printStackTrace();
 					try{
@@ -1626,12 +1634,69 @@ public class WCReimbursementDAO {
 		return true;
 	}
 	
+	public Calendar selectFullDutyDate(Claimant clmnt){
+		PreparedStatement stmtSelectFDDate = null;
+		try {
+			stmtSelectFDDate = this.dbConnection.prepareStatement("SELECT FD_DATE FROM APP.R_SUMMARY " + 
+					"where CLAIM_ID = ?");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ResultSet results = null;
+		try{
+			stmtSelectFDDate.clearParameters();
+			stmtSelectFDDate.setInt(1, clmnt.getID());
+			if (!stmtSelectFDDate.execute()){
+				stmtSelectFDDate.close();
+				try{
+					throw new Exception("Could not Execute FD_DATE Query.");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return null;
+			}
+			results = stmtSelectFDDate.getResultSet();
+			if(results == null){
+				try{
+					throw new SQLException("Null FD_DATE ResultSet for:"+clmnt.toString());
+				} catch (SQLException e){
+					e.printStackTrace();
+					stmtSelectFDDate.close();
+				}
+			}
+			
+			//ResultSetMetaData rsmd = results.getMetaData();
+            //int numberCols = rsmd.getColumnCount();
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				stmtSelectFDDate.close();
+			} catch (SQLException se){
+				se.printStackTrace();
+			}
+			return null;
+		}
+		GregorianCalendar fdDate = new GregorianCalendar(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		try {
+			if(results.next()){
+				fdDate.setTimeInMillis(results.getDate("FD_DATE").getTime());
+			}
+			else{
+				return null;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return this.getStateLawCalculation(clmnt.getState()).normalizeCalendarTime(fdDate);
+	}
+	
 	public ReimbursementOverview selectReimbursementOverview(Claimant clmnt){
 		System.out.println("Adding ReimbursementOverview for Claimant: "+clmnt.toString()+"...");
 
 		ReimbursementOverview ro = new ReimbursementOverview();
 		ro.setClaimant(clmnt);
 		ro.setTTDRSumm(this.selectTTDRSummary(clmnt));
+		ro.setFullDutyReturnDate(this.selectFullDutyDate(clmnt));
 		if(ro.getTTDRSumm() != null){
 			System.out.println("TTDRS & ClaimSummar for: "+clmnt.toString()+" Added: "+ro.ttdRSumm.toString());
 			System.out.println("TTDRS & ClaimSummar for: "+clmnt.toString()+" Added: "+ro.ttdRSumm.claimSummary.toString());

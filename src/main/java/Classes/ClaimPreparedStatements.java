@@ -92,7 +92,8 @@ public class ClaimPreparedStatements {
 			    "UPDATE APP.R_SUMMARY " +
 			    "SET TD_TYPE = ?, " +
 			    "    BD_CALCWEEKPAY = ?, " +
-			    "    BD_ANOTPAID = ? " +
+			    "    BD_ANOTPAID = ?, " +
+			    "	 FD_DATE = ?" +
 			    "where CLAIM_ID = ? " + //This AND statement may throw an error
 			    "AND TD_TYPE = ?";
 	}
@@ -150,8 +151,8 @@ public class ClaimPreparedStatements {
 	public void setStmtInsertRSummary(){
 			this.stmtInsertRSummary =
 				"INSERT INTO APP.R_SUMMARY" + 
-				"(CLAIM_ID, TD_TYPE, BD_CALCWEEKPAY, BD_ANOTPAID) VALUES" +
-				"(?,?,?,?)";
+				"(CLAIM_ID, TD_TYPE, BD_CALCWEEKPAY, BD_ANOTPAID, FD_DATE) VALUES" +
+				"(?,?,?,?,?)";
 	}
 	
 	public void setStmtInsertClaimSummary(){

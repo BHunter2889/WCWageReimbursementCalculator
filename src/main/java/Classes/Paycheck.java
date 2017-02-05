@@ -26,10 +26,13 @@ public class Paycheck implements Comparable<Calendar> {
 
 	//null constructor
 	public Paycheck(){
-		this.grossAmount = null;
-		this.paymentDate = null;
-		this.payPeriodStart = null;
-		this.payPeriodEnd = null;
+		this.grossAmount = new BigDecimal("0");
+		this.paymentDate = new GregorianCalendar(new SimpleTimeZone(0, "Standard"));
+		this.paymentDate.setTimeInMillis(Long.MAX_VALUE); 
+		this.payPeriodStart = new GregorianCalendar(new SimpleTimeZone(0, "Standard"));
+		this.payPeriodStart.setTimeInMillis(Long.MIN_VALUE);
+		this.payPeriodEnd = new GregorianCalendar(new SimpleTimeZone(0, "Standard"));
+		this.payPeriodEnd.setTimeInMillis(Long.MAX_VALUE);
 	}
 	
 	//standard constructor

@@ -120,6 +120,13 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 		return "Amount Not Yet Paid: $"+this.amountNotPaid.toPlainString()+" | Light Duty Pay-To-Date: $"+this.getWorkPayToDate().toPlainString()+
 				" | Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString();
 	}
+	
+	public String toTableString(){
+		String eol = System.getProperty("line.separator");
+		return "Amount Not Yet Paid: $"+this.amountNotPaid.toPlainString()+eol+
+				"Light Duty Pay-To-Date: $"+this.getWorkPayToDate().toPlainString()+eol+
+				"Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString();
+	}
 	/*public void setReceivedWorkPayments(){
 		boolean added = false;
 		System.out.println("Please Select an Option:");
