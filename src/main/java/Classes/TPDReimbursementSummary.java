@@ -18,7 +18,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 	
 	public TPDReimbursementSummary(CompClaim claim, StateLawCalculable stateLawCalc) {
 		super(claim, stateLawCalc);
-		this.receivedWorkPayments = null;
+		this.receivedWorkPayments = new ArrayList<Paycheck>();
 	}
 	
 	public TPDReimbursementSummary(CompClaim claim, StateLawCalculable stateLawCalc, ArrayList<Paycheck> receivedWorkPayments) {
@@ -28,7 +28,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 	
 	public TPDReimbursementSummary(ReimbursementSummary rsumm){
 		super(rsumm);
-		this.receivedWorkPayments = null;
+		this.receivedWorkPayments = new ArrayList<Paycheck>();
 	}
 	
 	public TPDReimbursementSummary(ReimbursementSummary rsumm, ArrayList<Paycheck> receivedWorkPayments){

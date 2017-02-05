@@ -164,7 +164,6 @@ public class CompClaim {
 		if(this.priorWages.size() < 2){
 			return;
 		}
-		this.sortPaychecksByDate();
 		this.computeAvgPriorGrossWeeklyPayment();
 	}
 /*
@@ -626,14 +625,14 @@ public class CompClaim {
 	
 	public String toTableString(){
 		String eol = System.getProperty("line.separator");
-		String completed = "";
 		if (this.priorWagesIsComplete()){
-			completed = "Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+eol+
+			return "Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+eol+
 				"Average Prior Gross Weekly Payment: $"+this.avgPriorGrossWeeklyPayment.toPlainString();
 		}
-		String notCompleted = "Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+eol+
+		else{
+			return "Date Injured: "+this.toStringDateInjured()+" | Days Injured: "+String.valueOf(this.daysInjured)+" | Weeks Injured: "+String.valueOf(this.weeksInjured)+eol+
 				"Average Prior Gross Weekly Payment: Not Yet Completed.";
-		return (this.avgPriorGrossWeeklyPayment.compareTo(new BigDecimal("0")) > 0) ?  completed: notCompleted;
+		}
 	}
 	
 }

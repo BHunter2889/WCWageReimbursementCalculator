@@ -247,6 +247,7 @@ public class WCReimbursementCalculatorMenu {
 		btnCreateNewClaim.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				editPersonalInfo(true);
+				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
 			}
 		});
 		btnCreateNewClaim.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -259,6 +260,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEditPersonalInfo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				editPersonalInfo(false);
+				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
 			}
 		});
 		btnEditPersonalInfo.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -299,6 +301,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEditClaimHistory.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				editClaimSummary(claimantList.getSelectedValue(), true, false, false);
+				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
 				CompClaim cHist = claimantList.getSelectedValue().getTTDRSumm().getClaimSummary();
 				System.out.println("Post-Begin CS InjDate: "+cHist.toStringDateInjured());
 				System.out.println("Post-Begin CS PWSDate: "+cHist.toStringPriorWeekStart());
@@ -319,6 +322,7 @@ public class WCReimbursementCalculatorMenu {
 		btnChangeInjuryDate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				editClaimSummary(claimantList.getSelectedValue(), false, true, false);
+				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
 			}
 		});
 		btnChangeInjuryDate.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -331,6 +335,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEntercompletePriorWage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				editClaimSummary(claimantList.getSelectedValue(), false, false, true);
+				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
 				CompClaim cHist = claimantList.getSelectedValue().getTTDRSumm().getClaimSummary();
 				System.out.println("Post-Begin CS InjDate: "+cHist.toStringDateInjured());
 				System.out.println("Post-Begin CS PWSDate: "+cHist.toStringPriorWeekStart());
@@ -350,6 +355,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEditWageReimbursement.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				startWageReimbursementDetails();
+				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
 			}
 		}); 
 		btnEditWageReimbursement.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -367,6 +373,7 @@ public class WCReimbursementCalculatorMenu {
 		btnAddWorkComp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				btnEditWageReimbursement.doClick();
+				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
 			}
 		});
 		btnAddWorkComp.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -378,6 +385,7 @@ public class WCReimbursementCalculatorMenu {
 		btnAddTtdWork.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addTTDWCPaychecks(claimantList.getSelectedValue().getTTDRSumm(), false);
+				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
 			}
 		});
 		btnAddTtdWork.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -389,6 +397,7 @@ public class WCReimbursementCalculatorMenu {
 		btnAddTpdWork.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addTPDWCPaychecks(claimantList.getSelectedValue().getTPDRSumm());
+				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
 			}
 		});
 		btnAddTpdWork.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -403,6 +412,7 @@ public class WCReimbursementCalculatorMenu {
 			public void actionPerformed(ActionEvent e) {
 				//boolean balancedPayments = 
 				addWorkPayments(claimantList.getSelectedValue().getTPDRSumm()); // Make sure these payments are balanced at the end of the implemented method
+				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
 			}
 		});
 		btnAddLightDuty.setEnabled(false);
@@ -413,12 +423,9 @@ public class WCReimbursementCalculatorMenu {
 		btnDeleteAPaycheck.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(!deleteAPaycheck(claimantList.getSelectedValue())){
-					try{
-						throw new Exception("Paycheck not deleted. If user canceled input, ignore this exception.");
-					} catch (Exception ex){
-						ex.printStackTrace();
-					}
+					System.out.println("Paycheck NOT deleted.");
 				}
+				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
 			}
 		});
 		btnDeleteAPaycheck.setFont(new Font("SansSerif", Font.BOLD, 12));
@@ -471,34 +478,25 @@ public class WCReimbursementCalculatorMenu {
 	public GregorianCalendar getCalendar(String message, String title, boolean isPayment, boolean isPPS){
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
-		boolean nulled = false;
 		JXMonthView mV = new JXMonthView();
 		mV.setTimeZone(sLC.getTimeZone());
 		mV.setTraversable(true);
 		JXDatePicker picker = new JXDatePicker();
 		ReimbursementOverview r = claimantList.getSelectedValue();
 		CompClaim cS = null;
-		try{
-    		nulled = (r.getTTDRSumm().getClaimSummary() == null);
-    	} catch (NullPointerException ne) {
-    		nulled = true;
-    	}
-		
-    	if(nulled){
-    		cS = r.getTTDRSumm().getClaimSummary();
-    	}
+    	cS = r.getTTDRSumm().getClaimSummary();
+		java.util.Date start = new java.util.Date(cS.getDateInjured().getTimeInMillis());
+		//final java.util.Date startDate = new java.util.Date(cS.getDateInjured().getTimeInMillis());
+		java.util.Date end = new java.util.Date(new GregorianCalendar(sLC.getTimeZone()).getTimeInMillis());
+		//final java.util.Date endDate = new java.util.Date(new GregorianCalendar(sLC.getTimeZone()).getTimeInMillis());
 		if(isPayment){
 			if(isPPS){
-				Calendar start = cS.getDateInjured();
-				start.setTimeInMillis(start.getTimeInMillis() - mWeek);
-				Calendar end = new GregorianCalendar(sLC.getTimeZone());
-				mV.addSelectionInterval(start.getTime(), end.getTime());
+				start.setTime(start.getTime() - mWeek);
+				mV.addSelectionInterval(start, end);
 				picker.setMonthView(mV);
 			}
 			else{
-				Calendar start = cS.getDateInjured();
-				Calendar end = new GregorianCalendar(sLC.getTimeZone());
-				mV.addSelectionInterval(start.getTime(), end.getTime());
+				mV.addSelectionInterval(start, end);
 				picker.setMonthView(mV);
 			}
 		}
@@ -673,11 +671,10 @@ public class WCReimbursementCalculatorMenu {
 	public boolean startWageReimbursementDetails(){
 		String eol = System.getProperty("line.separator");
 		
-		ReimbursementOverview ro = claimantList.getSelectedValue();
-		if(ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment() != null){
-			ro.ttdRSumm.setCalculatedWeeklyPayment(sLC.computeCalculatedWeeklyPayment(ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment()));
-			claimListModel.set(claimantList.getSelectedIndex(), ro);
-		}
+		ReimbursementOverview ro = claimantList.getSelectedValue();	
+		ro.ttdRSumm.setCalculatedWeeklyPayment(sLC.computeCalculatedWeeklyPayment(ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment()));
+		claimListModel.set(claimantList.getSelectedIndex(), ro);
+		
 		if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, "Is the Injured Person able to work any hours?", "Able to Work?", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION){
 			if(dataAccess.selectTTDRSummary(ro.getClaimant()) == null){
 				dataAccess.insertRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), new BigDecimal("0"));
@@ -768,8 +765,9 @@ public class WCReimbursementCalculatorMenu {
 			else{
 				long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 				long mWeek = mDay * 7;
-				Calendar lastFDDate = ro.getTTDRSumm().getClaimSummary().getPriorWeekStart();
-				lastFDDate.setTimeInMillis(lastFDDate.getTimeInMillis() + ((mWeek*2)-mDay));
+				Calendar lastFDDate = new GregorianCalendar(sLC.getTimeZone());
+				
+				lastFDDate.setTimeInMillis(ro.getTTDRSumm().getClaimSummary().getPriorWeekStart().getTimeInMillis() + ((mWeek*2)-mDay));
 				if (wcPC.getPayPeriodStart().compareTo(lastFDDate) < 0){
 					String message = "This work comp paycheck appears to be from the week of injury."+eol+
 							"Were any hours worked during this week?";
@@ -782,9 +780,15 @@ public class WCReimbursementCalculatorMenu {
 				}
 				if(!worked){
 					wcPayments = sLC.addWCPaycheck(wcPC, wcPayments, rs.getClaimSummary().getPriorWeekStart());
+					WorkCompPaycheck p = wcPayments.get(wcPayments.size()-1);
+					dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TTD", p.getIsContested(),
+							p.getIsLate(), p.getFullTimeHours(),new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
+							new java.sql.Date(p.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(p.getPayPeriodEnd().getTimeInMillis()), p.getGrossAmount(), p.getAmountStillOwed(),
+							new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()));
 					rs.setWCPayments(wcPayments);
 					ro.setTTDRSumm(rs);
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
+					
 				}
 			}
 			String message = "";
@@ -799,7 +803,6 @@ public class WCReimbursementCalculatorMenu {
 		}
 		
 		rs.setWCPayments(wcPayments);
-		rs.computeAmountNotPaidAndAnyLateCompensation();
 		ro.setTTDRSumm(rs);
 		claimListModel.set(claimantList.getSelectedIndex(), ro);
 		dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", rs.getCalculatedWeeklyPayment(), rs.getAmountNotPaid());
@@ -1107,6 +1110,7 @@ public class WCReimbursementCalculatorMenu {
 							new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
 					ro.ttdRSumm.claimSummary.setPriorWages(priorWages);
 					ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
+					ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
 				}
 			}
@@ -1116,6 +1120,7 @@ public class WCReimbursementCalculatorMenu {
 				dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
 						new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment(), 
 						ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
+				ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
 				claimListModel.set(claimantList.getSelectedIndex(), ro);
 				return true;
 			}
@@ -1125,6 +1130,7 @@ public class WCReimbursementCalculatorMenu {
 				dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
 						new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), 
 						ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
+				ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
 				claimListModel.set(claimantList.getSelectedIndex(), ro);
 				return false;
 			}
@@ -1171,15 +1177,14 @@ public class WCReimbursementCalculatorMenu {
 						if (priorWages.isEmpty()){
 							return false;
 						}
-						label:for (Paycheck p : priorWages){
-							if(p.getPaymentDate().compareTo(pc.getPaymentDate()) == 0) pc = p;
-							break label;
-						}
+						pc = null;
+						pc = priorWages.get(priorWages.size() - 1);
 
 						dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
 								new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
 						ro.ttdRSumm.claimSummary.setPriorWages(priorWages);
 						ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
+						ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
 						claimListModel.set(claimantList.getSelectedIndex(), ro);
 					}
 				}
@@ -1189,6 +1194,7 @@ public class WCReimbursementCalculatorMenu {
 					dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
 							new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment(), 
 							ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
+					ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
 					return true;
 				}
@@ -1198,6 +1204,7 @@ public class WCReimbursementCalculatorMenu {
 					dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
 							new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), 
 							ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
+					ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
 					return false;
 				}
@@ -1625,7 +1632,7 @@ public class WCReimbursementCalculatorMenu {
             				btnEditPersonalInfo.setEnabled(true);
         	            	btnEditClaimHistory.setEnabled(true);
         	            	btnChangeInjuryDate.setEnabled(true);
-        	            	btnEntercompletePriorWage.setEnabled(true);
+        	            	btnEntercompletePriorWage.setEnabled(false);
         	            	btnEditWageReimbursement.setEnabled(true);
             				btnAddWorkComp.setEnabled(false);
 			            	btnAddLightDuty.setEnabled(false);
@@ -1635,7 +1642,7 @@ public class WCReimbursementCalculatorMenu {
 	    	            	btnDeleteAPaycheck.setEnabled(true);
 			            	TableModel tm = table.getModel();
     		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
-			            	tm.setValueAt("Not Completed.", 1, 1);
+			            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toString(), 1, 1);
 			            	tm.setValueAt("Not Completed.", 2, 1);
 			            	tm.setValueAt("Not Completed.", 3, 1);
 			            	table.setModel(tm);
@@ -1645,7 +1652,7 @@ public class WCReimbursementCalculatorMenu {
             					btnEditPersonalInfo.setEnabled(true);
             	            	btnEditClaimHistory.setEnabled(true);
             	            	btnChangeInjuryDate.setEnabled(true);
-            	            	btnEntercompletePriorWage.setEnabled(true);
+            	            	btnEntercompletePriorWage.setEnabled(false);
             	            	btnEditWageReimbursement.setEnabled(true);
 	            				btnAddWorkComp.setEnabled(true);
 				            	btnAddLightDuty.setEnabled(false);
@@ -1664,7 +1671,7 @@ public class WCReimbursementCalculatorMenu {
             					btnEditPersonalInfo.setEnabled(true);
             	            	btnEditClaimHistory.setEnabled(true);
             	            	btnChangeInjuryDate.setEnabled(true);
-            	            	btnEntercompletePriorWage.setEnabled(true);
+            	            	btnEntercompletePriorWage.setEnabled(false);
             	            	btnEditWageReimbursement.setEnabled(true);
             	            	btnAddWorkComp.setEnabled(true);
             	            	btnAddLightDuty.setEnabled(true);

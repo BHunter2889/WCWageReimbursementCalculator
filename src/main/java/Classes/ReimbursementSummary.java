@@ -40,12 +40,24 @@ public abstract class ReimbursementSummary {
 	//for super() subclass construction
 	public ReimbursementSummary(BigDecimal calculatedWeeklyPayment, CompClaim claimSummary, BigDecimal amountNotPaid, ArrayList<WorkCompPaycheck> wcPayments) {
 		//this.s = new Scanner(System.in);
-		this.claimSummary = claimSummary;
-		this.stateLawCalculation = this.claimSummary.stateLawCalculation;
-		this.wcPayments = wcPayments;
-		if(!this.wcPayments.isEmpty())this.sortWCPaymentsByDate();
-		this.calculatedWeeklyPayment = calculatedWeeklyPayment;
-		this.amountNotPaid = amountNotPaid;
+		boolean priorWages = false;
+		if(calculatedWeeklyPayment.compareTo(new BigDecimal("0")) <= 0){
+			this.wcPayments = wcPayments;
+			priorWages = this.setClaimSummary(claimSummary);
+			if (!priorWages){
+				this.calculatedWeeklyPayment = calculatedWeeklyPayment;
+				this.amountNotPaid = amountNotPaid;
+			}
+			if(!this.wcPayments.isEmpty())this.sortWCPaymentsByDate();
+		}
+		else{
+			this.claimSummary = claimSummary;
+			this.stateLawCalculation = this.claimSummary.stateLawCalculation;
+			this.wcPayments = wcPayments;
+			if(!this.wcPayments.isEmpty())this.sortWCPaymentsByDate();
+			this.calculatedWeeklyPayment = calculatedWeeklyPayment;
+			this.amountNotPaid = amountNotPaid;
+		}
 	}
 	
 	public ReimbursementSummary(ReimbursementSummary rsumm) {
@@ -159,9 +171,10 @@ public abstract class ReimbursementSummary {
 		Calendar pcPPS = pc.getPayPeriodStart();
 		//long pcPPSDate = pcPPS.getTimeInMillis();
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
+		formatter.setTimeZone(this.stateLawCalculation.getTimeZone());
 		formatter.setLenient(false);
 		long mEPPS = this.claimSummary.priorWeekStart.getTimeInMillis() + mWeek;
-		GregorianCalendar ePPSt = new GregorianCalendar();
+		GregorianCalendar ePPSt = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
 		Date epcPPS = new Date(mEPPS);
 		ePPSt.setTime(epcPPS);
 		Calendar ePPS = this.stateLawCalculation.normalizeCalendarTime(ePPSt);
@@ -219,11 +232,12 @@ public abstract class ReimbursementSummary {
 	public void computeAmountNotPaidAndAnyLateCompensation(){
 		String aNP = "0.00";
 		BigDecimal amountNotPaid = new BigDecimal(aNP);
-		
-		for (WorkCompPaycheck p : this.wcPayments){
-			p.computeAnyAddtionalLatePaymentCompensation(this.calculatedWeeklyPayment);
-			BigDecimal aSO = p.getAmountStillOwed();
-			amountNotPaid = amountNotPaid.add(aSO);
+		if(!this.wcPayments.isEmpty()){
+			for (WorkCompPaycheck p : this.wcPayments){
+				p.computeAnyAddtionalLatePaymentCompensation(this.calculatedWeeklyPayment);
+				BigDecimal aSO = p.getAmountStillOwed();
+				amountNotPaid = amountNotPaid.add(aSO);
+			}
 		}
 		amountNotPaid = amountNotPaid.setScale(2, RoundingMode.HALF_EVEN);
 		this.amountNotPaid = amountNotPaid;
@@ -265,12 +279,15 @@ public abstract class ReimbursementSummary {
 		return this.wcPayments;
 	}
 	
-	public void setClaimSummary(CompClaim cS){
+	public boolean setClaimSummary(CompClaim cS){
 		this.claimSummary = cS;
 		this.stateLawCalculation = cS.stateLawCalculation;
 		if (cS.priorWagesIsComplete()){
 			this.calculateAndSetWeeklyPayment();
+			this.computeAmountNotPaidAndAnyLateCompensation();
+			return true;
 		}
+		return false;
 	}
 	
 	public void setCalculatedWeeklyPayment(BigDecimal cWP){

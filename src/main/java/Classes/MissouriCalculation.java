@@ -267,8 +267,9 @@ public class MissouriCalculation implements StateLawCalculable {
 
 	@Override
 	public BigDecimal computeCalculatedWeeklyPayment(BigDecimal avgPGrossWeekPay) {
-		BigDecimal two3 = new BigDecimal(String.valueOf(2/3));
+		BigDecimal two3 = new BigDecimal("2").divide(new BigDecimal("3"), 20, RoundingMode.HALF_UP);
 		BigDecimal cWP = avgPGrossWeekPay.multiply(two3);
+		System.out.println("Calculated Weelkly Payment (unrounded): $"+cWP.toPlainString());
 		return cWP.setScale(2, RoundingMode.HALF_EVEN);
 	}
 
@@ -313,7 +314,8 @@ public class MissouriCalculation implements StateLawCalculable {
 		//BigDecimal week = new BigDecimal(String.valueOf(mWeek));
 		//BigDecimal weekPercentRemainder =  week.divide(new BigDecimal(String.valueOf(Math.round((mPP % mWeek) / mDay))), RoundingMode.UNNECESSARY);
 		BigDecimal payPWeeks = (new BigDecimal(String.valueOf(mPP)).divide(new BigDecimal(String.valueOf(mWeek))));
-		BigDecimal weeklyPayment = (avgPriorGrossWeeklyPayment.multiply(payPWeeks).subtract(workPayment.getGrossAmount())).multiply(new BigDecimal(String.valueOf(2/3)));
+		BigDecimal weeklyPayment = 
+				(avgPriorGrossWeeklyPayment.multiply(payPWeeks).subtract(workPayment.getGrossAmount())).multiply(new BigDecimal("2").divide(new BigDecimal("3"), 20, RoundingMode.HALF_UP));
 	
 		return weeklyPayment.setScale(2, RoundingMode.HALF_EVEN);
 	}

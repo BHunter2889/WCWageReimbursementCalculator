@@ -53,6 +53,7 @@ public class WorkCompPaycheck extends Paycheck {
 		this.isContested = isContested;
 		this.fullTimeHours = false;
 		this.isLate = false;
+		this.amountStillOwed = new BigDecimal("0");
 	}
 	
 	/*CONSTRUCTOR: Calendar constructor, pPE and pD are different, payReceived is same as payDate (if employer or WC Insurer has contested payment at 
@@ -63,6 +64,7 @@ public class WorkCompPaycheck extends Paycheck {
 		this.isContested = isContested;
 		this.fullTimeHours = false;
 		this.isLate = false;
+		this.amountStillOwed = new BigDecimal("0");
 	}
 
 	/*CONSTRUCTOR: (to set stateDaystoLate) Calendar constructor, pD and ppE are the same, payReceived is same as payDate (if employer or WC Insurer has contested payment at 
@@ -75,6 +77,7 @@ public class WorkCompPaycheck extends Paycheck {
 		determineAndSetIsLate();
 		this.fullTimeHours = false;
 		this.isLate = false;
+		this.amountStillOwed = new BigDecimal("0");
 	}
 	
 	/*CONSTRUCTOR: (to set stateDaystoLate) Calendar constructor, pPE and pD are different, payReceived is same as payDate (if employer or WC Insurer has contested payment at 
@@ -87,6 +90,7 @@ public class WorkCompPaycheck extends Paycheck {
 		determineAndSetIsLate();
 		this.fullTimeHours = false;
 		this.isLate = false;
+		this.amountStillOwed = new BigDecimal("0");
 	}
 	
 	/*CONSTRUCTOR: (to set stateDaystoLate) Calendar constructor, pD and ppE are the same, payReceived IS NOT payDate (payDate becomes irrelevant) (if employer or WC Insurer has contested payment at 
@@ -99,6 +103,7 @@ public class WorkCompPaycheck extends Paycheck {
 		determineAndSetIsLate();
 		this.fullTimeHours = false;
 		this.isLate = false;
+		this.amountStillOwed = new BigDecimal("0");
 	}
 	
 	/*CONSTRUCTOR: (to set stateDaystoLate) Calendar constructor, pPE and pD are different, payReceived IS NOT payDate (payDate becomes irrelevant) (if employer or WC Insurer has contested payment at 
@@ -111,16 +116,18 @@ public class WorkCompPaycheck extends Paycheck {
 		determineAndSetIsLate();
 		this.fullTimeHours = false;
 		this.isLate = false;
+		this.amountStillOwed = new BigDecimal("0");
 	}
 	
 	public WorkCompPaycheck() {
 		super();
 		this.isContested = false;
 		this.isLate = false;
-		this.amountStillOwed = null;
+		this.amountStillOwed = new BigDecimal("0");
 		this.fullTimeHours = false;
 		this.payReceivedDate = null;
 		this.stateLawCalculation = null;
+		
 	}
 
 	//methods

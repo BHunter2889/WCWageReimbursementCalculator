@@ -21,7 +21,9 @@ public class TTDReimbursementSummary extends ReimbursementSummary {
 	}
 	
 	public String toString(){
-		return (this.calculatedWeeklyPayment != null) ? "Calculated Weekly Payment: $"+this.calculatedWeeklyPayment.toPlainString()+" | Amount Not Yet Paid: $"+this.amountNotPaid.toPlainString()+
-				" | Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString(): "Not Yet Completed.";
+		String eol = System.getProperty("line.separator");
+		return (this.claimSummary.priorWagesIsComplete()) ? "Calculated Weekly Payment: $"+this.calculatedWeeklyPayment.toPlainString()+" | Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString()+eol+
+				" | Amount Not Yet Paid: $"+this.amountNotPaid.toPlainString()
+				: "Not Yet Completed.";
 	}
 }
