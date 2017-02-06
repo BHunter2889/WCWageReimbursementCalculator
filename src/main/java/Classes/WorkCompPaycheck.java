@@ -198,7 +198,8 @@ public class WorkCompPaycheck extends Paycheck {
 	}
 	
 	protected void setAmountStillOwed(BigDecimal aSO){
-		this.amountStillOwed = aSO;
+		if (aSO.compareTo(new BigDecimal("-1")) == 0) this.amountStillOwed = new BigDecimal("0");
+		else this.amountStillOwed = aSO;
 	}
 	
 	public boolean getIsContested(){

@@ -55,13 +55,37 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 					break label;
 				}
 			}
+			WorkCompPaycheck p2 = null;
+			if (!this.arePayPeriodsEqual(p, pcheck)){
+				label:for (WorkCompPaycheck wc : this.wcPayments){
+					if (wc.getPayPeriodStart().compareTo(pcheck.getPayPeriodStart()) == 0){
+						p2 = wc;
+						break label;
+					}
+				}
+			}
 			BigDecimal calcSuppPayment = this.stateLawCalculation.computeWCSupplementalPayment(pcheck, this.claimSummary.getAvgPriorGrossWeeklyPayment());
 			p.computeAnyAddtionalLatePaymentCompensation(calcSuppPayment);
+			if(p2 != null) p2.computeAnyAddtionalLatePaymentCompensation(calcSuppPayment);
 			BigDecimal aSO = p.getAmountStillOwed();
+			if (p2 != null) aSO.add(p2.getAmountStillOwed());
 			amountNotPaid = amountNotPaid.add(aSO);
 		}
 		amountNotPaid = amountNotPaid.setScale(2, RoundingMode.HALF_EVEN);
 		this.amountNotPaid = amountNotPaid;
+	}
+	
+	public boolean arePayPeriodsEqual(WorkCompPaycheck wc, Paycheck p){
+		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
+		long wcEnd = wc.getPayPeriodEnd().getTimeInMillis() + mDay;
+		long wcStart = wc.getPayPeriodStart().getTimeInMillis();
+		long wcPP = wcEnd - wcStart;
+		
+		long pEnd = p.getPayPeriodEnd().getTimeInMillis() + mDay;
+		long pStart = p.getPayPeriodStart().getTimeInMillis();
+		long pPP = pEnd - pStart;
+		
+		return wcPP == pPP;
 	}
 	
 	public void sortPaychecksByDate(){

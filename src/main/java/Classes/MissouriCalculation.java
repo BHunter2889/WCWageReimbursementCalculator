@@ -308,14 +308,14 @@ public class MissouriCalculation implements StateLawCalculable {
 	public BigDecimal computeWCSupplementalPayment(Paycheck workPayment, BigDecimal avgPriorGrossWeeklyPayment) {
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
-		long mPP = workPayment.getPayPeriodEnd().getTimeInMillis() - workPayment.getPayPeriodStart().getTimeInMillis();
+		long mPP = (workPayment.getPayPeriodEnd().getTimeInMillis() + mDay) - workPayment.getPayPeriodStart().getTimeInMillis();
 		//long mDR = mPP % mWeek;
 		//long daysRemaining = Math.round((mPP % mWeek) / mDay);
 		//BigDecimal week = new BigDecimal(String.valueOf(mWeek));
 		//BigDecimal weekPercentRemainder =  week.divide(new BigDecimal(String.valueOf(Math.round((mPP % mWeek) / mDay))), RoundingMode.UNNECESSARY);
 		BigDecimal payPWeeks = (new BigDecimal(String.valueOf(mPP)).divide(new BigDecimal(String.valueOf(mWeek))));
 		BigDecimal weeklyPayment = 
-				(avgPriorGrossWeeklyPayment.multiply(payPWeeks).subtract(workPayment.getGrossAmount())).multiply(new BigDecimal("2").divide(new BigDecimal("3"), 20, RoundingMode.HALF_UP));
+				(avgPriorGrossWeeklyPayment.multiply(payPWeeks).subtract(workPayment.getGrossAmount())).divide(payPWeeks, 20, RoundingMode.HALF_UP).multiply(new BigDecimal("2").divide(new BigDecimal("3"), 20, RoundingMode.HALF_UP));
 	
 		return weeklyPayment.setScale(2, RoundingMode.HALF_EVEN);
 	}
