@@ -611,6 +611,52 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
+	public boolean updateTPDPaychecks(Claimant clmnt, int id, String pcType, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdWCCalc){
+		boolean updated = false;
+		PreparedStatement stmtUpdateTPDPaychecks = null;
+		try {
+			stmtUpdateTPDPaychecks = this.dbConnection.prepareStatement(
+					"UPDATE APP.PAYCHECKS " +
+				    "SET PC_TYPE = ?, " +
+				    "    PAY_DATE = ?, " +
+				    "    PAY_START = ?, " +
+				    "    PAY_END = ?, " +
+				    "    BD_GROSS_AMNT = ?, " +
+				    "    BD_WC_CALC = ? " +
+				    "where CLAIM_ID = ? " +
+				    "AND PC_TYPE = ?" +
+				    "AND ID = ?");
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		try {
+			stmtUpdateTPDPaychecks.clearParameters();
+			stmtUpdateTPDPaychecks.setString(1, pcType);
+			stmtUpdateTPDPaychecks.setDate(2, payDate, tZ);
+			stmtUpdateTPDPaychecks.setDate(3, payStart, tZ);
+			stmtUpdateTPDPaychecks.setDate(4, payEnd, tZ);
+			stmtUpdateTPDPaychecks.setBigDecimal(5, bdGrossAmnt);
+			stmtUpdateTPDPaychecks.setBigDecimal(6, bdWCCalc);
+			stmtUpdateTPDPaychecks.setInt(7, clmnt.getID());
+			stmtUpdateTPDPaychecks.setString(8, pcType);
+			stmtUpdateTPDPaychecks.setInt(9, id);
+			stmtUpdateTPDPaychecks.executeUpdate();
+			updated = true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				stmtUpdateTPDPaychecks.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return updated;
+	}
+	
 	public boolean updateWCPaychecks(int id, String wcPCType, boolean isContest, boolean isLate, boolean ftHours, int stDaysToLate, 
 			Date payReceived, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdAmntOwed, Date contestRslvd){
 		boolean updated = false;
@@ -786,6 +832,43 @@ public class WCReimbursementDAO {
 		} finally {
 			try {
 				stmtInsertPaychecks.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return updated;
+	}
+	
+	public boolean insertTPDPaychecks(int id, String pcType, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdWCCalc){
+		boolean updated = false;
+		PreparedStatement stmtInsertTPDPaychecks = null;
+		try {
+			stmtInsertTPDPaychecks = this.dbConnection.prepareStatement(
+					"INSERT INTO APP.PAYCHECKS" + 
+					"(CLAIM_ID, PC_TYPE, PAY_DATE, PAY_START, PAY_END, BD_GROSS_AMNT, BD_WC_CALC) VALUES" +
+					"(?,?,?,?,?,?,?)");
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		Claimant clmnt = this.selectClaimants(id);
+		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		try {
+			stmtInsertTPDPaychecks.clearParameters();
+			stmtInsertTPDPaychecks.setInt(1, id);
+			stmtInsertTPDPaychecks.setString(2, pcType);
+			stmtInsertTPDPaychecks.setDate(3, payDate, tZ);
+			stmtInsertTPDPaychecks.setDate(4, payStart, tZ);
+			stmtInsertTPDPaychecks.setDate(5, payEnd, tZ);
+			stmtInsertTPDPaychecks.setBigDecimal(6, bdGrossAmnt);
+			stmtInsertTPDPaychecks.setBigDecimal(7, bdWCCalc);
+			stmtInsertTPDPaychecks.executeUpdate();
+			updated = true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				stmtInsertTPDPaychecks.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -1280,6 +1363,73 @@ public class WCReimbursementDAO {
 		try{
 			results.close();
 			stmtSelectPaychecks.close();
+		} catch (SQLException e){
+			e.printStackTrace();
+		}
+		//SortedMap<Paycheck, Integer> newPCList = sLC.sortPCHashMapByDate(pcList);
+		return pcList;
+	}
+	
+	public SortedMap<TPDPaycheck, Integer> selectTPDPaychecksHashMap(int id, String pcType){
+		SortedMap<TPDPaycheck, Integer> pcList = new TreeMap<TPDPaycheck, Integer>(Paycheck.PPS_COMPARATOR);
+		PreparedStatement stmtSelectTPDPaychecks = null;
+		try {
+			stmtSelectTPDPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectPCType());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		ResultSet results = null;
+		
+		try{
+			stmtSelectTPDPaychecks.clearParameters();
+			stmtSelectTPDPaychecks.setInt(1, id);
+			stmtSelectTPDPaychecks.setString(2, pcType);
+			if (!stmtSelectTPDPaychecks.execute()){
+				stmtSelectTPDPaychecks.close();
+				return pcList;
+			}
+			results = stmtSelectTPDPaychecks.getResultSet();
+
+			//ResultSetMetaData rsmd = results.getMetaData();
+            //int numberCols = rsmd.getColumnCount();
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				stmtSelectTPDPaychecks.close();
+			} catch (SQLException se){
+				se.printStackTrace();
+			}
+			return pcList;
+		}
+		Claimant clmnt = this.selectClaimants(id);
+		StateLawCalculable sLC = this.getStateLawCalculation(clmnt.getState());
+		Calendar tZ = Calendar.getInstance(sLC.getTimeZone());
+		try{
+			while(results.next()){
+				TPDPaycheck p = new TPDPaycheck();
+				p.setPaymentDate(results.getDate(4, tZ));
+				p.setPayPeriodStart(results.getDate(5, tZ));
+				p.setPayPeriodEnd(results.getDate(6, tZ));
+				p.setGrossAmount(results.getBigDecimal(7));
+				p.setWCCalcPay(results.getBigDecimal(8));
+				pcList.put(p, results.getInt(1));
+			}
+			
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				results.close();
+				stmtSelectTPDPaychecks.close();
+				return pcList;
+			} catch (SQLException se){
+				se.printStackTrace();
+				return pcList;
+			}
+		}
+		
+		try{
+			results.close();
+			stmtSelectTPDPaychecks.close();
 		} catch (SQLException e){
 			e.printStackTrace();
 		}

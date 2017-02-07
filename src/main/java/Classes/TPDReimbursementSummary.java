@@ -8,48 +8,57 @@ import java.util.Collections;
 
 public class TPDReimbursementSummary extends ReimbursementSummary {
 	//additional fields
-	protected ArrayList<Paycheck> receivedWorkPayments;
+	protected ArrayList<TPDPaycheck> receivedWorkPayments;
 	//unnecessary (this varies week to week based on hours worked) protected BigDecimal computedWCSupplementalPayment;
 	
 	public TPDReimbursementSummary(){
 		super();
-		this.receivedWorkPayments = new ArrayList<Paycheck>();
+		this.receivedWorkPayments = new ArrayList<TPDPaycheck>();
 	}
 	
 	public TPDReimbursementSummary(CompClaim claim, StateLawCalculable stateLawCalc) {
 		super(claim, stateLawCalc);
-		this.receivedWorkPayments = new ArrayList<Paycheck>();
+		this.receivedWorkPayments = new ArrayList<TPDPaycheck>();
 	}
 	
-	public TPDReimbursementSummary(CompClaim claim, StateLawCalculable stateLawCalc, ArrayList<Paycheck> receivedWorkPayments) {
+	public TPDReimbursementSummary(CompClaim claim, StateLawCalculable stateLawCalc, ArrayList<TPDPaycheck> receivedWorkPayments) {
 		super(claim, stateLawCalc);
 		this.receivedWorkPayments = receivedWorkPayments;
 	}
 	
 	public TPDReimbursementSummary(ReimbursementSummary rsumm){
 		super(rsumm);
-		this.receivedWorkPayments = new ArrayList<Paycheck>();
+		this.receivedWorkPayments = new ArrayList<TPDPaycheck>();
 	}
 	
-	public TPDReimbursementSummary(ReimbursementSummary rsumm, ArrayList<Paycheck> receivedWorkPayments){
+	public TPDReimbursementSummary(ReimbursementSummary rsumm, ArrayList<TPDPaycheck> receivedWorkPayments){
 		super(rsumm);
 		this.receivedWorkPayments = receivedWorkPayments;
 	}
-	public TPDReimbursementSummary(BigDecimal calculatedWeeklyPayment, CompClaim claimSummary, BigDecimal amountNotPaid, ArrayList<WorkCompPaycheck> wcPayments, ArrayList<Paycheck> receivedWorkPayments) {
+	public TPDReimbursementSummary(BigDecimal calculatedWeeklyPayment, CompClaim claimSummary, BigDecimal amountNotPaid, ArrayList<WorkCompPaycheck> wcPayments, ArrayList<TPDPaycheck> receivedWorkPayments) {
 		super(calculatedWeeklyPayment, claimSummary, amountNotPaid, wcPayments);
 		this.receivedWorkPayments = receivedWorkPayments;
 		this.sortPaychecksByDate();
 	}
 	
 	@Override
-	//calculates and sets amountNotPaid total and sets the amountStillOwed for each pay period entered in wcPayments
-	//also determines if wcPC was late and adds and late payment owed to wcPC grossAmnt
 	public void computeAmountNotPaidAndAnyLateCompensation(){
 		String aNP = "0.00";
 		BigDecimal amountNotPaid = new BigDecimal(aNP);
-		Paycheck pcheck = null;
+		BigDecimal wcTotalPay = this.getWCPayToDate();
+		BigDecimal wcCalcTotalPay = this.getWCCalcPayToDate();
+		amountNotPaid = wcCalcTotalPay.subtract(wcTotalPay);
+		amountNotPaid = amountNotPaid.setScale(2, RoundingMode.HALF_EVEN);
+		this.amountNotPaid = amountNotPaid;
+	}
+	//calculates and sets amountNotPaid total and sets the amountStillOwed for each pay period entered in wcPayments
+	//also determines if wcPC was late and adds and late payment owed to wcPC grossAmnt
+	public void computeAmountNotPaidAndAnyLateCompensationByWCPC(){
+		String aNP = "0.00";
+		BigDecimal amountNotPaid = new BigDecimal(aNP);
+		TPDPaycheck pcheck = null;
 		for (WorkCompPaycheck p : this.wcPayments){
-			label:for (Paycheck pc : this.receivedWorkPayments){
+			label:for (TPDPaycheck pc : this.receivedWorkPayments){
 				if (p.getPayPeriodEnd().compareTo(pc.getPayPeriodEnd()) == 0){
 					pcheck = pc;
 					break label;
@@ -66,7 +75,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 			}
 			BigDecimal calcSuppPayment = this.stateLawCalculation.computeWCSupplementalPayment(pcheck, this.claimSummary.getAvgPriorGrossWeeklyPayment());
 			p.computeAnyAddtionalLatePaymentCompensation(calcSuppPayment);
-			if(p2 != null) p2.computeAnyAddtionalLatePaymentCompensation(calcSuppPayment);
+			if(p2 != null) p2.computeAnyAddtionalLatePaymentCompensation(calcSuppPayment); //TODO maybe ensure that these together match the PP length for the Paycheck 
 			BigDecimal aSO = p.getAmountStillOwed();
 			if (p2 != null) aSO.add(p2.getAmountStillOwed());
 			amountNotPaid = amountNotPaid.add(aSO);
@@ -92,7 +101,8 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 		Collections.sort(this.receivedWorkPayments, Paycheck.PPS_COMPARATOR);
 	}
 	
-	public void addPaycheck(Paycheck pc){
+	public void addPaycheck(TPDPaycheck pc){
+		//if(pc.getWCCalcPay().compareTo(new BigDecimal("0")) <=0 ) pc.computeWCCalcPay(stateLawCalculation, this.claimSummary.getAvgPriorGrossWeeklyPayment());
 		this.receivedWorkPayments.add(pc);
 		this.sortPaychecksByDate();
 		this.computeAmountNotPaidAndAnyLateCompensation();
@@ -115,7 +125,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 		return pc;
 	}
 	
-	public void updateReceivedWorkPayments(ArrayList<Paycheck> pchecks){
+	public void updateReceivedWorkPayments(ArrayList<TPDPaycheck> pchecks){
 		this.receivedWorkPayments = pchecks;
 		this.sortPaychecksByDate();
 		this.computeAmountNotPaidAndAnyLateCompensation();
@@ -124,19 +134,45 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 	public BigDecimal getWorkPayToDate(){
 		String wPTD = "0.00";
 		BigDecimal workPTD = new BigDecimal(wPTD);
-		for(Paycheck p : this.receivedWorkPayments){
-			BigDecimal pay = p.getGrossAmount();
-			workPTD = workPTD.add(pay);
+		for (int i=0, j=this.receivedWorkPayments.size()-1; i<j; i++, j--){
+			TPDPaycheck p1 = this.receivedWorkPayments.get(i);
+			TPDPaycheck p2 = this.receivedWorkPayments.get(j);
+			workPTD = workPTD.add(p1.getGrossAmount()).add(p2.getGrossAmount());
+			if(i+2 == j){
+				p1 = this.receivedWorkPayments.get(i+1);
+				workPTD = workPTD.add(p1.getGrossAmount());
+				break;
+			}
 		}
 		workPTD = workPTD.setScale(2, RoundingMode.HALF_EVEN);
 		return workPTD;
 	}
 	
-	public ArrayList<Paycheck> getReceivedWorkPayments(){
+	public BigDecimal getWCCalcPayToDate(){
+		BigDecimal wcCalcPTD = new BigDecimal("0");
+		TPDPaycheck pcheck = null;
+		for (int i=0, j=this.receivedWorkPayments.size()-1; i<j; i++, j--){
+			TPDPaycheck p1 = this.receivedWorkPayments.get(i);
+			TPDPaycheck p2 = this.receivedWorkPayments.get(j);
+			if (p1.getWCCalcPay().compareTo(new BigDecimal("0")) <= 0) p1.computeWCCalcPay(stateLawCalculation, this.claimSummary.getAvgPriorGrossWeeklyPayment());
+			if (p2.getWCCalcPay().compareTo(new BigDecimal("0")) <= 0) p2.computeWCCalcPay(stateLawCalculation, this.claimSummary.getAvgPriorGrossWeeklyPayment());
+			wcCalcPTD = wcCalcPTD.add(p1.getWCCalcPay()).add(p2.getWCCalcPay());
+			if(i+2 == j){
+				p1 = this.receivedWorkPayments.get(i+1);
+				if (p1.getWCCalcPay().compareTo(new BigDecimal("0")) <= 0) p1.computeWCCalcPay(stateLawCalculation, this.claimSummary.getAvgPriorGrossWeeklyPayment());
+				wcCalcPTD = wcCalcPTD.add(p1.getGrossAmount());
+				break;
+			}
+		}
+		wcCalcPTD = wcCalcPTD.setScale(2, RoundingMode.HALF_EVEN);
+		return wcCalcPTD;
+	}	
+	
+	public ArrayList<TPDPaycheck> getReceivedWorkPayments(){
 		return this.receivedWorkPayments;
 	}
 	
-	public void setReceivedWorkPayments(ArrayList<Paycheck> rWP){
+	public void setReceivedWorkPayments(ArrayList<TPDPaycheck> rWP){
 		this.receivedWorkPayments = rWP;
 	}
 	

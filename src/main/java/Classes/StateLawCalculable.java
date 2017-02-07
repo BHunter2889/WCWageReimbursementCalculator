@@ -18,7 +18,7 @@ public interface StateLawCalculable {
 	//public BigDecimal computeAmountNotPaid(ArrayList<WorkCompPaycheck> wcPayments, BigDecimal calcWP);	//ReimbursementSummary
 	public BigDecimal computeCalculatedWeeklyPayment(BigDecimal avgPGrossWeekPay); //ReimbursementSummary
 	public Calendar computeEarliestPriorWageDate(Calendar priorWeekStart); //CompClaim
-	public BigDecimal computeWCSupplementalPayment(Paycheck workPayment, BigDecimal avgPriorGrossWeeklyPayment);
+	public BigDecimal computeWCSupplementalPayment(TPDPaycheck workPayment, BigDecimal avgPriorGrossWeeklyPayment);
 	public boolean determineAndSetIsLate(Calendar payPeriodEnd, Calendar payReceived); //WCPaycheck
 	public GregorianCalendar normalizeCalendarTime(GregorianCalendar calendar);
 	public String getStateAbbrv();

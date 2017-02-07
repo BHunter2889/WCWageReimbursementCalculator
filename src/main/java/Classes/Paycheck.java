@@ -165,7 +165,7 @@ public class Paycheck implements Comparable<Calendar> {
 		java.util.Date payPS = this.payPeriodStart.getTime();
 		java.util.Date payPE = this.payPeriodEnd.getTime();
 		
-		return formatter.format(payPS) + " - " + formatter.format(payPE) + ": $" + this.getGrossAmount() + " paid on " + formatter.format(payD) + ".";
+		return formatter.format(payPS) + " - " + formatter.format(payPE) + ": $" + this.getGrossAmount().toPlainString() + " paid on " + formatter.format(payD) + ".";
 		
 	}
 

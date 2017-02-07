@@ -255,10 +255,18 @@ public abstract class ReimbursementSummary {
 	public BigDecimal getWCPayToDate(){
 		String zero = "0.00";
 		BigDecimal wcPTD = new BigDecimal(zero);
-		for(WorkCompPaycheck p : this.wcPayments){
-			BigDecimal pay = p.getGrossAmount();
-			wcPTD = wcPTD.add(pay);
+		
+		for (int i=0, j=this.wcPayments.size()-1; i<j; i++, j--){
+			WorkCompPaycheck wc1 = this.wcPayments.get(i);
+			WorkCompPaycheck wc2 = this.wcPayments.get(j);
+			wcPTD = wcPTD.add(wc1.getGrossAmount()).add(wc2.getGrossAmount());
+			if(i+2 == j){
+				wc1 = this.wcPayments.get(i+1);
+				wcPTD = wcPTD.add(wc1.getGrossAmount());
+				break;
+			}
 		}
+		
 		wcPTD = wcPTD.setScale(2, RoundingMode.HALF_EVEN);
 		return wcPTD;
 	}
