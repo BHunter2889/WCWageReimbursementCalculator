@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.SimpleTimeZone;
 import java.util.SortedMap;
@@ -179,7 +180,7 @@ public class MissouriCalculation implements StateLawCalculable {
 	}
 
 	@Override
-	public ArrayList<Paycheck> addTPDWorkPaycheck(Paycheck pc, ArrayList<Paycheck> pchecks, Calendar priorWeekStart) throws Exception {
+	public ArrayList<TPDPaycheck> addTPDWorkPaycheck(TPDPaycheck pc, ArrayList<TPDPaycheck> pchecks, Calendar priorWeekStart) throws Exception {
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		String message = "";
 		Calendar pcPPS = pc.getPayPeriodStart();
@@ -241,6 +242,23 @@ public class MissouriCalculation implements StateLawCalculable {
 		
 		wcPayments.add(wcPC);
 		return wcPayments;
+	}
+	
+	public Paycheck[] splitDateInjuredPayPeriodChecks(Paycheck pc, CompClaim cHist){
+		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
+		Paycheck[] splitPCs = {new Paycheck(), new TPDPaycheck()};
+		final Paycheck fpc = pc;
+		Paycheck pw = this.addAndTrimToPriorWages(pc, new ArrayList<Paycheck>(), cHist).get(0);
+		splitPCs[0] = pw;
+		long pwPPE = pw.getPayPeriodEnd().getTimeInMillis();
+		Calendar tpdPPS = new GregorianCalendar(timeZone);
+		tpdPPS.setTimeInMillis(pwPPE + mDay);
+		
+		TPDPaycheck tpdPC = new TPDPaycheck(fpc.getGrossAmount().subtract(pw.getGrossAmount()).toString(), fpc.getPaymentDate(),
+				tpdPPS, fpc.getPayPeriodEnd(),"0");
+		splitPCs[1] = tpdPC;
+		
+		return splitPCs;
 	}
 
 	@Override

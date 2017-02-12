@@ -1304,6 +1304,78 @@ public class WCReimbursementDAO {
 		return pcList;
 	}
 	
+	public ArrayList<TPDPaycheck> selectTPDPaychecks(int id){
+		ArrayList<TPDPaycheck> pcList = new ArrayList<TPDPaycheck>();
+		PreparedStatement selectTPDPaychecks = null;
+		try {
+			selectTPDPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectPCType());
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		ResultSet results = null;
+		
+		try{
+			selectTPDPaychecks.clearParameters();
+			selectTPDPaychecks.setInt(1, id);
+			selectTPDPaychecks.setString(2, "WORKPAYMENT");
+			if (!selectTPDPaychecks.execute()){
+				selectTPDPaychecks.close();
+				return pcList;
+			}
+			results = selectTPDPaychecks.getResultSet();
+
+			//ResultSetMetaData rsmd = results.getMetaData();
+            //int numberCols = rsmd.getColumnCount();
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				selectTPDPaychecks.close();
+			} catch (SQLException se){
+				se.printStackTrace();
+			}
+			return pcList;
+		}
+		Claimant clmnt = this.selectClaimants(id);
+		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		int row = -1;
+		try{
+			while(results.next()){
+				row++;
+				TPDPaycheck p = new TPDPaycheck();
+				p.setPaymentDate(results.getDate(4, tZ));
+				p.setPayPeriodStart(results.getDate(5, tZ));
+				p.setPayPeriodEnd(results.getDate(6, tZ));
+				p.setGrossAmount(results.getBigDecimal(7));
+				if(results.getBigDecimal(8) != null && results.getBigDecimal(8).compareTo(new BigDecimal("0")) > 0) p.setWCCalcPay(results.getBigDecimal(8));
+				else p.setWCCalcPay("0");
+				pcList.add(p);
+			}
+			if (row < 0){
+				results.close();
+				selectTPDPaychecks.close();
+				return pcList;
+			}
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				results.close();
+				selectTPDPaychecks.close();
+				return pcList;
+			} catch (SQLException se){
+				se.printStackTrace();
+				return pcList;
+			}
+		}
+		
+		try{
+			results.close();
+			selectTPDPaychecks.close();
+		} catch (SQLException e){
+			e.printStackTrace();
+		}
+		return pcList;
+	}
+	
 	public SortedMap<Paycheck, Integer> selectPaychecksHashMap(int id, String pcType){
 		SortedMap<Paycheck, Integer> pcList = new TreeMap<Paycheck, Integer>(Paycheck.PPS_COMPARATOR);
 		PreparedStatement stmtSelectPaychecks = null;
@@ -1597,7 +1669,7 @@ public class WCReimbursementDAO {
 	public TPDReimbursementSummary selectTPDRSummary(Claimant clmnt){
 		int id = clmnt.getID();
 		CompClaim claimSum = this.selectClaimSummary(clmnt);
-		ArrayList<Paycheck> workPay = this.selectPaychecks(id, "WORKPAYMENTS");
+		ArrayList<TPDPaycheck> workPay = this.selectTPDPaychecks(id);
 		ArrayList<WorkCompPaycheck> tpdWCPay = this.selectWorkCompPaychecks(id, "TPD");
 		PreparedStatement stmtSelectRSummary = null;
 		try {
@@ -1829,7 +1901,8 @@ public class WCReimbursementDAO {
 		GregorianCalendar fdDate = new GregorianCalendar(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
 		try {
 			if(results.next()){
-				fdDate.setTimeInMillis(results.getDate("FD_DATE").getTime());
+				if (results.getDate("FD_DATE") != null) fdDate.setTimeInMillis(results.getDate("FD_DATE").getTime());
+				else return null;
 			}
 			else{
 				return null;

@@ -831,7 +831,7 @@ public class WCReimbursementCalculatorMenu {
 		ReimbursementOverview ro = claimantList.getSelectedValue();
 		int ok = JOptionPane.OK_OPTION;
 		ArrayList<WorkCompPaycheck> wcPayments = new ArrayList<WorkCompPaycheck>();
-		ArrayList<Paycheck> workPayments = new ArrayList<Paycheck>();
+		ArrayList<TPDPaycheck> workPayments = new ArrayList<TPDPaycheck>();
 		if(rs.getWCPayments().size() > 0){
 			wcPayments = rs.getWCPayments();
 		}
@@ -887,7 +887,7 @@ public class WCReimbursementCalculatorMenu {
 					"(You may enter it separately at a later time if you wish.)"+eol+
 					"(Note: This is necessary to compute appropriate amount owed for Work Comp Payments(TPD).)";
 			if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, message, "Enter Light Duty Work Payment?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
-				Paycheck pc = createWorkPayment();
+				TPDPaycheck pc = createWorkPayment();
 				
 				try {
 					workPayments = sLC.addTPDWorkPaycheck(pc, workPayments, rs.getClaimSummary().getPriorWeekStart());
@@ -961,13 +961,13 @@ public class WCReimbursementCalculatorMenu {
 	public boolean addWorkPayments(TPDReimbursementSummary rs){
 		String eol = System.getProperty("line.separator");
 		ReimbursementOverview ro = claimantList.getSelectedValue();
-		ArrayList<Paycheck> workPayments = new ArrayList<Paycheck>();
+		ArrayList<TPDPaycheck> workPayments = new ArrayList<TPDPaycheck>();
 		if(rs.getReceivedWorkPayments().size() > 0){
 			workPayments = rs.getReceivedWorkPayments();
 		}
 		int yes = JOptionPane.YES_OPTION;
 		while(yes == JOptionPane.YES_OPTION){
-			Paycheck pc = createWorkPayment();
+			TPDPaycheck pc = createWorkPayment();
 			if(pc == null){
 				return false;
 			}
@@ -1032,8 +1032,8 @@ public class WCReimbursementCalculatorMenu {
 	}	
 
 	
-	public Paycheck createWorkPayment(){
-		Paycheck pc = null;
+	public TPDPaycheck createWorkPayment(){
+		TPDPaycheck pc = null;
 		GregorianCalendar pPS = getCalendar("Select Pay Period Start Date", "Pay Period Start", true, true);
 		if(pPS == null){
 			return null;
@@ -1050,11 +1050,11 @@ public class WCReimbursementCalculatorMenu {
 		if(grossAmnt.compareTo("") == 0){
 			return null;
 		}
-		pc = new Paycheck(grossAmnt, pD, pPS, pPE);
+		pc = new TPDPaycheck(grossAmnt, pD, pPS, pPE, "0");
 		return pc;
 	}
 	
-	public Paycheck trimWorkPayment(TPDReimbursementSummary rs, Paycheck pc){
+	public TPDPaycheck trimWorkPayment(TPDReimbursementSummary rs, TPDPaycheck pc){
 		String eol = System.getProperty("line.separator");
 		String message = "To continue entering work payment from week of Inury, You will need the total hours worked during the entire pay period, AND the hours worked during the week injured."+eol+
 				"If you wish to Exit and enter later, confirm without entering a value. Otherwise, Enter TOTAL Hours Worked for the pay period: ";
@@ -1089,6 +1089,8 @@ public class WCReimbursementCalculatorMenu {
 	}
 	
 	public boolean editClaimSummary(ReimbursementOverview ro, boolean create, boolean dInjOnly, boolean pcOnly){
+		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
+		long mWeek = mDay * 7;
 		if(create){
 			String eol = System.getProperty("line.separator");
 			String historyMessage = "To create history you must have the following:"+eol+
@@ -1122,16 +1124,51 @@ public class WCReimbursementCalculatorMenu {
 					ok = JOptionPane.CANCEL_OPTION;
 				}
 				else{
-					priorWages = sLC.addAndTrimToPriorWages(pc, priorWages, cHist);
-					if (priorWages.isEmpty()){
-						return false;
+					long pWE = cHist.getPriorWeekStart().getTimeInMillis();
+					pWE += mWeek;
+					if(pc.getPayPeriodEnd().getTimeInMillis() > pWE){
+	
+						BigDecimal gA = pc.getGrossAmount();
+						TPDPaycheck tpdPC = new TPDPaycheck();
+						tpdPC.setGrossAmount(gA);
+						tpdPC.setPayPeriodStart(pc.getPayPeriodStart());
+						tpdPC.setPayPeriodEnd(pc.getPayPeriodEnd());
+						tpdPC.setPaymentDate(pc.getPaymentDate());
+						tpdPC.setWCCalcPay("0");
+						
+						Paycheck[] splits = sLC.splitDateInjuredPayPeriodChecks(pc, cHist);
+						dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", new java.sql.Date(splits[0].getPaymentDate().getTimeInMillis()), new java.sql.Date(splits[0].getPayPeriodStart().getTimeInMillis()),
+							new java.sql.Date(splits[0].getPayPeriodEnd().getTimeInMillis()), splits[0].getGrossAmount());
+						dataAccess.insertTPDPaychecks(ro.getClaimant().getID(), "WORKPAYMENT", new java.sql.Date(splits[1].getPaymentDate().getTimeInMillis()),
+								new java.sql.Date(splits[1].getPayPeriodStart().getTimeInMillis()), new java.sql.Date(splits[1].getPayPeriodEnd().getTimeInMillis()), splits[1].getGrossAmount(),
+								((TPDPaycheck) splits[1]).getWCCalcPay());
+						if(dataAccess.selectTPDRSummary(ro.getClaimant()) == null) dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", new BigDecimal("-1"), new BigDecimal("-1"), null);
+						ro.setTPDRSumm(new TPDReimbursementSummary());
+						ro.tpdRSumm.setClaimSummary(cHist);
+						ro.tpdRSumm.addPaycheck((TPDPaycheck) splits[1]);
+						
+						priorWages = sLC.addAndTrimToPriorWages(splits[0], priorWages, cHist);
+						if (priorWages.isEmpty()){
+							return false;
+						}
+						ro.ttdRSumm.claimSummary.setPriorWages(priorWages);
+						ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
+						ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
 					}
-					pc = priorWages.get(priorWages.size() - 1);
-					dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
-							new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
-					ro.ttdRSumm.claimSummary.setPriorWages(priorWages);
-					ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
-					ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
+					else{
+						priorWages = sLC.addAndTrimToPriorWages(pc, priorWages, cHist);
+						if (priorWages.isEmpty()){
+							return false;
+						}
+						Paycheck newPC = priorWages.get(priorWages.size() - 1);
+					
+						dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", new java.sql.Date(newPC.getPaymentDate().getTimeInMillis()), new java.sql.Date(newPC.getPayPeriodStart().getTimeInMillis()),
+								new java.sql.Date(newPC.getPayPeriodEnd().getTimeInMillis()), newPC.getGrossAmount());
+						ro.ttdRSumm.claimSummary.setPriorWages(priorWages);
+						ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
+						ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
+					}
+					
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
 				}
 			}
@@ -1392,7 +1429,7 @@ public class WCReimbursementCalculatorMenu {
 					}
 				}
 				else{
-					ArrayList<Paycheck> workPay = ro.tpdRSumm.receivedWorkPayments;
+					ArrayList<TPDPaycheck> workPay = ro.tpdRSumm.receivedWorkPayments;
 					for(Paycheck p : workPay){
 						if (Math.abs(p.getPaymentDate().getTimeInMillis() - toDelete.getPaymentDate().getTimeInMillis()) < mDay){
 							try{

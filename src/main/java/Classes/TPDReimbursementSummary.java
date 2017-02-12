@@ -108,7 +108,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 		this.computeAmountNotPaidAndAnyLateCompensation();
 	}
 	
-	public Paycheck trimFirstWorkPayment(Paycheck pc, String bdTotalHrsWorked, String bdWeekInjHrsWorked){
+	public TPDPaycheck trimFirstWorkPayment(TPDPaycheck pc, String bdTotalHrsWorked, String bdWeekInjHrsWorked){
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
 		BigDecimal totalHrs = new BigDecimal(bdTotalHrsWorked);
@@ -150,7 +150,6 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 	
 	public BigDecimal getWCCalcPayToDate(){
 		BigDecimal wcCalcPTD = new BigDecimal("0");
-		TPDPaycheck pcheck = null;
 		for (int i=0, j=this.receivedWorkPayments.size()-1; i<j; i++, j--){
 			TPDPaycheck p1 = this.receivedWorkPayments.get(i);
 			TPDPaycheck p2 = this.receivedWorkPayments.get(j);
