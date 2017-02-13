@@ -248,8 +248,7 @@ public class WCReimbursementCalculatorMenu {
 		btnCreateNewClaim.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				editPersonalInfo(true);
-				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
-			}
+				selectedROEnabler();			}
 		});
 		btnCreateNewClaim.setFont(new Font("Dialog", Font.BOLD, 12));
 		btnCreateNewClaim.setPreferredSize(new Dimension(180, 30));
@@ -261,8 +260,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEditPersonalInfo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				editPersonalInfo(false);
-				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
-			}
+				selectedROEnabler();			}
 		});
 		btnEditPersonalInfo.setHorizontalTextPosition(SwingConstants.CENTER);
 		btnEditPersonalInfo.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -302,7 +300,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEditClaimHistory.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				editClaimSummary(claimantList.getSelectedValue(), true, false, false);
-				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
+				selectedROEnabler();
 				CompClaim cHist = claimantList.getSelectedValue().getTTDRSumm().getClaimSummary();
 				System.out.println("Post-Begin CS InjDate: "+cHist.toStringDateInjured());
 				System.out.println("Post-Begin CS PWSDate: "+cHist.toStringPriorWeekStart());
@@ -323,8 +321,7 @@ public class WCReimbursementCalculatorMenu {
 		btnChangeInjuryDate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				editClaimSummary(claimantList.getSelectedValue(), false, true, false);
-				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
-			}
+				selectedROEnabler();			}
 		});
 		btnChangeInjuryDate.setFont(new Font("Dialog", Font.BOLD, 12));
 		btnChangeInjuryDate.setPreferredSize(new Dimension(180, 30));
@@ -336,7 +333,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEntercompletePriorWage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				editClaimSummary(claimantList.getSelectedValue(), false, false, true);
-				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
+				selectedROEnabler();
 				CompClaim cHist = claimantList.getSelectedValue().getTTDRSumm().getClaimSummary();
 				System.out.println("Post-Begin CS InjDate: "+cHist.toStringDateInjured());
 				System.out.println("Post-Begin CS PWSDate: "+cHist.toStringPriorWeekStart());
@@ -356,7 +353,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEditWageReimbursement.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				startWageReimbursementDetails();
-				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
+				selectedROEnabler();
 			}
 		}); 
 		btnEditWageReimbursement.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -374,7 +371,7 @@ public class WCReimbursementCalculatorMenu {
 		btnAddWorkComp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				btnEditWageReimbursement.doClick();
-				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
+				selectedROEnabler();
 			}
 		});
 		btnAddWorkComp.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -386,7 +383,7 @@ public class WCReimbursementCalculatorMenu {
 		btnAddTtdWork.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addTTDWCPaychecks(claimantList.getSelectedValue().getTTDRSumm(), false);
-				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
+				selectedROEnabler();
 			}
 		});
 		btnAddTtdWork.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -398,7 +395,7 @@ public class WCReimbursementCalculatorMenu {
 		btnAddTpdWork.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addTPDWCPaychecks(claimantList.getSelectedValue().getTPDRSumm());
-				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
+				selectedROEnabler();
 			}
 		});
 		btnAddTpdWork.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -413,7 +410,7 @@ public class WCReimbursementCalculatorMenu {
 			public void actionPerformed(ActionEvent e) {
 				//boolean balancedPayments = 
 				addWorkPayments(claimantList.getSelectedValue().getTPDRSumm()); // Make sure these payments are balanced at the end of the implemented method
-				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
+				selectedROEnabler();
 			}
 		});
 		btnAddLightDuty.setEnabled(false);
@@ -426,12 +423,24 @@ public class WCReimbursementCalculatorMenu {
 				if(!deleteAPaycheck(claimantList.getSelectedValue())){
 					System.out.println("Paycheck NOT deleted.");
 				}
-				claimantList.setSelectedIndex(claimantList.getSelectedIndex());
+
+				selectedROEnabler();
 			}
 		});
 		btnDeleteAPaycheck.setFont(new Font("SansSerif", Font.BOLD, 12));
     	btnDeleteAPaycheck.setEnabled(false);
 		panel_1.add(btnDeleteAPaycheck);
+		
+		btnFullDutyDate = new JButton("Enter Full Duty Return");
+		btnFullDutyDate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				selectedROEnabler();
+			}
+		});
+		btnFullDutyDate.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnFullDutyDate.setEnabled(false);
+		panel_1.add(btnFullDutyDate);
 		
 		btnViewClaimDetails = new JButton("View Claim Details");
 		btnViewClaimDetails.setIconTextGap(20);
@@ -1614,95 +1623,113 @@ public class WCReimbursementCalculatorMenu {
 
 	}
 	
-	public class SharedListSelectionHandler implements ListSelectionListener {
-		@Override
-        public void valueChanged(ListSelectionEvent e) {
-			boolean nulled = false;
-			
-            if(listSelectionModel.isSelectionEmpty()){
-            	btnEditPersonalInfo.setEnabled(false);
-            	btnEditClaimHistory.setEnabled(false);
-            	btnChangeInjuryDate.setEnabled(false);
+	protected void selectedROEnabler(){
+		boolean nulled = false;
+		
+        if(listSelectionModel.isSelectionEmpty()){
+        	btnEditPersonalInfo.setEnabled(false);
+        	btnEditClaimHistory.setEnabled(false);
+        	btnChangeInjuryDate.setEnabled(false);
+        	btnEntercompletePriorWage.setEnabled(false);
+        	btnEditWageReimbursement.setEnabled(false);
+        	btnAddWorkComp.setEnabled(false);
+        	btnAddLightDuty.setEnabled(false);
+        	btnAddTtdWork.setEnabled(false);
+        	btnAddTpdWork.setEnabled(false);
+        	btnViewClaimDetails.setEnabled(false);
+        	btnDeleteAPaycheck.setEnabled(false);
+        	TableModel tm = table.getModel();
+        	tm.setValueAt("No Claim Selected.", 0, 1);
+        	tm.setValueAt("No Claim Selected.", 1, 1);
+        	tm.setValueAt("No Claim Selected.", 2, 1);
+        	tm.setValueAt("No Claim Selected.", 3, 1);
+        	table.setModel(tm);
+        }
+        else{
+        	label:for(StateLawCalculable s : (new StatesWithCalculations())){
+    			if(claimantList.getSelectedValue().getClaimant().getState().compareTo(s.getStateName()) == 0){
+    				sLC = s;
+    				break label;
+    			}
+    		}
+        	try{
+        		nulled = !claimantList.getSelectedValue().containsTTD();
+        		if(!nulled){
+        			nulled = !claimantList.getSelectedValue().getTTDRSumm().containsCompClaim();
+        		}
+        		
+        	} catch (NullPointerException ne) {
+        		ne.printStackTrace();
+        		nulled = true;
+        	}
+        	if(nulled){
+        		btnEditPersonalInfo.setEnabled(true);
+	            	btnEditClaimHistory.setEnabled(true);
+        		btnChangeInjuryDate.setEnabled(false);
             	btnEntercompletePriorWage.setEnabled(false);
             	btnEditWageReimbursement.setEnabled(false);
             	btnAddWorkComp.setEnabled(false);
             	btnAddLightDuty.setEnabled(false);
             	btnAddTtdWork.setEnabled(false);
             	btnAddTpdWork.setEnabled(false);
-            	btnViewClaimDetails.setEnabled(false);
-            	btnDeleteAPaycheck.setEnabled(false);
+            	btnViewClaimDetails.setEnabled(true);
             	TableModel tm = table.getModel();
-            	tm.setValueAt("No Claim Selected.", 0, 1);
-            	tm.setValueAt("No Claim Selected.", 1, 1);
-            	tm.setValueAt("No Claim Selected.", 2, 1);
-            	tm.setValueAt("No Claim Selected.", 3, 1);
+            	tm.setValueAt("Not Completed.", 0, 1);
+            	tm.setValueAt("Not Completed.", 1, 1);
+            	tm.setValueAt("Not Completed.", 2, 1);
+            	tm.setValueAt("Not Completed.", 3, 1);
             	table.setModel(tm);
-            }
-            else{
-            	label:for(StateLawCalculable s : (new StatesWithCalculations())){
-        			if(claimantList.getSelectedValue().getClaimant().getState().compareTo(s.getStateName()) == 0){
-        				sLC = s;
-        				break label;
-        			}
-        		}
-            	try{
-            		nulled = !claimantList.getSelectedValue().containsTTD();
-            		if(!nulled){
-            			nulled = !claimantList.getSelectedValue().getTTDRSumm().containsCompClaim();
-            		}
-            		
-            	} catch (NullPointerException ne) {
-            		ne.printStackTrace();
-            		nulled = true;
-            	}
-            	if(nulled){
-            		btnEditPersonalInfo.setEnabled(true);
-   	            	btnEditClaimHistory.setEnabled(true);
-            		btnChangeInjuryDate.setEnabled(false);
-	            	btnEntercompletePriorWage.setEnabled(false);
-	            	btnEditWageReimbursement.setEnabled(false);
+        	}
+        	else{
+        		if (!sLC.priorWagesIsComplete(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().getPriorWages())){
+        			btnEditPersonalInfo.setEnabled(true);
+	            	btnEditClaimHistory.setEnabled(false);
+	            	btnChangeInjuryDate.setEnabled(true);
+	            	btnEntercompletePriorWage.setEnabled(true);
+        			btnEditWageReimbursement.setEnabled(false);
 	            	btnAddWorkComp.setEnabled(false);
 	            	btnAddLightDuty.setEnabled(false);
 	            	btnAddTtdWork.setEnabled(false);
 	            	btnAddTpdWork.setEnabled(false);
 	            	btnViewClaimDetails.setEnabled(true);
+	            	btnDeleteAPaycheck.setEnabled(true);
 	            	TableModel tm = table.getModel();
-	            	tm.setValueAt("Not Completed.", 0, 1);
+	            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
 	            	tm.setValueAt("Not Completed.", 1, 1);
 	            	tm.setValueAt("Not Completed.", 2, 1);
 	            	tm.setValueAt("Not Completed.", 3, 1);
 	            	table.setModel(tm);
-            	}
-            	else{
-            		if (!sLC.priorWagesIsComplete(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().getPriorWages())){
-            			btnEditPersonalInfo.setEnabled(true);
-    	            	btnEditClaimHistory.setEnabled(false);
+        		}
+        		else{
+        			if(claimantList.getSelectedValue().getTTDRSumm().getWCPayments().isEmpty() && !claimantList.getSelectedValue().containsTPD()){
+        				btnEditPersonalInfo.setEnabled(true);
+    	            	btnEditClaimHistory.setEnabled(true);
     	            	btnChangeInjuryDate.setEnabled(true);
-    	            	btnEntercompletePriorWage.setEnabled(true);
-            			btnEditWageReimbursement.setEnabled(false);
-		            	btnAddWorkComp.setEnabled(false);
+    	            	btnEntercompletePriorWage.setEnabled(false);
+    	            	btnEditWageReimbursement.setEnabled(true);
+        				btnAddWorkComp.setEnabled(false);
 		            	btnAddLightDuty.setEnabled(false);
 		            	btnAddTtdWork.setEnabled(false);
 		            	btnAddTpdWork.setEnabled(false);
-    	            	btnViewClaimDetails.setEnabled(true);
+		            	btnViewClaimDetails.setEnabled(true);
     	            	btnDeleteAPaycheck.setEnabled(true);
-    	            	TableModel tm = table.getModel();
+		            	TableModel tm = table.getModel();
 		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
-		            	tm.setValueAt("Not Completed.", 1, 1);
+		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toTableString(), 1, 1);
 		            	tm.setValueAt("Not Completed.", 2, 1);
 		            	tm.setValueAt("Not Completed.", 3, 1);
 		            	table.setModel(tm);
-            		}
-            		else{
-            			if(claimantList.getSelectedValue().getTTDRSumm().getWCPayments().isEmpty() && !claimantList.getSelectedValue().containsTPD()){
-            				btnEditPersonalInfo.setEnabled(true);
+        			}
+        			else{
+        				if(!claimantList.getSelectedValue().containsTPD()){
+        					btnEditPersonalInfo.setEnabled(true);
         	            	btnEditClaimHistory.setEnabled(true);
         	            	btnChangeInjuryDate.setEnabled(true);
         	            	btnEntercompletePriorWage.setEnabled(false);
         	            	btnEditWageReimbursement.setEnabled(true);
-            				btnAddWorkComp.setEnabled(false);
+            				btnAddWorkComp.setEnabled(true);
 			            	btnAddLightDuty.setEnabled(false);
-			            	btnAddTtdWork.setEnabled(false);
+			            	btnAddTtdWork.setEnabled(true);
 			            	btnAddTpdWork.setEnabled(false);
 			            	btnViewClaimDetails.setEnabled(true);
 	    	            	btnDeleteAPaycheck.setEnabled(true);
@@ -1710,52 +1737,38 @@ public class WCReimbursementCalculatorMenu {
     		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
 			            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toTableString(), 1, 1);
 			            	tm.setValueAt("Not Completed.", 2, 1);
-			            	tm.setValueAt("Not Completed.", 3, 1);
+			            	tm.setValueAt("N/A until TPD Setup Completed.", 3, 1);
 			            	table.setModel(tm);
-            			}
-            			else{
-            				if(!claimantList.getSelectedValue().containsTPD()){
-            					btnEditPersonalInfo.setEnabled(true);
-            	            	btnEditClaimHistory.setEnabled(true);
-            	            	btnChangeInjuryDate.setEnabled(true);
-            	            	btnEntercompletePriorWage.setEnabled(false);
-            	            	btnEditWageReimbursement.setEnabled(true);
-	            				btnAddWorkComp.setEnabled(true);
-				            	btnAddLightDuty.setEnabled(false);
-				            	btnAddTtdWork.setEnabled(true);
-				            	btnAddTpdWork.setEnabled(false);
-				            	btnViewClaimDetails.setEnabled(true);
-		    	            	btnDeleteAPaycheck.setEnabled(true);
-				            	TableModel tm = table.getModel();
-	    		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
-				            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toTableString(), 1, 1);
-				            	tm.setValueAt("Not Completed.", 2, 1);
-				            	tm.setValueAt("N/A until TPD Setup Completed.", 3, 1);
-				            	table.setModel(tm);
-        	            	}
-            				else{
-            					btnEditPersonalInfo.setEnabled(true);
-            	            	btnEditClaimHistory.setEnabled(true);
-            	            	btnChangeInjuryDate.setEnabled(true);
-            	            	btnEntercompletePriorWage.setEnabled(false);
-            	            	btnEditWageReimbursement.setEnabled(true);
-            	            	btnAddWorkComp.setEnabled(true);
-            	            	btnAddLightDuty.setEnabled(true);
-            	            	btnAddTtdWork.setEnabled(true);
-            	            	btnAddTpdWork.setEnabled(true);
-            	            	btnViewClaimDetails.setEnabled(true);
-            	            	btnDeleteAPaycheck.setEnabled(true);
-            	            	TableModel tm = table.getModel();
-	    		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
-				            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toTableString(), 1, 1);
-				            	tm.setValueAt(claimantList.getSelectedValue().getTPDRSumm().toTableString(), 2, 1);
-				            	tm.setValueAt(claimantList.getSelectedValue().getTotalString(), 3, 1);
-				            	table.setModel(tm);
-            				}
-            			}
-            		}
-            	}
-            } 
+    	            	}
+        				else{
+        					btnEditPersonalInfo.setEnabled(true);
+        	            	btnEditClaimHistory.setEnabled(true);
+        	            	btnChangeInjuryDate.setEnabled(true);
+        	            	btnEntercompletePriorWage.setEnabled(false);
+        	            	btnEditWageReimbursement.setEnabled(true);
+        	            	btnAddWorkComp.setEnabled(true);
+        	            	btnAddLightDuty.setEnabled(true);
+        	            	btnAddTtdWork.setEnabled(true);
+        	            	btnAddTpdWork.setEnabled(true);
+        	            	btnViewClaimDetails.setEnabled(true);
+        	            	btnDeleteAPaycheck.setEnabled(true);
+        	            	TableModel tm = table.getModel();
+    		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
+			            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toTableString(), 1, 1);
+			            	tm.setValueAt(claimantList.getSelectedValue().getTPDRSumm().toTableString(), 2, 1);
+			            	tm.setValueAt(claimantList.getSelectedValue().getTotalString(), 3, 1);
+			            	table.setModel(tm);
+        				}
+        			}
+        		}
+        	}
+        }
+	}
+	
+	public class SharedListSelectionHandler implements ListSelectionListener {
+		@Override
+        public void valueChanged(ListSelectionEvent e) {
+			selectedROEnabler();
         }
     }
 }
