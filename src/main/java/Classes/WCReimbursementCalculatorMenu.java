@@ -431,15 +431,15 @@ public class WCReimbursementCalculatorMenu {
     	btnDeleteAPaycheck.setEnabled(false);
 		panel_1.add(btnDeleteAPaycheck);
 		
-		btnFullDutyDate = new JButton("Enter Full Duty Return");
+		btnFullDutyDate = new JButton("Enter Full Duty Return Date");
 		btnFullDutyDate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				setFullDutyReturnDate(claimantList.getSelectedValue());
 				selectedROEnabler();
 			}
 		});
 		btnFullDutyDate.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnFullDutyDate.setEnabled(false);
+		btnFullDutyDate.setEnabled(true);
 		panel_1.add(btnFullDutyDate);
 		
 		btnViewClaimDetails = new JButton("View Claim Details");
@@ -1366,6 +1366,27 @@ public class WCReimbursementCalculatorMenu {
 				JOptionPane.showMessageDialog(frmWorkersCompensationLost, "Cannot Update Personal Information. Please make sure that a claim has been created for the specified Claimant ID");
 			}
 		}
+	}
+	
+	public boolean setFullDutyReturnDate(ReimbursementOverview ro){
+		boolean fullDuty = false;
+		int yes = JOptionPane.showConfirmDialog(frmWorkersCompensationLost, "Has the employee retruned to Full Duty (Full-Time Hours, No Work Restrictions)?", "Full Duty?", JOptionPane.YES_NO_OPTION);
+		if(yes != JOptionPane.YES_OPTION) return false;
+		
+		Calendar fDReturn = this.getCalendar("Select the date first returned to Full Duty: ", "Select Full Duty Return Date", false, false);
+		if (fDReturn == null) return false;
+		
+		ro.setFullDutyReturnDate(fDReturn);
+		try{
+			dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), new Date(ro.getFullDutyReturnDate().getTimeInMillis()));
+			dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTPDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), new Date(ro.getFullDutyReturnDate().getTimeInMillis()));
+			fullDuty = true;
+		} catch (Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		this.claimListModel.set(this.claimantList.getSelectedIndex(), ro);
+		return fullDuty;
 	}
 	
 	public boolean deleteAPaycheck(ReimbursementOverview ro){
