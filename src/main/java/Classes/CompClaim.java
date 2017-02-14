@@ -532,6 +532,11 @@ public class CompClaim {
 		this.weeksInjured = (long) Math.floor((cur - mDI) / mWeek);
 	}
 	
+	public void setDaysAndWeeksInjuredByFullDutyReturn(long days, long weeks){
+		this.daysInjured = days;
+		this.weeksInjured = weeks;
+	}
+	
 	public void sortPaychecksByDate(){
 		Collections.sort(this.priorWages, Paycheck.PPS_COMPARATOR);
 	}

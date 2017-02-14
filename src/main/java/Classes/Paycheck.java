@@ -8,6 +8,9 @@ import java.util.SimpleTimeZone;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.temporal.Temporal;
 
 
 public class Paycheck implements Comparable<Calendar> {
@@ -196,5 +199,21 @@ public class Paycheck implements Comparable<Calendar> {
 		GregorianCalendar pPE = new GregorianCalendar(tZ);
 		pPE.setTime(payPE);
 		this.payPeriodEnd = new MissouriCalculation().normalizeCalendarTime(pPE);
+	}
+	
+	public long getDaysInPayPeriod(){
+		LocalDate start = this.payPeriodStart.getTime().toInstant().atZone(new SimpleTimeZone(0, "Standard").toZoneId()).toLocalDate();
+		LocalDate end = this.payPeriodEnd.getTime().toInstant().atZone(new SimpleTimeZone(0, "Standard").toZoneId()).toLocalDate();
+		long days = (long) Period.between( start, end).getDays() + 1;
+		return days;
+		
+	}
+	
+	public boolean doPayPeriodsOverlap(Paycheck pc){
+		boolean overlap = false;
+		
+		overlap = this.payPeriodStart.after(pc.getPayPeriodStart()) && this.payPeriodStart.before(pc.getPayPeriodEnd());
+		
+		return overlap;
 	}
 }

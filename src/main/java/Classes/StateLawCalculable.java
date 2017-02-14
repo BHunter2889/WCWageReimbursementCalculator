@@ -22,6 +22,8 @@ public interface StateLawCalculable {
 	public BigDecimal computeWCSupplementalPayment(TPDPaycheck workPayment, BigDecimal avgPriorGrossWeeklyPayment);
 	public boolean determineAndSetIsLate(Calendar payPeriodEnd, Calendar payReceived); //WCPaycheck
 	public GregorianCalendar normalizeCalendarTime(GregorianCalendar calendar);
+	public boolean isWithinTPDPeriod(ArrayList<Paycheck> tpdWork, Paycheck pc);
+	//public ArrayList<GregorianCalendar> getPaycheckDateRanges(ArrayList<Paycheck> pchecks);
 	public String getStateAbbrv();
 	public String getStateName();
 	public TimeZone getTimeZone();

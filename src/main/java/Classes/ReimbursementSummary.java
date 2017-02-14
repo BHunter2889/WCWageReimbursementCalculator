@@ -298,6 +298,8 @@ public abstract class ReimbursementSummary {
 		return false;
 	}
 	
+	
+	
 	public void setCalculatedWeeklyPayment(BigDecimal cWP){
 		this.calculatedWeeklyPayment = cWP;
 	}

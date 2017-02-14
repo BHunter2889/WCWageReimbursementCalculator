@@ -509,6 +509,19 @@ public class MissouriCalculation implements StateLawCalculable {
 			return true;
 		}		
 	}
+
+	@Override
+	public boolean isWithinTPDPeriod(ArrayList<Paycheck> tpdWork, Paycheck pc) {
+		for (int i = 0, j=tpdWork.size()-1; i < j; i++, j--){
+			if(pc.doPayPeriodsOverlap(tpdWork.get(i)) || pc.doPayPeriodsOverlap(tpdWork.get(j))) return true; 
+			if (j - i == 2){
+				i++;
+				return pc.doPayPeriodsOverlap(tpdWork.get(i));
+				
+			}
+		}
+		return false;
+	}
 	
 	/* for testing purposes
 	public void main(){

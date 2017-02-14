@@ -1,7 +1,12 @@
 package Classes;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.SimpleTimeZone;
 
 public class ReimbursementOverview {
 	
@@ -39,6 +44,37 @@ public class ReimbursementOverview {
 	
 	public void setFullDutyReturnDate(Calendar fullDutyReturnDate){
 		this.fullDutyReturnDate = fullDutyReturnDate;
+		if (this.fullDutyReturnDate != null) computeDaysAndWeeksInjured();
+	}
+	
+	public void computeDaysAndWeeksInjured(){
+		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
+		long mWeek = mDay * 7;
+		Calendar dateInjured = new GregorianCalendar(this.ttdRSumm.getClaimSummary().stateLawCalculation.getTimeZone());
+		dateInjured.setTimeInMillis(this.ttdRSumm.claimSummary.getDateInjured().getTimeInMillis());
+		long milliDays = (this.fullDutyReturnDate.getTimeInMillis() - dateInjured.getTimeInMillis()) + mDay;
+		long days = (long) Math.floor((milliDays) / mDay);
+		long weeks = (long) Math.floor((milliDays) / mWeek);
+		this.ttdRSumm.claimSummary.setDaysAndWeeksInjuredByFullDutyReturn(days, weeks);
+	}
+	
+	public long getNumDaysNotInTPD(){
+		ArrayList<TPDPaycheck> tpd = this.getTPDRSumm().getReceivedWorkPayments();
+		long daysTPD = 0;
+		for(int i = 0, j=tpd.size()-1; i<j; i++, j--){
+			daysTPD += tpd.get(i).getDaysInPayPeriod() + tpd.get(j).getDaysInPayPeriod();
+			if(j - i == 2){
+				i++;
+				daysTPD += tpd.get(i).getDaysInPayPeriod();
+				return daysTPD;
+			}
+		}
+		
+		LocalDate end = this.fullDutyReturnDate.getTime().toInstant().atZone(new SimpleTimeZone(0, "Standard").toZoneId()).toLocalDate();
+		LocalDate start = this.ttdRSumm.claimSummary.getDateInjured().getTime().toInstant().atZone(new SimpleTimeZone(0, "Standard").toZoneId()).toLocalDate();
+		long days = (long) Period.between( start, end).getDays() + 1;
+		long daysNotTPD = days - daysTPD;
+		return daysNotTPD;
 	}
 	
 	public Claimant getClaimant(){
