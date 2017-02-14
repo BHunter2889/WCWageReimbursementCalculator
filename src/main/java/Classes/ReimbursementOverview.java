@@ -44,21 +44,40 @@ public class ReimbursementOverview {
 	
 	public void setFullDutyReturnDate(Calendar fullDutyReturnDate){
 		this.fullDutyReturnDate = fullDutyReturnDate;
-		if (this.fullDutyReturnDate != null) computeDaysAndWeeksInjured();
+		if (this.fullDutyReturnDate != null){
+			computeDaysAndWeeksInjured();
+		}
 	}
 	
 	public void computeDaysAndWeeksInjured(){
-		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
-		long mWeek = mDay * 7;
-		Calendar dateInjured = new GregorianCalendar(this.ttdRSumm.getClaimSummary().stateLawCalculation.getTimeZone());
-		dateInjured.setTimeInMillis(this.ttdRSumm.claimSummary.getDateInjured().getTimeInMillis());
-		long milliDays = (this.fullDutyReturnDate.getTimeInMillis() - dateInjured.getTimeInMillis()) + mDay;
-		long days = (long) Math.floor((milliDays) / mDay);
-		long weeks = (long) Math.floor((milliDays) / mWeek);
+		if (this.fullDutyReturnDate == null) return;
+		LocalDate end = this.fullDutyReturnDate.getTime().toInstant().atZone(new SimpleTimeZone(0, "Standard").toZoneId()).toLocalDate();
+		LocalDate start = null;
+		if (this.containsTTD()){
+			if(this.ttdRSumm.containsCompClaim()) start = this.ttdRSumm.claimSummary.getDateInjured().getTime().toInstant().atZone(new SimpleTimeZone(0, "Standard").toZoneId()).toLocalDate();
+			else return;
+		}
+		else if (this.containsTPD()){
+			if(this.tpdRSumm.containsCompClaim()) start = this.tpdRSumm.claimSummary.getDateInjured().getTime().toInstant().atZone(new SimpleTimeZone(0, "Standard").toZoneId()).toLocalDate();
+			else return;
+		}
+		Period timeInj = Period.between( start, end);
+		long days = timeInj.getDays() + 1;
+		long weeks = (long) Math.ceil(days/7);
 		this.ttdRSumm.claimSummary.setDaysAndWeeksInjuredByFullDutyReturn(days, weeks);
 	}
 	
 	public long getNumDaysNotInTPD(){
+		this.computeDaysAndWeeksInjured();
+		if (!this.containsTPD()){
+			if (this.containsTTD()) return this.ttdRSumm.claimSummary.daysInjured;
+			else try{
+				throw new NullPointerException("Neither ReimbursementSummary contains a CompClaim with a valid Date of Injury.");
+			} catch (NullPointerException e){
+				e.printStackTrace();
+				return -1;
+			}
+		}
 		ArrayList<TPDPaycheck> tpd = this.getTPDRSumm().getReceivedWorkPayments();
 		long daysTPD = 0;
 		for(int i = 0, j=tpd.size()-1; i<j; i++, j--){
@@ -69,11 +88,8 @@ public class ReimbursementOverview {
 				return daysTPD;
 			}
 		}
-		
-		LocalDate end = this.fullDutyReturnDate.getTime().toInstant().atZone(new SimpleTimeZone(0, "Standard").toZoneId()).toLocalDate();
-		LocalDate start = this.ttdRSumm.claimSummary.getDateInjured().getTime().toInstant().atZone(new SimpleTimeZone(0, "Standard").toZoneId()).toLocalDate();
-		long days = (long) Period.between( start, end).getDays() + 1;
-		long daysNotTPD = days - daysTPD;
+		ReimbursementSummary rs = (this.containsTTD()) ? this.getTTDRSumm():this.getTPDRSumm();
+		long daysNotTPD = rs.claimSummary.getDaysInjured() - daysTPD;
 		return daysNotTPD;
 	}
 	
