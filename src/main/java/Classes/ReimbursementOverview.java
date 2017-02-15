@@ -41,14 +41,14 @@ public class ReimbursementOverview {
 	}
 	
 	public void setTPDRSumm(TPDReimbursementSummary tpdRSumm){
+		if (tpdRSumm == null) return;
 		this.tpdRSumm = tpdRSumm;
 	}
 	
 	public void setFullDutyReturnDate(Calendar fullDutyReturnDate){
+		if (this.fullDutyReturnDate == null) return;
 		this.fullDutyReturnDate = fullDutyReturnDate;
-		if (this.fullDutyReturnDate != null){
-			computeDaysAndWeeksInjured();
-		}
+		computeDaysAndWeeksInjured();
 	}
 	
 	public void computeDaysAndWeeksInjured(){
