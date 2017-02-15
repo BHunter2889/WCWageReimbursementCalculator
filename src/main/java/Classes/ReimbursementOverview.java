@@ -35,6 +35,7 @@ public class ReimbursementOverview {
 	}
 	
 	public void setTTDRSumm(TTDReimbursementSummary ttdRSumm){
+		if (ttdRSumm == null) return;
 		this.ttdRSumm = ttdRSumm;
 		this.computeTTDaNPNoLatePayCalculation();
 	}
@@ -107,6 +108,7 @@ public class ReimbursementOverview {
 	public BigDecimal getTotalTTDCalcOwed(){
 		this.computeDaysAndWeeksInjured();
 		long nonTPDInjDays = this.getNumDaysNotInTPD();
+		if (nonTPDInjDays < 0) return new BigDecimal("0.00");
 		if (this.ttdRSumm.calculatedWeeklyPayment.compareTo(new BigDecimal("0")) <= 0) this.ttdRSumm.calculateAndSetWeeklyPayment();
 		BigDecimal dailyPay = this.ttdRSumm.calculatedWeeklyPayment.divide(new BigDecimal("7"), 3, RoundingMode.HALF_EVEN);
 		return dailyPay.multiply(new BigDecimal(String.valueOf(nonTPDInjDays))).setScale(2, RoundingMode.HALF_EVEN);
