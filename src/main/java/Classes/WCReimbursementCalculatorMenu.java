@@ -8,6 +8,8 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -105,6 +107,7 @@ public class WCReimbursementCalculatorMenu {
 	        @Override
 	        public void run() {
 	        	if(dataAccess.shutdownAllConnectionInstances()){
+	        		System.out.println("Shutting Down Application... ");
 	    			System.gc();
 	    			System.exit(0);
 	    		}
@@ -248,7 +251,8 @@ public class WCReimbursementCalculatorMenu {
 		btnCreateNewClaim.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				editPersonalInfo(true);
-				selectedROEnabler();			}
+				//selectedROEnabler();			
+			}
 		});
 		btnCreateNewClaim.setFont(new Font("Dialog", Font.BOLD, 12));
 		btnCreateNewClaim.setPreferredSize(new Dimension(180, 30));
@@ -260,7 +264,8 @@ public class WCReimbursementCalculatorMenu {
 		btnEditPersonalInfo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				editPersonalInfo(false);
-				selectedROEnabler();			}
+				//selectedROEnabler();			
+			}
 		});
 		btnEditPersonalInfo.setHorizontalTextPosition(SwingConstants.CENTER);
 		btnEditPersonalInfo.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -273,6 +278,7 @@ public class WCReimbursementCalculatorMenu {
 		notCreate.add(btnEditPersonalInfo);
 		
 		this.claimListModel = new DefaultListModel<ReimbursementOverview>();
+		claimListModel.addListDataListener(new ROListDataChangeListener());
 		boolean data = loadExistingData();
 		
 		JPanel panel_1 = new JPanel();
@@ -300,7 +306,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEditClaimHistory.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				editClaimSummary(claimantList.getSelectedValue(), true, false, false);
-				selectedROEnabler();
+				//selectedROEnabler();
 				CompClaim cHist = claimantList.getSelectedValue().getTTDRSumm().getClaimSummary();
 				System.out.println("Post-Begin CS InjDate: "+cHist.toStringDateInjured());
 				System.out.println("Post-Begin CS PWSDate: "+cHist.toStringPriorWeekStart());
@@ -321,7 +327,8 @@ public class WCReimbursementCalculatorMenu {
 		btnChangeInjuryDate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				editClaimSummary(claimantList.getSelectedValue(), false, true, false);
-				selectedROEnabler();			}
+				//selectedROEnabler();			
+				}
 		});
 		btnChangeInjuryDate.setFont(new Font("Dialog", Font.BOLD, 12));
 		btnChangeInjuryDate.setPreferredSize(new Dimension(180, 30));
@@ -333,7 +340,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEntercompletePriorWage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				editClaimSummary(claimantList.getSelectedValue(), false, false, true);
-				selectedROEnabler();
+				//selectedROEnabler();
 				CompClaim cHist = claimantList.getSelectedValue().getTTDRSumm().getClaimSummary();
 				System.out.println("Post-Begin CS InjDate: "+cHist.toStringDateInjured());
 				System.out.println("Post-Begin CS PWSDate: "+cHist.toStringPriorWeekStart());
@@ -353,7 +360,7 @@ public class WCReimbursementCalculatorMenu {
 		btnEditWageReimbursement.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				startWageReimbursementDetails();
-				selectedROEnabler();
+				//selectedROEnabler();
 			}
 		}); 
 		btnEditWageReimbursement.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -371,7 +378,7 @@ public class WCReimbursementCalculatorMenu {
 		btnAddWorkComp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				btnEditWageReimbursement.doClick();
-				selectedROEnabler();
+				//selectedROEnabler();
 			}
 		});
 		btnAddWorkComp.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -383,7 +390,7 @@ public class WCReimbursementCalculatorMenu {
 		btnAddTtdWork.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addTTDWCPaychecks(claimantList.getSelectedValue().getTTDRSumm(), false);
-				selectedROEnabler();
+				//selectedROEnabler();
 			}
 		});
 		btnAddTtdWork.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -395,7 +402,7 @@ public class WCReimbursementCalculatorMenu {
 		btnAddTpdWork.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addTPDWCPaychecks(claimantList.getSelectedValue().getTPDRSumm());
-				selectedROEnabler();
+				//selectedROEnabler();
 			}
 		});
 		btnAddTpdWork.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -410,7 +417,7 @@ public class WCReimbursementCalculatorMenu {
 			public void actionPerformed(ActionEvent e) {
 				//boolean balancedPayments = 
 				addWorkPayments(claimantList.getSelectedValue().getTPDRSumm()); // Make sure these payments are balanced at the end of the implemented method
-				selectedROEnabler();
+				//selectedROEnabler();
 			}
 		});
 		btnAddLightDuty.setEnabled(false);
@@ -424,7 +431,7 @@ public class WCReimbursementCalculatorMenu {
 					System.out.println("Paycheck NOT deleted.");
 				}
 
-				selectedROEnabler();
+				//selectedROEnabler();
 			}
 		});
 		btnDeleteAPaycheck.setFont(new Font("SansSerif", Font.BOLD, 12));
@@ -435,7 +442,7 @@ public class WCReimbursementCalculatorMenu {
 		btnFullDutyDate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setFullDutyReturnDate(claimantList.getSelectedValue());
-				selectedROEnabler();
+				//selectedROEnabler();
 			}
 		});
 		btnFullDutyDate.setFont(new Font("SansSerif", Font.BOLD, 12));
@@ -1815,10 +1822,29 @@ public class WCReimbursementCalculatorMenu {
         }
 	}
 	
-	public class SharedListSelectionHandler implements ListSelectionListener {
+	public class SharedListSelectionHandler implements ListSelectionListener{
 		@Override
         public void valueChanged(ListSelectionEvent e) {
 			selectedROEnabler();
-        }
+        }		
     }
+	
+	public class ROListDataChangeListener implements ListDataListener{
+
+		@Override
+		public void contentsChanged(ListDataEvent e) {
+			selectedROEnabler();			
+		}
+
+		@Override
+		public void intervalAdded(ListDataEvent e) {
+			selectedROEnabler();			
+		}
+
+		@Override
+		public void intervalRemoved(ListDataEvent e) {
+			selectedROEnabler();			
+		}	
+	}
+	
 }

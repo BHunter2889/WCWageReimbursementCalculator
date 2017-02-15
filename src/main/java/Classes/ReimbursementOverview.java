@@ -66,7 +66,11 @@ public class ReimbursementOverview {
 		Period timeInj = Period.between( start, end);
 		long days = timeInj.getDays() + 1;
 		long weeks = (long) Math.ceil(days/7);
-		this.ttdRSumm.claimSummary.setDaysAndWeeksInjuredByFullDutyReturn(days, weeks);
+		TTDReimbursementSummary rs = this.ttdRSumm;
+		CompClaim cS = this.ttdRSumm.claimSummary;
+		cS.setDaysAndWeeksInjuredByFullDutyReturn(days, weeks);
+		rs.setClaimSummary(cS);
+		this.setTTDRSumm(rs);
 	}
 	
 	public long getNumDaysNotInTPD(){
@@ -102,7 +106,9 @@ public class ReimbursementOverview {
 		
 		amountNotPaid = totalCalcPay.subtract(wcPAID).setScale(2, RoundingMode.HALF_EVEN);
 		amountNotPaid = (this.ttdRSumm.amountNotPaid.compareTo(amountNotPaid) <= 0) ? amountNotPaid: this.ttdRSumm.getAmountNotPaid();
-		this.ttdRSumm.setAmountNotPaid(amountNotPaid);
+		TTDReimbursementSummary rs = this.ttdRSumm;
+		rs.setAmountNotPaid(amountNotPaid);
+		this.setTTDRSumm(rs);
 	}
 	
 	public BigDecimal getTotalTTDCalcOwed(){
