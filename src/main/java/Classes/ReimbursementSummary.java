@@ -194,6 +194,26 @@ public abstract class ReimbursementSummary {
 		
 	}
 	
+	public boolean addWCPaycheckNoPeriodDates(String grossAmount, GregorianCalendar payReceivedDate, boolean isContested){
+		
+		GregorianCalendar epoch = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
+		epoch.setTimeInMillis(0);
+		WorkCompPaycheck pc = new WorkCompPaycheck(grossAmount, payReceivedDate, epoch, epoch, isContested);
+		//long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
+		//long mWeek = mDay * 7;
+		sortWCPaymentsByDate();
+		
+		this.wcPayments.add(pc);
+		return true;
+		
+	}
+	public boolean addWCPaycheckNoPeriodDates(WorkCompPaycheck wcPC){
+		this.wcPayments.add(wcPC);
+		sortWCPaymentsByDate();
+		return true;
+		
+	}
+	
 	public boolean addWCPaycheck(String grossAmount, GregorianCalendar payReceivedDate, GregorianCalendar payPeriodStart, boolean isContested){
 		WorkCompPaycheck pc = new WorkCompPaycheck(grossAmount, payReceivedDate, payPeriodStart, isContested);
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds

@@ -1,11 +1,11 @@
 package Classes;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 
 public class ReimbursementOverview {
@@ -36,6 +36,7 @@ public class ReimbursementOverview {
 	
 	public void setTTDRSumm(TTDReimbursementSummary ttdRSumm){
 		this.ttdRSumm = ttdRSumm;
+		this.computeTTDaNPNoLatePayCalculation();
 	}
 	
 	public void setTPDRSumm(TPDReimbursementSummary tpdRSumm){
@@ -93,6 +94,24 @@ public class ReimbursementOverview {
 		return daysNotTPD;
 	}
 	
+	public void computeTTDaNPNoLatePayCalculation(){
+		BigDecimal totalCalcPay = this.getTotalTTDCalcOwed();
+		BigDecimal amountNotPaid = new BigDecimal("0.00");
+		BigDecimal wcPAID = this.ttdRSumm.getWCPayToDate(); 
+		
+		amountNotPaid = totalCalcPay.subtract(wcPAID).setScale(2, RoundingMode.HALF_EVEN);
+		amountNotPaid = (this.ttdRSumm.amountNotPaid.compareTo(amountNotPaid) <= 0) ? amountNotPaid: this.ttdRSumm.getAmountNotPaid();
+		this.ttdRSumm.setAmountNotPaid(amountNotPaid);
+	}
+	
+	public BigDecimal getTotalTTDCalcOwed(){
+		this.computeDaysAndWeeksInjured();
+		long nonTPDInjDays = this.getNumDaysNotInTPD();
+		if (this.ttdRSumm.calculatedWeeklyPayment.compareTo(new BigDecimal("0")) <= 0) this.ttdRSumm.calculateAndSetWeeklyPayment();
+		BigDecimal dailyPay = this.ttdRSumm.calculatedWeeklyPayment.divide(new BigDecimal("7"), 3, RoundingMode.HALF_EVEN);
+		return dailyPay.multiply(new BigDecimal(String.valueOf(nonTPDInjDays))).setScale(2, RoundingMode.HALF_EVEN);
+	}
+	
 	public Claimant getClaimant(){
 		return this.claimant;
 	}
@@ -137,5 +156,6 @@ public class ReimbursementOverview {
 	public String toString(){
 		return String.valueOf(claimant.id) +" "+ claimant.firstName +" "+ claimant.middleName +" "+ claimant.lastName +" "+ claimant.workPlace +" "+ claimant.state;
 	}
+	
 
 }

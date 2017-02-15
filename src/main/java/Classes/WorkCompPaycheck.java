@@ -22,8 +22,10 @@ public class WorkCompPaycheck extends Paycheck {
 	protected static final Comparator<WorkCompPaycheck> PPS_COMPARATOR = new Comparator<WorkCompPaycheck>(){
 		@Override
 		public int compare(WorkCompPaycheck p1, WorkCompPaycheck p2) {
-	
-			return p1.compareTo(p2.getPayPeriodStart());
+			GregorianCalendar epoch = new GregorianCalendar(new SimpleTimeZone(0, "Standard"));
+			epoch.setTimeInMillis(0);
+			boolean pPS = p1.getPayPeriodStart().compareTo(epoch) > 0 && p2.getPayPeriodStart().compareTo(epoch) > 0;
+			return pPS ? p1.compareTo(p2.getPayPeriodStart()): p1.getPaymentDate().compareTo(p2.getPaymentDate());
 		}
 	};
 	
@@ -110,6 +112,7 @@ public class WorkCompPaycheck extends Paycheck {
 	any point, isContested should be true, otherwise false.)*/
 	public WorkCompPaycheck(String grossAmount, GregorianCalendar payReceivedDate, GregorianCalendar payPeriodStart, GregorianCalendar payPeriodEnd, boolean isContested, StateLawCalculable sLC, GregorianCalendar paymentDate) {
 		super(grossAmount, paymentDate, payPeriodStart, payPeriodEnd);
+		GregorianCalendar epoch = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
 		this.payReceivedDate = payReceivedDate;
 		this.isContested = isContested;
 		this.stateLawCalculation = sLC;
@@ -117,7 +120,7 @@ public class WorkCompPaycheck extends Paycheck {
 		this.fullTimeHours = false;
 		this.isLate = false;
 		this.amountStillOwed = new BigDecimal("0");
-		this.contestResolvedDate = payPeriodEnd;
+		this.contestResolvedDate = (payPeriodEnd.compareTo(epoch) >= 0) ? payPeriodEnd: paymentDate;
 	}
 	
 	public WorkCompPaycheck() {

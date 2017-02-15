@@ -644,19 +644,31 @@ public class WCReimbursementCalculatorMenu {
 	
 	public WorkCompPaycheck createWorkCompPaycheck(){
 		WorkCompPaycheck wcPC = null;
-		GregorianCalendar pPS = getCalendar("Select Pay Period Start Date", "Pay Period Start", true, true);
-		if(pPS == null){
-			return null;
+		String eol = System.getProperty("line.separator");
+		String message = "Do you know the pay period Start and End dates?"+eol+
+				"If not, you will still need to input the Payment Date and Pay Recieved Date."+eol+
+				"You will also not be able to immediately calculate any late payment adjustments.";
+		int knownDates = JOptionPane.showConfirmDialog(frmWorkersCompensationLost, message, "Pay Period Dates Known?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		if(knownDates == JOptionPane.CANCEL_OPTION) return null;
+		
+		GregorianCalendar pPS = null;
+		GregorianCalendar pPE = null;
+		if(knownDates == JOptionPane.YES_OPTION){
+			pPS = getCalendar("Select Pay Period Start Date", "Pay Period Start", true, true);
+			if(pPS == null){
+				return null;
+			}
+			pPE = getCalendar("Select Pay Period End Date", "Pay Period End", true, false);
+			if(pPE == null){
+				return null;
+			}
 		}
-		GregorianCalendar pPE = getCalendar("Select Pay Period End Date", "Pay Period End", true, false);
-		if(pPE == null){
-			return null;
-		}
-		GregorianCalendar pD = getCalendar("Select Payment Date", "Payment Date", true, false);
+		
+		GregorianCalendar pD = getCalendar("Select Payment Date (Check Date)", "Payment Date", true, false);
 		if(pD == null){
 			return null;
 		}
-		GregorianCalendar pRD = getCalendar("Select Day That Payment Was Received", "Payment Received Date", true, false);
+		GregorianCalendar pRD = getCalendar("Select Day That Payment Was Received (Date Check was Received)", "Payment Received Date", true, false);
 		if(pRD == null){
 			return null;
 		}
@@ -670,7 +682,11 @@ public class WCReimbursementCalculatorMenu {
 		if(isContested){
 			contestRslvdDate = getCalendar("Select Day That the Contest Was Resolved: ", "Contest Resolved Date", true, false);
 		}
-		wcPC = new WorkCompPaycheck(grossAmnt, pRD, pPS, pPE, isContested, sLC, pD);
+		
+		GregorianCalendar epoch = new GregorianCalendar(sLC.getTimeZone());
+		if (knownDates == JOptionPane.NO_OPTION) wcPC = new WorkCompPaycheck(grossAmnt, pRD, epoch, epoch, isContested, sLC, pD);
+		else wcPC = new WorkCompPaycheck(grossAmnt, pRD, pPS, pPE, isContested, sLC, pD);
+		
 		if(contestRslvdDate != null){
 			wcPC.setContestResolutionDate(contestRslvdDate);
 		}
@@ -784,19 +800,22 @@ public class WCReimbursementCalculatorMenu {
 				long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 				long mWeek = mDay * 7;
 				Calendar lastFDDate = new GregorianCalendar(sLC.getTimeZone());
-				
+				GregorianCalendar epoch = new GregorianCalendar(sLC.getTimeZone());
+				boolean knownPP = wcPC.getPayPeriodStart().compareTo(epoch) > 0;
 				lastFDDate.setTimeInMillis(ro.getTTDRSumm().getClaimSummary().getPriorWeekStart().getTimeInMillis() + ((mWeek*2)-mDay));
-				if (wcPC.getPayPeriodStart().compareTo(lastFDDate) < 0){
-					String message = "This work comp paycheck appears to be from the week of injury."+eol+
-							"Were any hours worked during this week?";
-					if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, message, "Any Hours Worked?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
-						worked = true;
-						message = "This work comp payment cannot be entered under TTD."+eol+ 
-								"To add this payment, please do so under TPD work comp payments when you are finished adding TTD work comp payments.";
-						JOptionPane.showMessageDialog(frmWorkersCompensationLost, message, "Enter Under TPD Payments", JOptionPane.PLAIN_MESSAGE);
+				if(knownPP){
+					if (wcPC.getPayPeriodStart().compareTo(lastFDDate) < 0){
+						String message = "This work comp paycheck appears to be from the week of injury."+eol+
+								"Were any hours worked during this week?";
+						if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, message, "Any Hours Worked?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
+							worked = true;
+							message = "This work comp payment cannot be entered under TTD."+eol+ 
+									"To add this payment, please do so under TPD work comp payments when you are finished adding TTD work comp payments.";
+							JOptionPane.showMessageDialog(frmWorkersCompensationLost, message, "Enter Under TPD Payments", JOptionPane.PLAIN_MESSAGE);
+						}
 					}
 				}
-				if(!worked){
+				if(knownPP && !worked){
 					wcPayments = sLC.addWCPaycheck(wcPC, wcPayments, rs.getClaimSummary().getPriorWeekStart());
 					WorkCompPaycheck p = wcPayments.get(wcPayments.size()-1);
 					dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TTD", p.getIsContested(),
@@ -807,6 +826,16 @@ public class WCReimbursementCalculatorMenu {
 					ro.setTTDRSumm(rs);
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
 					
+				}
+				else if(!knownPP){
+					dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TTD", wcPC.getIsContested(),
+							wcPC.getIsLate(), wcPC.getFullTimeHours(),new java.sql.Date(wcPC.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(wcPC.getPaymentDate().getTimeInMillis()),
+							new java.sql.Date(wcPC.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(wcPC.getPayPeriodEnd().getTimeInMillis()), wcPC.getGrossAmount(), wcPC.getAmountStillOwed(),
+							new java.sql.Date(wcPC.getContestResolutionDate().getTimeInMillis()));
+					rs.addWCPaycheckNoPeriodDates(wcPC);
+					wcPayments = rs.getWCPayments();
+					ro.setTTDRSumm(rs);
+					claimListModel.set(claimantList.getSelectedIndex(), ro);
 				}
 			}
 			String message = "";

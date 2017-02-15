@@ -10,7 +10,6 @@ import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.temporal.Temporal;
 
 
 public class Paycheck implements Comparable<Calendar> {
