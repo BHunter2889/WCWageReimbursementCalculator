@@ -2,7 +2,7 @@
 ## ***Please read the Wiki on the GitHubRepository for a better understanding of my code, application usage, and personal development related to this project.
 gradle build
 
-***This project was designed, built, and tested in Eclipse IDE. To run the application, simply use the .jar located at: "/build/libs/WCWageReimbursementCalculator-1.0.jar".
+###***This project was designed, built, and tested in Eclipse IDE. To run the application, simply use the .jar located at: "/build/libs/WCWageReimbursementCalculator-1.0.jar".
 Also, the distribution set can be found under at "/build/distributions/WCWageReimbursementCalculator-1.0.zip/lib/WCWageReimbursementCalculator-1.0.jar".
 To run in Eclipse, execute the Gradle command "run" on the /build/libs/ .jar file after loading the project into eclipse via pull request. 
 
