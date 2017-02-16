@@ -109,6 +109,7 @@ public class WCReimbursementCalculatorMenu {
 	        	if(dataAccess.shutdownAllConnectionInstances()){
 	        		System.out.println("Shutting Down Application... ");
 	    			System.gc();
+	    			System.out.println("Garbage Collected, Now Exiting...");
 	    			System.exit(0);
 	    		}
 	    		else {
