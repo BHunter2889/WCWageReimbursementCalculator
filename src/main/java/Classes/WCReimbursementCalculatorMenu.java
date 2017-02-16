@@ -733,6 +733,7 @@ public class WCReimbursementCalculatorMenu {
 			}
 			addTTDWCPaychecks(ro.getTTDRSumm(), true);
 			ro = claimantList.getSelectedValue();
+			claimListModel.set(claimantList.getSelectedIndex(), ro);
 			return false;
 		}
 		else { 
@@ -764,6 +765,7 @@ public class WCReimbursementCalculatorMenu {
 				}
 				addTTDWCPaychecks(ro.getTTDRSumm(), true);
 				ro = claimantList.getSelectedValue();
+				claimListModel.set(claimantList.getSelectedIndex(), ro);
 			}
 			message = "The current Calculated Weekly Payment owed from Work Comp during pay periods with no hours worked is: $"+ro.getTTDRSumm().getCalculatedWeeklyPayment().toPlainString()+eol+
 					"Would you like to add Work Comp Supplemental Payments for pay periods in which the Injured person was able to work hours (TPD) now? (You may enter them later if you wish.)"+eol+
@@ -774,6 +776,7 @@ public class WCReimbursementCalculatorMenu {
 			else{
 				addTPDWCPaychecks(ro.getTPDRSumm());
 				ro = claimantList.getSelectedValue();
+				claimListModel.set(claimantList.getSelectedIndex(), ro);
 				return true;
 			}
 
@@ -797,7 +800,7 @@ public class WCReimbursementCalculatorMenu {
 			wcPayments = rs.getWCPayments();
 		}
 		
-		label:while(ok == JOptionPane.OK_OPTION){
+	label:while(ok == JOptionPane.OK_OPTION){
 			boolean worked = false;
 			WorkCompPaycheck wcPC = createWorkCompPaycheck();
 			if(wcPC == null){
@@ -863,12 +866,13 @@ public class WCReimbursementCalculatorMenu {
 		if (ro.isFullDuty()) dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", rs.getCalculatedWeeklyPayment(), rs.getAmountNotPaid(),
 				new Date(ro.getFullDutyReturnDate().getTimeInMillis()));
 		else dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", rs.getCalculatedWeeklyPayment(), rs.getAmountNotPaid(), null);
-		for(WorkCompPaycheck p : rs.wcPayments){
+		//below is obsolete. leaving for reference until final completion
+		/*for(WorkCompPaycheck p : rs.wcPayments){
 			dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TTD", p.getIsContested(),
 					p.getIsLate(), p.getFullTimeHours(),new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
 					new java.sql.Date(p.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(p.getPayPeriodEnd().getTimeInMillis()), p.getGrossAmount(), p.getAmountStillOwed(),
 					new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()));
-		}
+		}*/
 		return true;
 	}
 	

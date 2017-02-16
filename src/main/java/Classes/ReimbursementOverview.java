@@ -229,6 +229,7 @@ public class ReimbursementOverview {
 			amountNotPaid = (!this.determineAnyLatePay()) ? amountNotPaid: this.ttdRSumm.getAmountNotPaid();
 			this.ttdRSumm.setAmountNotPaid(amountNotPaid);
 		}
+		System.out.println("TTD AmountNotPaid: $"+this.ttdRSumm.getAmountNotPaid().toPlainString());
 	}
 	
 	public BigDecimal getTotalTTDCalcOwed(){
