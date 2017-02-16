@@ -1550,6 +1550,7 @@ public class WCReimbursementDAO {
 			while(results.next()){
 				row++;
 				WorkCompPaycheck wp = new WorkCompPaycheck();
+				wp.setStateLawCalculation(this.stateLawCalculation);
 				wp.setIsContested(results.getBoolean(4));
 				wp.setIsLate(results.getBoolean(5));
 				wp.setFullTimeHours(results.getBoolean(6));
@@ -1560,7 +1561,6 @@ public class WCReimbursementDAO {
 				wp.setGrossAmount(results.getBigDecimal(11));
 				wp.setAmountStillOwed(results.getBigDecimal(12));
 				wp.setContestResolutionDate(results.getDate(13, tZ));
-				wp.setStateLawCalculation(this.stateLawCalculation);
 				wcpcList.add(wp);
 			}
 			if (row < 0){

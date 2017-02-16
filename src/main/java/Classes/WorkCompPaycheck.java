@@ -272,9 +272,7 @@ public class WorkCompPaycheck extends Paycheck {
 	}
 
 	public void setPayRecievedDate(Date payReceived) {
-		SimpleTimeZone tZ = new SimpleTimeZone(0, "Standard");
-		tZ.setDSTSavings(0);
-		GregorianCalendar pRD = new GregorianCalendar(tZ);
+		GregorianCalendar pRD = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
 		pRD.setTime(payReceived);
 		this.payReceivedDate = new MissouriCalculation().normalizeCalendarTime(pRD);
 	}
@@ -284,11 +282,9 @@ public class WorkCompPaycheck extends Paycheck {
 	}
 	
 	public void setContestResolutionDate(Date contestResolved) {
-		SimpleTimeZone tZ = new SimpleTimeZone(0, "Standard");
-		tZ.setDSTSavings(0);
-		GregorianCalendar pRD = new GregorianCalendar(tZ);
-		pRD.setTime(contestResolved);
-		this.payReceivedDate = new MissouriCalculation().normalizeCalendarTime(pRD); //Does not rely on any TimeZone or locale information, so Missouri was used arbitrarily
+		GregorianCalendar cRD = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
+		cRD.setTime(contestResolved);
+		this.payReceivedDate = new MissouriCalculation().normalizeCalendarTime(cRD); //Does not rely on any TimeZone or locale information, so Missouri was used arbitrarily
 		
 	}
 	
