@@ -1920,7 +1920,7 @@ public class WCReimbursementDAO {
 		ro.setClaimant(clmnt);
 		ro.setTTDRSumm(this.selectTTDRSummary(clmnt));
 		ro.setFullDutyReturnDate(this.selectFullDutyDate(clmnt));
-		if(ro.getTTDRSumm() != null){
+		if(ro.containsTTD()){
 			System.out.println("TTDRS & ClaimSummar for: "+clmnt.toString()+" Added: "+ro.ttdRSumm.toString());
 			System.out.println("TTDRS & ClaimSummar for: "+clmnt.toString()+" Added: "+ro.ttdRSumm.claimSummary.toString());
 		}

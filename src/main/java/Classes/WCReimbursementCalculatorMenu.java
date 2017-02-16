@@ -1406,17 +1406,32 @@ public class WCReimbursementCalculatorMenu {
 	
 	public boolean setFullDutyReturnDate(ReimbursementOverview ro){
 		boolean fullDuty = false;
-		int yes = JOptionPane.showConfirmDialog(frmWorkersCompensationLost, "Has the employee retruned to Full Duty (Full-Time Hours, No Work Restrictions)?", "Full Duty?", JOptionPane.YES_NO_OPTION);
+		int yes = JOptionPane.showConfirmDialog(frmWorkersCompensationLost, "Has the employee returned to Full Duty (Full-Time Hours, No Work Restrictions)?", "Full Duty?", JOptionPane.YES_NO_OPTION);
 		if(yes != JOptionPane.YES_OPTION) return false;
 		
 		Calendar fDReturn = this.getCalendar("Select the date first returned to Full Duty: ", "Select Full Duty Return Date", false, false);
 		if (fDReturn == null) return false;
 		
 		ro.setFullDutyReturnDate(fDReturn);
+		
+		try {
+			if (ro.getTTDRSumm().getCalculatedWeeklyPayment() == null) throw new NullPointerException("Calculated Weekly Payment Returns Null.");
+			if (ro.getTTDRSumm().getAmountNotPaid() == null) throw new NullPointerException("Amount Not Paid Returns Null.");
+			if (ro.getFullDutyReturnDate() == null) throw new NullPointerException("FD Return Date Returns Null.");
+		} catch (NullPointerException e){
+			e.printStackTrace();
+			return false;
+		}
 		try{
-			dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), new Date(ro.getFullDutyReturnDate().getTimeInMillis()));
-			dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTPDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), new Date(ro.getFullDutyReturnDate().getTimeInMillis()));
-			fullDuty = true;
+			if(ro.containsTTD() || ro.containsTPD()){
+				if(ro.containsTTD()) dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), new Date(ro.getFullDutyReturnDate().getTimeInMillis()));
+				if(ro.containsTPD()) dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTPDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), new Date(ro.getFullDutyReturnDate().getTimeInMillis()));
+				fullDuty = true;
+			}
+			else{
+				fullDuty = false;
+			}
+			
 		} catch (Exception e){
 			e.printStackTrace();
 			return false;
@@ -1682,6 +1697,7 @@ public class WCReimbursementCalculatorMenu {
 	
 	protected void selectedROEnabler(){
 		boolean nulled = false;
+		if (listSelectionModel == null) return;
 		
         if(listSelectionModel.isSelectionEmpty()){
         	btnEditPersonalInfo.setEnabled(false);

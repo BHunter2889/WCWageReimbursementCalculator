@@ -312,7 +312,6 @@ public abstract class ReimbursementSummary {
 		this.stateLawCalculation = cS.stateLawCalculation;
 		if (cS.priorWagesIsComplete()){
 			this.calculateAndSetWeeklyPayment();
-			this.computeAmountNotPaidAndAnyLateCompensation();
 			return true;
 		}
 		return false;

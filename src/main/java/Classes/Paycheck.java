@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.Period;
+import java.time.temporal.ChronoUnit;
 
 
 public class Paycheck implements Comparable<Calendar> {
@@ -203,7 +203,7 @@ public class Paycheck implements Comparable<Calendar> {
 	public long getDaysInPayPeriod(){
 		LocalDate start = this.payPeriodStart.getTime().toInstant().atZone(new SimpleTimeZone(0, "Standard").toZoneId()).toLocalDate();
 		LocalDate end = this.payPeriodEnd.getTime().toInstant().atZone(new SimpleTimeZone(0, "Standard").toZoneId()).toLocalDate();
-		long days = (long) Period.between( start, end).getDays() + 1;
+		long days = (long) ChronoUnit.DAYS.between( start, end) + 1;
 		return days;
 		
 	}
