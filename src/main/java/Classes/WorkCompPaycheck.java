@@ -112,10 +112,10 @@ public class WorkCompPaycheck extends Paycheck {
 	any point, isContested should be true, otherwise false.)*/
 	public WorkCompPaycheck(String grossAmount, GregorianCalendar payReceivedDate, GregorianCalendar payPeriodStart, GregorianCalendar payPeriodEnd, boolean isContested, StateLawCalculable sLC, GregorianCalendar paymentDate) {
 		super(grossAmount, paymentDate, payPeriodStart, payPeriodEnd);
+		this.stateLawCalculation = sLC;
 		GregorianCalendar epoch = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
 		this.payReceivedDate = payReceivedDate;
 		this.isContested = isContested;
-		this.stateLawCalculation = sLC;
 		determineAndSetIsLate();
 		this.fullTimeHours = false;
 		this.isLate = false;
