@@ -1544,7 +1544,8 @@ public class WCReimbursementDAO {
 		}
 		
 		Claimant clmnt = this.selectClaimants(id);
-		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		this.stateLawCalculation = this.getStateLawCalculation(clmnt.getState());
+		Calendar tZ = Calendar.getInstance(this.stateLawCalculation.getTimeZone());
 		int row = -1;
 		try{
 			while(results.next()){
@@ -1624,11 +1625,12 @@ public class WCReimbursementDAO {
 		}
 		
 		Claimant clmnt = this.selectClaimants(id);
-		StateLawCalculable sLC = this.getStateLawCalculation(clmnt.getState());
-		Calendar tZ = Calendar.getInstance(sLC.getTimeZone());
+		this.stateLawCalculation = this.getStateLawCalculation(clmnt.getState());
+		Calendar tZ = Calendar.getInstance(this.stateLawCalculation.getTimeZone());
 		try{
 			while(results.next()){
 				WorkCompPaycheck wp = new WorkCompPaycheck();
+				wp.setStateLawCalculation(this.stateLawCalculation);
 				wp.setIsContested(results.getBoolean(4));
 				wp.setIsLate(results.getBoolean(5));
 				wp.setFullTimeHours(results.getBoolean(6));
@@ -1639,7 +1641,7 @@ public class WCReimbursementDAO {
 				wp.setGrossAmount(results.getBigDecimal(11));
 				wp.setAmountStillOwed(results.getBigDecimal(12));
 				wp.setContestResolutionDate(results.getDate(13, tZ));
-				wp.setStateLawCalculation(this.stateLawCalculation);
+				
 				wcpcList.put(wp, results.getInt(1));
 			}
 		} catch (SQLException e){

@@ -297,6 +297,30 @@ public abstract class ReimbursementSummary {
 		return wcPTD;
 	}
 	
+	public boolean determineAnyLatePay(){
+		if(this.wcPayments.isEmpty()) return false;
+		if (this.wcPayments.size() > 1){
+			label:for(int i = 0, j=wcPayments.size()-1; i<j; i++, j--){
+					if (wcPayments.get(i).getIsLate() || wcPayments.get(j).getIsLate()){
+						return true;
+					}
+					if(j - i == 2){
+						i++;
+						if(wcPayments.get(i).getIsLate()){
+							return true;
+						}
+						break label;
+					}
+				}
+		}
+		else {
+			if(wcPayments.get(0).getIsLate()){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public CompClaim getClaimSummary(){
 		return this.claimSummary;
 	}
@@ -335,7 +359,7 @@ public abstract class ReimbursementSummary {
 	
 	public void setWCPayments(ArrayList<WorkCompPaycheck> wcP){
 		this.wcPayments = wcP;
-		this.computeAmountNotPaidAndAnyLateCompensation();
+		if(this.determineAnyLatePay()) this.computeAmountNotPaidAndAnyLateCompensation();
 	}
 	
 	public boolean containsCompClaim(){

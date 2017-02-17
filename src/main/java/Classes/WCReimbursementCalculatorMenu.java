@@ -1555,11 +1555,23 @@ public class WCReimbursementCalculatorMenu {
 			if (!wcPaychecksDB2.isEmpty()){
 				wcPaychecksDB.putAll(wcPaychecksDB2);
 			}
+			if(wcPaychecksDB.isEmpty()){
+				JOptionPane.showMessageDialog(frmWorkersCompensationLost, "There are no Work Comp Paychecks to delete.", "No Work Comp Paychecks", JOptionPane.ERROR_MESSAGE);
+				return false;
+			}
 			
 			WorkCompPaycheck toDelete = (WorkCompPaycheck) JOptionPane.showInternalInputDialog(frmWorkersCompensationLost.getContentPane(), 
 					message, 
 					"Select Work Comp Paycheck to Delete", 
 					JOptionPane.PLAIN_MESSAGE, null, wcPaychecksDB.keySet().toArray(), null);
+			if (toDelete == null){
+				try{
+					throw new Exception("No Valid input given. If user cancelled input, ignore this Exception");
+				} catch (Exception ex){
+					ex.printStackTrace();
+				}
+				return deleted;
+			}
 			deleted = dataAccess.deleteSingleWCPaycheck(ro.getClaimant().getID(), wcPaychecksDB.get(toDelete));
 			if (deleted){
 				ArrayList<WorkCompPaycheck> wcTTDPay = ro.ttdRSumm.wcPayments;
@@ -1569,6 +1581,8 @@ public class WCReimbursementCalculatorMenu {
 						try{
 							wcTTDPay.remove(p);
 							ro.ttdRSumm.setWCPayments(wcTTDPay);
+							if(!ro.ttdRSumm.determineAnyLatePay()) ro.computeTTDaNPNoLatePayCalculation(); 
+								
 							if (ro.isFullDuty()) dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.tpdRSumm.getCalculatedWeeklyPayment(), ro.tpdRSumm.getAmountNotPaid(),
 									new Date(ro.getFullDutyReturnDate().getTimeInMillis()));
 							else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.tpdRSumm.getCalculatedWeeklyPayment(), ro.tpdRSumm.getAmountNotPaid(), null);
@@ -1724,6 +1738,9 @@ public class WCReimbursementCalculatorMenu {
         	table.setModel(tm);
         }
         else{
+        	if(claimantList.getSelectedValue().isFullDuty()) btnFullDutyDate.setText("Change Full Duty Return Date");
+        	else btnFullDutyDate.setText("Enter Full Duty Return Date");
+        	
         	label:for(StateLawCalculable s : (new StatesWithCalculations())){
     			if(claimantList.getSelectedValue().getClaimant().getState().compareTo(s.getStateName()) == 0){
     				sLC = s;

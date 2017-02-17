@@ -50,111 +50,13 @@ public class ReimbursementOverview {
 	}
 	
 	public boolean determineAnyLatePay(){
-		ArrayList<WorkCompPaycheck> wcTTD = new ArrayList<WorkCompPaycheck>();
-		ArrayList<WorkCompPaycheck> wcTPD = new ArrayList<WorkCompPaycheck>();
-		if (this.containsTTD()) wcTTD = this.ttdRSumm.getWCPayments();
-		if (this.containsTPD()) wcTPD = this.tpdRSumm.getWCPayments();
-		if (wcTTD.isEmpty() && wcTPD.isEmpty()){
-			this.anyLatePay = false;
-			return false;
-		}
-		else if(wcTPD.isEmpty()){
-			if (wcTTD.size() > 1){
-				label:for(int i = 0, j=wcTTD.size()-1; i<j; i++, j--){
-						if (wcTTD.get(i).getIsLate() || wcTTD.get(j).getIsLate()){
-							this.anyLatePay = true;
-							return true;
-						}
-						if(j - i == 2){
-							i++;
-							if(wcTTD.get(i).getIsLate()){
-								this.anyLatePay = true;
-								return true;
-							}
-							break label;
-						}
-					}
-			}
-			else {
-				if(wcTTD.get(0).getIsLate()){
-					this.anyLatePay = true;
-					return true;
-				}
-			}
-		}
-		else if(wcTTD.isEmpty()){
-			if (wcTPD.size() > 1){
-				label:for(int i = 0, j=wcTPD.size()-1; i<j; i++, j--){
-						if (wcTPD.get(i).getIsLate() || wcTPD.get(j).getIsLate()){
-							this.anyLatePay = true;
-							return true;
-						}
-						if(j - i == 2){
-							i++;
-							if(wcTPD.get(i).getIsLate()){
-								this.anyLatePay = true;
-								return true;
-							}
-							break label;
-						}
-					}
-			}
-			else {
-				if(wcTPD.get(0).getIsLate()){
-					this.anyLatePay = true;
-					return true;
-				}
-			}
-		}
-		else{
-			if (wcTPD.size() > 1){
-				label:for(int i = 0, j=wcTPD.size()-1; i<j; i++, j--){
-						if (wcTPD.get(i).getIsLate() || wcTPD.get(j).getIsLate()){
-							this.anyLatePay = true;
-							return true;
-						}
-						if(j - i == 2){
-							i++;
-							if(wcTPD.get(i).getIsLate()){
-								this.anyLatePay = true;
-								return true;
-							}
-							break label;
-						}
-					}
-			}
-			else {
-				if(wcTPD.get(0).getIsLate()){
-					this.anyLatePay = true;
-					return true;
-				}
-			}
-			
-			if (wcTTD.size() > 1){
-				label:for(int i = 0, j=wcTTD.size()-1; i<j; i++, j--){
-						if (wcTTD.get(i).getIsLate() || wcTTD.get(j).getIsLate()){
-							this.anyLatePay = true;
-							return true;
-						}
-						if(j - i == 2){
-							i++;
-							if(wcTTD.get(i).getIsLate()){
-								this.anyLatePay = true;
-								return true;
-							}
-							break label;
-						}
-					}
-			}
-			else {
-				if(wcTTD.get(0).getIsLate()){
-					this.anyLatePay = true;
-					return true;
-				}
-			}
-		}
+		if(this.containsTPD() && this.containsTTD())this.anyLatePay = this.ttdRSumm.determineAnyLatePay() || this.tpdRSumm.determineAnyLatePay();
+		else if(this.containsTTD())this.anyLatePay = this.ttdRSumm.determineAnyLatePay();
+		else if(this.containsTPD())this.anyLatePay = this.tpdRSumm.determineAnyLatePay();
+		else this.anyLatePay = false;
 		
-		return false;
+		
+		return anyLatePay;
 	}
 	
 	public void setFullDutyReturnDate(Calendar fullDutyReturnDate){
@@ -235,7 +137,7 @@ public class ReimbursementOverview {
 	public BigDecimal getTotalTTDCalcOwed(){
 		//this.computeDaysAndWeeksInjured();
 		long nonTPDInjDays = this.getNumDaysNotInTPD();
-		if (nonTPDInjDays < 0) return new BigDecimal("0.00");
+		if (nonTPDInjDays <= 0) return new BigDecimal("0.00");
 		if (this.ttdRSumm.calculatedWeeklyPayment.compareTo(new BigDecimal("0")) <= 0) this.ttdRSumm.calculateAndSetWeeklyPayment();
 		BigDecimal dailyPay = this.ttdRSumm.calculatedWeeklyPayment.divide(new BigDecimal("7"), 3, RoundingMode.HALF_EVEN);
 		return dailyPay.multiply(new BigDecimal(String.valueOf(nonTPDInjDays))).setScale(2, RoundingMode.HALF_EVEN);

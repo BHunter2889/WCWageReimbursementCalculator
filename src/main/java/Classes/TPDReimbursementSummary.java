@@ -40,6 +40,12 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 		this.receivedWorkPayments = receivedWorkPayments;
 		this.sortPaychecksByDate();
 	}
+	@Override
+	public void setWCPayments(ArrayList<WorkCompPaycheck> wcP){
+		this.wcPayments = wcP;
+		if(this.determineAnyLatePay()) this.computeAmountNotPaidAndAnyLateCompensationByWCPC();
+		else this.computeAmountNotPaidAndAnyLateCompensation();
+	}
 	
 	@Override
 	public void computeAmountNotPaidAndAnyLateCompensation(){

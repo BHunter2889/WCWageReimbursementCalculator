@@ -232,12 +232,25 @@ public class WorkCompPaycheck extends Paycheck {
 	public String toString(){
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM/dd/yyyy");
 		formatter.setLenient(false);
+		formatter.setTimeZone(new SimpleTimeZone(0, "Standard"));
+		//String eol = System.getProperty("line.separator");
+		
+		java.util.Date payD = this.paymentDate.getTime();		
+		java.util.Date payRD = this.payReceivedDate.getTime();
+				
+		return "Payment Received on: " + formatter.format(payRD) + ": $" + this.getGrossAmount() + " paid on " + formatter.format(payD);
+	}
+	
+	public String toFullString(){
+		SimpleDateFormat formatter = new SimpleDateFormat("MMM/dd/yyyy");
+		formatter.setLenient(false);
+		formatter.setTimeZone(new SimpleTimeZone(0, "Standard"));
 		String eol = System.getProperty("line.separator");
 		
-		Date payD = (Date) this.paymentDate.getTime();
-		Date payPS = (Date) this.payPeriodStart.getTime();
-		Date payPE = (Date) this.payPeriodEnd.getTime();
-		Date payRD = (Date) this.payReceivedDate.getTime();
+		java.util.Date payD = this.paymentDate.getTime();
+		java.util.Date payPS = this.payPeriodStart.getTime();
+		java.util.Date payPE = this.payPeriodEnd.getTime();
+		java.util.Date payRD = this.payReceivedDate.getTime();
 		
 		String contested = "";
 		if(this.isContested){
@@ -263,7 +276,6 @@ public class WorkCompPaycheck extends Paycheck {
 		
 		return formatter.format(payPS) + " - " + formatter.format(payPE) + ": $" + this.getGrossAmount() + " paid on " + formatter.format(payD) + "." + eol + 
 				"Payment Received on: " + formatter.format(payRD) + ". Payment Contested: " + contested + "Late Payment: " + late + "Worked Regular Status Hours: " + fTH;
-		
 	}
 
 	public void setIsLate(boolean isLate) {
