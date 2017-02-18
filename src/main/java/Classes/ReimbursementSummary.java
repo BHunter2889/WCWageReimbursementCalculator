@@ -359,6 +359,7 @@ public abstract class ReimbursementSummary {
 	
 	public void setWCPayments(ArrayList<WorkCompPaycheck> wcP){
 		this.wcPayments = wcP;
+		this.sortWCPaymentsByDate();
 		if(this.determineAnyLatePay()) this.computeAmountNotPaidAndAnyLateCompensation();
 	}
 	

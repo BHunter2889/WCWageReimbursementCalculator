@@ -20,6 +20,22 @@ public class TTDReimbursementSummary extends ReimbursementSummary {
 		super(rsumm);
 	}
 	
+	public String listWCPCs(){
+		if (this.wcPayments.isEmpty()) return "No WC Paychecks Set.";
+		if (this.wcPayments.size() == 1) return "1) " + this.wcPayments.get(this.wcPayments.size()-1).toString();
+		
+		this.sortWCPaymentsByDate();
+		String eol = System.getProperty("line.separator");
+		String list = "";
+		int num = 1;
+		for(WorkCompPaycheck p : this.wcPayments){
+			list += num + ")" + p.toString() + eol;
+			num++;
+		}
+		
+		return list;
+	}
+	
 	public String toString(){
 		String eol = System.getProperty("line.separator");
 		

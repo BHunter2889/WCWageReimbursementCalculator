@@ -31,6 +31,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
@@ -651,6 +652,7 @@ public class WCReimbursementCalculatorMenu {
 	}
 	
 	public WorkCompPaycheck createWorkCompPaycheck(){
+		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		WorkCompPaycheck wcPC = null;
 		String eol = System.getProperty("line.separator");
 		String message = "Do you know the pay period Start and End dates?"+eol+
@@ -692,6 +694,7 @@ public class WCReimbursementCalculatorMenu {
 		}
 		
 		GregorianCalendar epoch = new GregorianCalendar(sLC.getTimeZone());
+		epoch.setTimeInMillis(mDay);
 		if (knownDates == JOptionPane.NO_OPTION) wcPC = new WorkCompPaycheck(grossAmnt, pRD, epoch, epoch, isContested, sLC, pD);
 		else wcPC = new WorkCompPaycheck(grossAmnt, pRD, pPS, pPE, isContested, sLC, pD);
 		
@@ -796,13 +799,14 @@ public class WCReimbursementCalculatorMenu {
 		}
 		int ok = JOptionPane.OK_OPTION;
 		ArrayList<WorkCompPaycheck> wcPayments = new ArrayList<WorkCompPaycheck>();
-		if(rs.getWCPayments().size() > 0){
+		if(!rs.getWCPayments().isEmpty()){
 			wcPayments = rs.getWCPayments();
 		}
 		
-	label:while(ok == JOptionPane.OK_OPTION){
+  label:while(ok == JOptionPane.OK_OPTION){
 			boolean worked = false;
-			WorkCompPaycheck wcPC = createWorkCompPaycheck();
+			WorkCompPaycheck wcPC = null;
+			wcPC = createWorkCompPaycheck();
 			if(wcPC == null){
 				ok = JOptionPane.CANCEL_OPTION;
 				break label;
@@ -812,6 +816,7 @@ public class WCReimbursementCalculatorMenu {
 				long mWeek = mDay * 7;
 				Calendar lastFDDate = new GregorianCalendar(sLC.getTimeZone());
 				GregorianCalendar epoch = new GregorianCalendar(sLC.getTimeZone());
+				epoch.setTimeInMillis(mDay);
 				boolean knownPP = wcPC.getPayPeriodStart().compareTo(epoch) > 0;
 				lastFDDate.setTimeInMillis(ro.getTTDRSumm().getClaimSummary().getPriorWeekStart().getTimeInMillis() + ((mWeek*2)-mDay));
 				if(knownPP){
@@ -823,6 +828,7 @@ public class WCReimbursementCalculatorMenu {
 							message = "This work comp payment cannot be entered under TTD."+eol+ 
 									"To add this payment, please do so under TPD work comp payments when you are finished adding TTD work comp payments.";
 							JOptionPane.showMessageDialog(frmWorkersCompensationLost, message, "Enter Under TPD Payments", JOptionPane.PLAIN_MESSAGE);
+							
 						}
 					}
 				}
@@ -833,18 +839,30 @@ public class WCReimbursementCalculatorMenu {
 							p.getIsLate(), p.getFullTimeHours(),new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
 							new java.sql.Date(p.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(p.getPayPeriodEnd().getTimeInMillis()), p.getGrossAmount(), p.getAmountStillOwed(),
 							new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()));
+					System.out.println("Known Pay Period WCPC "+p.toString()+" inserted.");
 					rs.setWCPayments(wcPayments);
 					ro.setTTDRSumm(rs);
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
 					
 				}
-				else if(!knownPP){
-					dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TTD", wcPC.getIsContested(),
-							wcPC.getIsLate(), wcPC.getFullTimeHours(),new java.sql.Date(wcPC.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(wcPC.getPaymentDate().getTimeInMillis()),
-							new java.sql.Date(wcPC.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(wcPC.getPayPeriodEnd().getTimeInMillis()), wcPC.getGrossAmount(), wcPC.getAmountStillOwed(),
-							new java.sql.Date(wcPC.getContestResolutionDate().getTimeInMillis()));
-					rs.addWCPaycheckNoPeriodDates(wcPC);
-					wcPayments = rs.getWCPayments();
+				if(!knownPP){
+					wcPayments = sLC.addWCPaycheckNoKnownPP(wcPC, wcPayments, rs.getClaimSummary().getPriorWeekStart());
+					WorkCompPaycheck p = wcPayments.get(wcPayments.size()-1);
+					boolean inserted = dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TTD", p.getIsContested(),
+							p.getIsLate(), p.getFullTimeHours(),new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
+							new java.sql.Date(p.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(p.getPayPeriodEnd().getTimeInMillis()), p.getGrossAmount(), p.getAmountStillOwed(),
+							new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()));
+					if(inserted)System.out.println("Work Comp Paycheck "+p.toString()+" Inserted");
+					else{
+						try{
+							throw new SQLException("WCPC Insert returns false, but does not throw prior exception.");
+						} catch (SQLException e){
+							e.printStackTrace();
+							return false;
+						}
+					}
+					rs.setWCPayments(wcPayments);
+					
 					ro.setTTDRSumm(rs);
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
 				}
@@ -860,7 +878,6 @@ public class WCReimbursementCalculatorMenu {
 			ok = JOptionPane.showConfirmDialog(frmWorkersCompensationLost, message, "Add Another Payment?", JOptionPane.OK_CANCEL_OPTION);
 		}
 		
-		rs.setWCPayments(wcPayments);
 		ro.setTTDRSumm(rs);
 		claimListModel.set(claimantList.getSelectedIndex(), ro);
 		if (ro.isFullDuty()) dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", rs.getCalculatedWeeklyPayment(), rs.getAmountNotPaid(),

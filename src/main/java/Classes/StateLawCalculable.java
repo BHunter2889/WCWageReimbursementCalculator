@@ -13,6 +13,7 @@ public interface StateLawCalculable {
 	public ArrayList<Paycheck> addAndTrimToPriorWages(Paycheck pc, ArrayList<Paycheck> pchecks, CompClaim cHist); //CompClaim
 	public ArrayList<TPDPaycheck> addTPDWorkPaycheck(TPDPaycheck pc, ArrayList<TPDPaycheck> workPayments, Calendar priorWeekStart) throws Exception; //TPDRSummary
 	public ArrayList<WorkCompPaycheck> addWCPaycheck(WorkCompPaycheck wcPC, ArrayList<WorkCompPaycheck> wcPayments, Calendar priorWeekStart); //ReimbursementSummary
+	public ArrayList<WorkCompPaycheck> addWCPaycheckNoKnownPP(WorkCompPaycheck wcPC, ArrayList<WorkCompPaycheck> wcPayments, Calendar priorWeekStart);
 	public Paycheck[] splitDateInjuredPayPeriodChecks(Paycheck pc, CompClaim cHist);
 	public BigDecimal computeAnyLatePaymentCompensation(BigDecimal grossAmnt, BigDecimal calculatedWeeklyPayment); //WCPaycheck
 	public BigDecimal computeAvgPriorGrossWeeklyPayment(ArrayList<Paycheck> priorWages); //CompClaim

@@ -243,6 +243,31 @@ public class MissouriCalculation implements StateLawCalculable {
 		return wcPayments;
 	}
 	
+	@Override
+	public ArrayList<WorkCompPaycheck> addWCPaycheckNoKnownPP(WorkCompPaycheck wcPC, ArrayList<WorkCompPaycheck> wcPayments, Calendar priorWeekStart) {
+		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
+		long mWeek = mDay * 7;
+		String message = "";
+		
+		Calendar wcPRD = wcPC.getPaymentDate();
+		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
+		formatter.setLenient(false);
+		long mEPPS = priorWeekStart.getTimeInMillis() + mWeek;
+		GregorianCalendar ePPSt = new GregorianCalendar(timeZone);
+		Date epcPPS = new Date(mEPPS);
+		ePPSt.setTime(epcPPS);
+		GregorianCalendar ePPS = this.normalizeCalendarTime(ePPSt);
+
+		if(wcPRD.compareTo(ePPS) < 0){
+			message = "Invalid paycheck pay date. Pay Date must be on or after " + formatter.format(epcPPS) + " based on date of injury in accordance with Missouri law.";
+			JOptionPane.showMessageDialog(null, message);
+			return wcPayments;
+		}
+		
+		wcPayments.add(wcPC);
+		return wcPayments;
+	}
+	
 	public Paycheck[] splitDateInjuredPayPeriodChecks(Paycheck pc, CompClaim cHist){
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		Paycheck[] splitPCs = {new Paycheck(), new TPDPaycheck()};

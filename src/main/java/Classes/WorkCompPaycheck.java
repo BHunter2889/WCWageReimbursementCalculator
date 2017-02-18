@@ -19,11 +19,11 @@ public class WorkCompPaycheck extends Paycheck {
 	protected boolean fullTimeHours;
 	protected Calendar contestResolvedDate = null;
 	protected StateLawCalculable stateLawCalculation;//defaults to false
-	protected static final Comparator<WorkCompPaycheck> PPS_COMPARATOR = new Comparator<WorkCompPaycheck>(){
+	protected static final Comparator<WorkCompPaycheck> WC_COMPARATOR = new Comparator<WorkCompPaycheck>(){
 		@Override
 		public int compare(WorkCompPaycheck p1, WorkCompPaycheck p2) {
 			GregorianCalendar epoch = new GregorianCalendar(new SimpleTimeZone(0, "Standard"));
-			epoch.setTimeInMillis(0);
+			epoch.setTimeInMillis(1000*60*60*24);
 			boolean pPS = p1.getPayPeriodStart().compareTo(epoch) > 0 && p2.getPayPeriodStart().compareTo(epoch) > 0;
 			return pPS ? p1.compareTo(p2.getPayPeriodStart()): p1.getPaymentDate().compareTo(p2.getPaymentDate());
 		}

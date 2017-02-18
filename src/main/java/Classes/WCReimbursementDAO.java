@@ -459,8 +459,9 @@ public class WCReimbursementDAO {
 			stmtDeleteSingleWCPC.clearParameters();
 			stmtDeleteSingleWCPC.setInt(1, id);
 			stmtDeleteSingleWCPC.setInt(2, rowID);
-			stmtDeleteSingleWCPC.executeUpdate();
+			int rows = stmtDeleteSingleWCPC.executeUpdate();
 			deleted = true;
+			System.out.println(String.valueOf(rows)+" rows successfully Deleted from Paychecks.");
 		} catch (SQLException sqle) {
 	        sqle.printStackTrace();
 	    } finally {
@@ -888,7 +889,8 @@ public class WCReimbursementDAO {
 		}
 		
 		Claimant clmnt = this.selectClaimants(id);
-		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		this.stateLawCalculation = this.getStateLawCalculation(clmnt.getState());
+		Calendar tZ = Calendar.getInstance(this.stateLawCalculation.getTimeZone());
 		try {
 			stmtInsertWCPaychecks.clearParameters();
 			stmtInsertWCPaychecks.setInt(1, id);
@@ -910,6 +912,7 @@ public class WCReimbursementDAO {
 		} finally {
 			try {
 				stmtInsertWCPaychecks.close();
+				System.out.println("WCPC of amount: $"+bdGrossAmnt.toPlainString()+" Inserted.");
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -1591,7 +1594,7 @@ public class WCReimbursementDAO {
 	}
 	
 	public SortedMap<WorkCompPaycheck, Integer> selectWorkCompPaychecksHashMap(int id, String wcpcType){
-		SortedMap<WorkCompPaycheck, Integer> wcpcList = new TreeMap<WorkCompPaycheck, Integer>(Paycheck.PPS_COMPARATOR);
+		SortedMap<WorkCompPaycheck, Integer> wcpcList = new TreeMap<WorkCompPaycheck, Integer>(WorkCompPaycheck.WC_COMPARATOR);
 		PreparedStatement stmtSelectWCPaychecks = null;
 		try {
 			stmtSelectWCPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectWCPCType());
@@ -1625,12 +1628,13 @@ public class WCReimbursementDAO {
 		}
 		
 		Claimant clmnt = this.selectClaimants(id);
-		this.stateLawCalculation = this.getStateLawCalculation(clmnt.getState());
-		Calendar tZ = Calendar.getInstance(this.stateLawCalculation.getTimeZone());
+		StateLawCalculable sLC = this.getStateLawCalculation(clmnt.getState());
+		Calendar tZ = Calendar.getInstance(sLC.getTimeZone());
 		try{
 			while(results.next()){
-				WorkCompPaycheck wp = new WorkCompPaycheck();
-				wp.setStateLawCalculation(this.stateLawCalculation);
+				WorkCompPaycheck wp = null;
+				wp = new WorkCompPaycheck();
+				wp.setStateLawCalculation(sLC);
 				wp.setIsContested(results.getBoolean(4));
 				wp.setIsLate(results.getBoolean(5));
 				wp.setFullTimeHours(results.getBoolean(6));
@@ -1641,18 +1645,30 @@ public class WCReimbursementDAO {
 				wp.setGrossAmount(results.getBigDecimal(11));
 				wp.setAmountStillOwed(results.getBigDecimal(12));
 				wp.setContestResolutionDate(results.getDate(13, tZ));
-				
-				wcpcList.put(wp, results.getInt(1));
+				try{
+					wcpcList.put(wp, results.getInt(1));
+				} catch(UnsupportedOperationException u){
+					u.printStackTrace();
+				}catch(ClassCastException c){
+					c.printStackTrace();
+				}catch(NullPointerException n){
+					n.printStackTrace();
+				}catch(IllegalArgumentException i){
+					i.printStackTrace();
+				}
+				System.out.println("Prior to Map: "+wp.toString());
+				System.out.println("After Map: "+wcpcList.lastKey().toString()+" or "+wcpcList.firstKey().toString());
 			}
+			
 		} catch (SQLException e){
 			e.printStackTrace();
 			try{
 				results.close();
 				stmtSelectWCPaychecks.close();
-				return (SortedMap<WorkCompPaycheck, Integer>) wcpcList;
+				return wcpcList;
 			} catch (SQLException se){
 				se.printStackTrace();
-				return (SortedMap<WorkCompPaycheck, Integer>) wcpcList;
+				return wcpcList;
 			}
 		}
 		
@@ -1663,7 +1679,7 @@ public class WCReimbursementDAO {
 			e.printStackTrace();
 		}
 		//SortedMap<WorkCompPaycheck, Integer> newWCPCList = sLC.sortWCPCHashMapByDate(wcpcList);
-		
+		System.out.println("Selected WCPC SortedMap: "+wcpcList.toString());
 		return wcpcList;
 	}
 	
@@ -1923,7 +1939,7 @@ public class WCReimbursementDAO {
 		ro.setTTDRSumm(this.selectTTDRSummary(clmnt));
 		ro.setFullDutyReturnDate(this.selectFullDutyDate(clmnt));
 		if(ro.containsTTD()){
-			System.out.println("TTDRS & ClaimSummar for: "+clmnt.toString()+" Added: "+ro.ttdRSumm.toString());
+			System.out.println("TTDRS & ClaimSummar for: "+clmnt.toString()+" Added: "+ro.ttdRSumm.toString()+" TTD WC Paychecks: "+ro.ttdRSumm.listWCPCs());
 			System.out.println("TTDRS & ClaimSummar for: "+clmnt.toString()+" Added: "+ro.ttdRSumm.claimSummary.toString());
 		}
 		ro.setTPDRSumm(this.selectTPDRSummary(clmnt));
