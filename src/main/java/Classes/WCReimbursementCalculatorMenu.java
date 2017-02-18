@@ -849,7 +849,7 @@ public class WCReimbursementCalculatorMenu {
 					wcPayments = sLC.addWCPaycheckNoKnownPP(wcPC, wcPayments, rs.getClaimSummary().getPriorWeekStart());
 					WorkCompPaycheck p = wcPayments.get(wcPayments.size()-1);
 					boolean inserted = dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TTD", p.getIsContested(),
-							p.getIsLate(), p.getFullTimeHours(),new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
+							p.getIsLate(), p.getFullTimeHours(), new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
 							new java.sql.Date(p.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(p.getPayPeriodEnd().getTimeInMillis()), p.getGrossAmount(), p.getAmountStillOwed(),
 							new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()));
 					if(inserted)System.out.println("Work Comp Paycheck "+p.toString()+" Inserted");

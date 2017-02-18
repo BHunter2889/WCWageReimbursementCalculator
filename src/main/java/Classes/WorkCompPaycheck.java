@@ -296,7 +296,7 @@ public class WorkCompPaycheck extends Paycheck {
 	public void setContestResolutionDate(Date contestResolved) {
 		GregorianCalendar cRD = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
 		cRD.setTime(contestResolved);
-		this.payReceivedDate = new MissouriCalculation().normalizeCalendarTime(cRD); //Does not rely on any TimeZone or locale information, so Missouri was used arbitrarily
+		this.contestResolvedDate = new MissouriCalculation().normalizeCalendarTime(cRD); //Does not rely on any TimeZone or locale information, so Missouri was used arbitrarily
 		
 	}
 	
