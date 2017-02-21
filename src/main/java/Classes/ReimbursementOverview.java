@@ -47,6 +47,7 @@ public class ReimbursementOverview {
 	public void setTPDRSumm(TPDReimbursementSummary tpdRSumm){
 		if (tpdRSumm == null) return;
 		this.tpdRSumm = tpdRSumm;
+		if (this.containsTTD()) this.computeTTDaNPNoLatePayCalculation();
 	}
 	
 	public boolean determineAnyLatePay(){

@@ -53,6 +53,7 @@ public class TPDPaycheck extends Paycheck {
 	
 	public void computeWCCalcPay(StateLawCalculable sLC, BigDecimal aPGWP){
 		this.wcCalcPay = sLC.computeWCSupplementalPayment(this, aPGWP);
+		System.out.println(this.wcCalcPay.toPlainString());
 	}
 	
 	public BigDecimal getWCCalcPay(){

@@ -60,7 +60,7 @@ public class MissouriCalculation implements StateLawCalculable {
 		long mPWeekEnd =  priorWeekStart.getTimeInMillis() + (mDay * 6);
 		GregorianCalendar pWeekEnd = new GregorianCalendar(timeZone);
 		pWeekEnd.setTimeInMillis(mPWeekEnd);
-		GregorianCalendar priorWeekEnd = this.normalizeCalendarTime(pWeekEnd);
+		Calendar priorWeekEnd = this.normalizeCalendarTime(pWeekEnd);
 		Calendar pcPPE = new GregorianCalendar(timeZone);
 		pcPPE.setTime(pc.getPayPeriodEnd().getTime());
 		//Date dPPE = (Date) pcPPE.getTime();
@@ -191,7 +191,7 @@ public class MissouriCalculation implements StateLawCalculable {
 		long mPWeekEnd =  priorWeekStart.getTimeInMillis() + (mDay * 6);
 		GregorianCalendar pWeekEnd = new GregorianCalendar(timeZone);
 		pWeekEnd.setTimeInMillis(mPWeekEnd);
-		GregorianCalendar priorWeekEnd = this.normalizeCalendarTime(pWeekEnd);
+		Calendar priorWeekEnd = this.normalizeCalendarTime(pWeekEnd);
 		Calendar pcPPE = pc.getPayPeriodEnd();
 		//Date dPPE = (Date) pcPPE.getTime();
 		//Date dPWE = (Date) priorWeekEnd.getTime();
@@ -227,7 +227,7 @@ public class MissouriCalculation implements StateLawCalculable {
 		GregorianCalendar ePPSt = new GregorianCalendar(timeZone);
 		Date epcPPS = new Date(mEPPS);
 		ePPSt.setTime(epcPPS);
-		GregorianCalendar ePPS = this.normalizeCalendarTime(ePPSt);
+		Calendar ePPS = this.normalizeCalendarTime(ePPSt);
 		//Date dPPS = pcPPS.getTime();
 
 		//Calendar pcPPE = pc.getPayPeriodEnd();
@@ -256,7 +256,7 @@ public class MissouriCalculation implements StateLawCalculable {
 		GregorianCalendar ePPSt = new GregorianCalendar(timeZone);
 		Date epcPPS = new Date(mEPPS);
 		ePPSt.setTime(epcPPS);
-		GregorianCalendar ePPS = this.normalizeCalendarTime(ePPSt);
+		Calendar ePPS = this.normalizeCalendarTime(ePPSt);
 
 		if(wcPRD.compareTo(ePPS) < 0){
 			message = "Invalid paycheck pay date. Pay Date must be on or after " + formatter.format(epcPPS) + " based on date of injury in accordance with Missouri law.";
@@ -351,14 +351,16 @@ public class MissouriCalculation implements StateLawCalculable {
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
 		long mPP = (workPayment.getPayPeriodEnd().getTimeInMillis() + mDay) - workPayment.getPayPeriodStart().getTimeInMillis();
+		long days = (long) Math.ceil(mPP/mDay);
+		System.out.println("Days in Pay Period: "+String.valueOf(days));
 		//long mDR = mPP % mWeek;
 		//long daysRemaining = Math.round((mPP % mWeek) / mDay);
 		//BigDecimal week = new BigDecimal(String.valueOf(mWeek));
 		//BigDecimal weekPercentRemainder =  week.divide(new BigDecimal(String.valueOf(Math.round((mPP % mWeek) / mDay))), RoundingMode.UNNECESSARY);
-		BigDecimal payPWeeks = (new BigDecimal(String.valueOf(mPP)).divide(new BigDecimal(String.valueOf(mWeek))));
+		BigDecimal payPWeeks = (new BigDecimal(String.valueOf(mPP)).divide(new BigDecimal(String.valueOf(mWeek)), 20, RoundingMode.HALF_UP));
 		BigDecimal ppSupplementalPayment = 
 				(avgPriorGrossWeeklyPayment.multiply(payPWeeks).subtract(workPayment.getGrossAmount())).multiply(new BigDecimal("2").divide(new BigDecimal("3"), 20, RoundingMode.HALF_UP));
-	
+
 		return ppSupplementalPayment.compareTo(new BigDecimal("0")) > 0 ? ppSupplementalPayment.setScale(2, RoundingMode.HALF_EVEN): new BigDecimal("0");
 	}
 
@@ -381,7 +383,7 @@ public class MissouriCalculation implements StateLawCalculable {
 	
 	//ensures Calendar time is set to 00:00 on same date
 	@Override
-	public GregorianCalendar normalizeCalendarTime(GregorianCalendar calendar) {
+	public Calendar normalizeCalendarTime(Calendar calendar) {
 		if (calendar.get(Calendar.HOUR) == 0 && calendar.get(Calendar.HOUR_OF_DAY) == 0 && calendar.get(Calendar.MINUTE) == 0 && calendar.get(Calendar.SECOND) == 0 && calendar.get(Calendar.MILLISECOND) == 0){
 			return calendar;
 		}

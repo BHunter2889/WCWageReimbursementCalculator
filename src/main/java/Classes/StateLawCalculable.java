@@ -3,7 +3,6 @@ package Classes;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TimeZone;
@@ -22,7 +21,7 @@ public interface StateLawCalculable {
 	public Calendar computeEarliestPriorWageDate(Calendar priorWeekStart); //CompClaim
 	public BigDecimal computeWCSupplementalPayment(TPDPaycheck workPayment, BigDecimal avgPriorGrossWeeklyPayment);
 	public boolean determineAndSetIsLate(Calendar payPeriodEnd, Calendar payReceived); //WCPaycheck
-	public GregorianCalendar normalizeCalendarTime(GregorianCalendar calendar);
+	public Calendar normalizeCalendarTime(Calendar calendar);
 	public boolean isWithinTPDPeriod(ArrayList<Paycheck> tpdWork, Paycheck pc);
 	//public ArrayList<GregorianCalendar> getPaycheckDateRanges(ArrayList<Paycheck> pchecks);
 	public String getStateAbbrv();

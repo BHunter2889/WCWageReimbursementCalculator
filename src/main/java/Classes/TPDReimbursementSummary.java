@@ -55,6 +55,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 		BigDecimal wcCalcTotalPay = this.getWCCalcPayToDate();
 		amountNotPaid = wcCalcTotalPay.subtract(wcTotalPay);
 		amountNotPaid = amountNotPaid.setScale(2, RoundingMode.HALF_EVEN);
+		//TODO Implement LatePayCalc for noKnownPP
 		this.amountNotPaid = amountNotPaid;
 	}
 	//calculates and sets amountNotPaid total and sets the amountStillOwed for each pay period entered in wcPayments
@@ -140,6 +141,9 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 	public BigDecimal getWorkPayToDate(){
 		String wPTD = "0.00";
 		BigDecimal workPTD = new BigDecimal(wPTD);
+		if(this.receivedWorkPayments.isEmpty()) return workPTD;
+		if(this.receivedWorkPayments.size() < 2) return this.receivedWorkPayments.get(0).getGrossAmount();
+		
 		for (int i=0, j=this.receivedWorkPayments.size()-1; i<j; i++, j--){
 			TPDPaycheck p1 = this.receivedWorkPayments.get(i);
 			TPDPaycheck p2 = this.receivedWorkPayments.get(j);

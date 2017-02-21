@@ -708,6 +708,7 @@ public class WCReimbursementDAO {
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
+		int rows = 0;
 		try {
 			stmtInsertClaimants.clearParameters();
 			stmtInsertClaimants.setString(1, lastname);
@@ -715,7 +716,7 @@ public class WCReimbursementDAO {
 			stmtInsertClaimants.setString(3, middlename);
 			stmtInsertClaimants.setString(4, workplace);
 			stmtInsertClaimants.setString(5, state);
-			stmtInsertClaimants.executeUpdate();
+			rows = stmtInsertClaimants.executeUpdate();
 			ResultSet results = stmtInsertClaimants.getGeneratedKeys();
 	        if (results.next()) {
 	            id = results.getInt(1);
@@ -726,6 +727,7 @@ public class WCReimbursementDAO {
 		} finally {
 			try {
 				stmtInsertClaimants.close();
+				System.out.println(String.valueOf(rows)+" rows Inserted into Claimants.");
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -744,6 +746,7 @@ public class WCReimbursementDAO {
 		}
 		Claimant clmnt = this.selectClaimants(id);
 		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		int rows = 0;
 		try {
 			stmtInsertRSummary.clearParameters();
 			stmtInsertRSummary.setInt(1, id);
@@ -752,13 +755,14 @@ public class WCReimbursementDAO {
 			stmtInsertRSummary.setBigDecimal(4, bdAmntNotPaid);
 			if (fullDutyDate == null) stmtInsertRSummary.setNull(5, java.sql.Types.DATE);
 			else stmtInsertRSummary.setDate(5, fullDutyDate, tZ);
-			stmtInsertRSummary.executeUpdate();
+			rows = stmtInsertRSummary.executeUpdate();
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			try {
 				stmtInsertRSummary.close();
+				System.out.println(String.valueOf(rows)+" rows Inserted into R_Summary.");
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -784,6 +788,7 @@ public class WCReimbursementDAO {
 		}
 		Claimant clmnt = this.selectClaimants(id);
 		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		int rows = 0;
 		try {
 			stmtInsertClaimSummary.clearParameters();
 			stmtInsertClaimSummary.setInt(1, id);
@@ -793,13 +798,14 @@ public class WCReimbursementDAO {
 			stmtInsertClaimSummary.setBigDecimal(5, avgPGWP);
 			stmtInsertClaimSummary.setLong(6, daysInj);
 			stmtInsertClaimSummary.setLong(7, weeksInj);
-			stmtInsertClaimSummary.executeUpdate();
+			rows = stmtInsertClaimSummary.executeUpdate();
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			try {
 				stmtInsertClaimSummary.close();
+				System.out.println(String.valueOf(rows)+" rows Inserted into Claim_Summary.");
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -818,6 +824,7 @@ public class WCReimbursementDAO {
 		}
 		Claimant clmnt = this.selectClaimants(id);
 		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		int rows = 0;
 		try {
 			stmtInsertPaychecks.clearParameters();
 			stmtInsertPaychecks.setInt(1, id);
@@ -826,13 +833,14 @@ public class WCReimbursementDAO {
 			stmtInsertPaychecks.setDate(4, payStart, tZ);
 			stmtInsertPaychecks.setDate(5, payEnd, tZ);
 			stmtInsertPaychecks.setBigDecimal(6, bdGrossAmnt);
-			stmtInsertPaychecks.executeUpdate();
+			rows = stmtInsertPaychecks.executeUpdate();
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			try {
 				stmtInsertPaychecks.close();
+				System.out.println(String.valueOf(rows)+" rows Inserted into Paychecks.");
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -854,6 +862,7 @@ public class WCReimbursementDAO {
 		}
 		Claimant clmnt = this.selectClaimants(id);
 		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		int rows = 0;
 		try {
 			stmtInsertTPDPaychecks.clearParameters();
 			stmtInsertTPDPaychecks.setInt(1, id);
@@ -863,13 +872,14 @@ public class WCReimbursementDAO {
 			stmtInsertTPDPaychecks.setDate(5, payEnd, tZ);
 			stmtInsertTPDPaychecks.setBigDecimal(6, bdGrossAmnt);
 			stmtInsertTPDPaychecks.setBigDecimal(7, bdWCCalc);
-			stmtInsertTPDPaychecks.executeUpdate();
+			rows = stmtInsertTPDPaychecks.executeUpdate();
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			try {
 				stmtInsertTPDPaychecks.close();
+				System.out.println(String.valueOf(rows)+" rows Inserted into Paychecks as TPDPaychecks.");
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -891,6 +901,7 @@ public class WCReimbursementDAO {
 		Claimant clmnt = this.selectClaimants(id);
 		this.stateLawCalculation = this.getStateLawCalculation(clmnt.getState());
 		Calendar tZ = Calendar.getInstance(this.stateLawCalculation.getTimeZone());
+		int rows = 0;
 		try {
 			stmtInsertWCPaychecks.clearParameters();
 			stmtInsertWCPaychecks.setInt(1, id);
@@ -905,7 +916,7 @@ public class WCReimbursementDAO {
 			stmtInsertWCPaychecks.setBigDecimal(10, bdGrossAmnt);
 			stmtInsertWCPaychecks.setBigDecimal(11, bdAmntOwed);
 			stmtInsertWCPaychecks.setDate(12, contestRslvd, tZ);
-			stmtInsertWCPaychecks.executeUpdate();
+			rows = stmtInsertWCPaychecks.executeUpdate();
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -913,6 +924,7 @@ public class WCReimbursementDAO {
 			try {
 				stmtInsertWCPaychecks.close();
 				System.out.println("WCPC of amount: $"+bdGrossAmnt.toPlainString()+" Inserted.");
+				System.out.println(String.valueOf(rows)+" rows Inserted into WC_Paychecks.");
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -1339,15 +1351,19 @@ public class WCReimbursementDAO {
 			return pcList;
 		}
 		Claimant clmnt = this.selectClaimants(id);
-		Calendar tZ = Calendar.getInstance(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		this.stateLawCalculation = this.getStateLawCalculation(clmnt.getState());
+		Calendar tZ = Calendar.getInstance(this.stateLawCalculation.getTimeZone());
 		int row = -1;
 		try{
 			while(results.next()){
 				row++;
 				TPDPaycheck p = new TPDPaycheck();
 				p.setPaymentDate(results.getDate(4, tZ));
+				p.setPaymentDate(this.stateLawCalculation.normalizeCalendarTime(p.getPaymentDate()));
 				p.setPayPeriodStart(results.getDate(5, tZ));
+				p.setPayPeriodStart(this.stateLawCalculation.normalizeCalendarTime(p.getPayPeriodStart()));
 				p.setPayPeriodEnd(results.getDate(6, tZ));
+				p.setPayPeriodEnd(this.stateLawCalculation.normalizeCalendarTime(p.getPayPeriodEnd()));
 				p.setGrossAmount(results.getBigDecimal(7));
 				if(results.getBigDecimal(8) != null && results.getBigDecimal(8).compareTo(new BigDecimal("0")) > 0) p.setWCCalcPay(results.getBigDecimal(8));
 				else p.setWCCalcPay("0");

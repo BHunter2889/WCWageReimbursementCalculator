@@ -110,17 +110,17 @@ public class WorkCompPaycheck extends Paycheck {
 	
 	/*CONSTRUCTOR: (to set stateDaystoLate) Calendar constructor, pPE and pD are different, payReceived IS NOT payDate (payDate becomes irrelevant) (if employer or WC Insurer has contested payment at 
 	any point, isContested should be true, otherwise false.)*/
-	public WorkCompPaycheck(String grossAmount, GregorianCalendar payReceivedDate, GregorianCalendar payPeriodStart, GregorianCalendar payPeriodEnd, boolean isContested, StateLawCalculable sLC, GregorianCalendar paymentDate) {
-		super(grossAmount, paymentDate, payPeriodStart, payPeriodEnd);
+	public WorkCompPaycheck(String grossAmount, Calendar pRD, Calendar pPS, Calendar pPE, boolean isContested, StateLawCalculable sLC, Calendar pD) {
+		super(grossAmount, pD, pPS, pPE);
 		this.stateLawCalculation = sLC;
 		GregorianCalendar epoch = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
-		this.payReceivedDate = payReceivedDate;
+		this.payReceivedDate = pRD;
 		this.isContested = isContested;
 		determineAndSetIsLate();
 		this.fullTimeHours = false;
 		this.isLate = false;
 		this.amountStillOwed = new BigDecimal("0");
-		this.contestResolvedDate = (payPeriodEnd.compareTo(epoch) >= 0) ? payPeriodEnd: paymentDate;
+		this.contestResolvedDate = (pPE.compareTo(epoch) >= 0) ? pPE: pD;
 	}
 	
 	public WorkCompPaycheck() {
@@ -282,21 +282,42 @@ public class WorkCompPaycheck extends Paycheck {
 		this.isLate = isLate;
 		
 	}
+	
+	@Override
+	public void setPayPeriodStart(Date pPS){
+		GregorianCalendar payPS = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
+		payPS.setTime(pPS);
+		this.payPeriodStart = this.stateLawCalculation.normalizeCalendarTime(payPS);
+	}
+	
+	@Override
+	public void setPayPeriodEnd(Date pPE){
+		GregorianCalendar payPE = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
+		payPE.setTime(pPE);
+		this.payPeriodEnd = this.stateLawCalculation.normalizeCalendarTime(payPE);
+	}
+	
+	@Override
+	public void setPaymentDate(Date pD){
+		GregorianCalendar payD = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
+		payD.setTime(pD);
+		this.paymentDate = this.stateLawCalculation.normalizeCalendarTime(payD);
+	}
 
 	public void setPayRecievedDate(Date payReceived) {
 		GregorianCalendar pRD = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
 		pRD.setTime(payReceived);
-		this.payReceivedDate = new MissouriCalculation().normalizeCalendarTime(pRD);
+		this.payReceivedDate = this.stateLawCalculation.normalizeCalendarTime(pRD);
 	}
 	
-	public void setContestResolutionDate(GregorianCalendar contestResolved){
-		this.contestResolvedDate = contestResolved;
+	public void setContestResolutionDate(Calendar contestRslvdDate){
+		this.contestResolvedDate = this.stateLawCalculation.normalizeCalendarTime(contestRslvdDate);
 	}
 	
 	public void setContestResolutionDate(Date contestResolved) {
 		GregorianCalendar cRD = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
 		cRD.setTime(contestResolved);
-		this.contestResolvedDate = new MissouriCalculation().normalizeCalendarTime(cRD); //Does not rely on any TimeZone or locale information, so Missouri was used arbitrarily
+		this.contestResolvedDate = this.stateLawCalculation.normalizeCalendarTime(cRD); //Does not rely on any TimeZone or locale information, so Missouri was used arbitrarily
 		
 	}
 	

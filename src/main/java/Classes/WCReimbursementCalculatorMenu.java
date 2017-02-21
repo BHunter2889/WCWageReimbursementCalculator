@@ -494,7 +494,7 @@ public class WCReimbursementCalculatorMenu {
 		return i;
 	}
 	// To get Date Injured or RSumm paycheck/WCpaycheck dates
-	public GregorianCalendar getCalendar(String message, String title, boolean isPayment, boolean isPPS){
+	public Calendar getCalendar(String message, String title, boolean isPayment, boolean isPPS){
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
 		JXMonthView mV = new JXMonthView();
@@ -522,7 +522,8 @@ public class WCReimbursementCalculatorMenu {
 		
 		Object[] params = {message,picker};		
 		GregorianCalendar selected = new GregorianCalendar(this.sLC.getTimeZone());
-		JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.OK_CANCEL_OPTION);
+		boolean cancel = JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION;
+		if (cancel) return null;
 		selected.setTime(((JXDatePicker)params[1]).getDate());
 		while(selected.compareTo(new GregorianCalendar(sLC.getTimeZone())) == 0){
 			String m = "You must select a date within the dates provided in order to continue." +System.getProperty("line.separator")+
@@ -530,14 +531,15 @@ public class WCReimbursementCalculatorMenu {
 			if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, m, null, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.CANCEL_OPTION){
 				return null;
 			}
-			JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.OK_CANCEL_OPTION);
+			cancel = JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION;
+			if (cancel) return null;
 			selected.setTime(((JXDatePicker)params[1]).getDate());
 		}
 		
 		return sLC.normalizeCalendarTime(selected);
 	}
 	
-	public GregorianCalendar getInjuryDateCalendar(String message, String title){
+	public Calendar getInjuryDateCalendar(String message, String title){
 		//long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		//long mWeek = mDay * 7;
 		//boolean nulled = false;
@@ -568,7 +570,7 @@ public class WCReimbursementCalculatorMenu {
 		return sLC.normalizeCalendarTime(selected);
 	}
 	
-	public GregorianCalendar getPriorWageCalendar(String message, String title, CompClaim claimSumm, boolean ppS, boolean payDate){
+	public Calendar getPriorWageCalendar(String message, String title, CompClaim claimSumm, boolean ppS, boolean payDate){
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
 		JXMonthView mV = new JXMonthView();
@@ -629,15 +631,15 @@ public class WCReimbursementCalculatorMenu {
 	
 	public Paycheck createPriorWagePaycheck(CompClaim claimSumm){
 		Paycheck pc = null;
-		GregorianCalendar pPS = getPriorWageCalendar("Select Pay Period Start Date", "Pay Period Start", claimSumm, true, false);
+		Calendar pPS = getPriorWageCalendar("Select Pay Period Start Date", "Pay Period Start", claimSumm, true, false);
 		if(pPS == null){
 			return null;
 		}
-		GregorianCalendar pPE = getPriorWageCalendar("Select Pay Period End Date", "Pay Period End", claimSumm, false, false);
+		Calendar pPE = getPriorWageCalendar("Select Pay Period End Date", "Pay Period End", claimSumm, false, false);
 		if(pPE == null){
 			return null;
 		}
-		GregorianCalendar pD = getPriorWageCalendar("Select Payment Date", "Payment Date", claimSumm, false, true);
+		Calendar pD = getPriorWageCalendar("Select Payment Date", "Payment Date", claimSumm, false, true);
 		if(pD == null){
 			return null;
 		}
@@ -661,8 +663,8 @@ public class WCReimbursementCalculatorMenu {
 		int knownDates = JOptionPane.showConfirmDialog(frmWorkersCompensationLost, message, "Pay Period Dates Known?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		if(knownDates == JOptionPane.CANCEL_OPTION) return null;
 		
-		GregorianCalendar pPS = null;
-		GregorianCalendar pPE = null;
+		Calendar pPS = null;
+		Calendar pPE = null;
 		if(knownDates == JOptionPane.YES_OPTION){
 			pPS = getCalendar("Select Pay Period Start Date", "Pay Period Start", true, true);
 			if(pPS == null){
@@ -674,11 +676,11 @@ public class WCReimbursementCalculatorMenu {
 			}
 		}
 		
-		GregorianCalendar pD = getCalendar("Select Payment Date (Check Date)", "Payment Date", true, false);
+		Calendar pD = getCalendar("Select Payment Date (Check Date)", "Payment Date", true, false);
 		if(pD == null){
 			return null;
 		}
-		GregorianCalendar pRD = getCalendar("Select Day That Payment Was Received (Date Check was Received)", "Payment Received Date", true, false);
+		Calendar pRD = getCalendar("Select Day That Payment Was Received (Date Check was Received)", "Payment Received Date", true, false);
 		if(pRD == null){
 			return null;
 		}
@@ -688,7 +690,7 @@ public class WCReimbursementCalculatorMenu {
 		}
 		boolean isContested = (JOptionPane.showConfirmDialog(frmWorkersCompensationLost, 
 				"Has the claim been contested at any point during this pay period and had to be resolved in court?", "Contested Pay Period?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION);
-		GregorianCalendar contestRslvdDate = null;
+		Calendar contestRslvdDate = null;
 		if(isContested){
 			contestRslvdDate = getCalendar("Select Day That the Contest Was Resolved: ", "Contest Resolved Date", true, false);
 		}
@@ -905,6 +907,13 @@ public class WCReimbursementCalculatorMenu {
 		if(rs.getReceivedWorkPayments().size() > 0){
 			workPayments = rs.getReceivedWorkPayments();
 		}
+		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
+		long mWeek = mDay * 7;
+		Calendar lastFDDate = new GregorianCalendar(sLC.getTimeZone());
+		GregorianCalendar epoch = new GregorianCalendar(sLC.getTimeZone());
+		epoch.setTimeInMillis(mDay);
+		lastFDDate.setTimeInMillis(ro.getTTDRSumm().getClaimSummary().getPriorWeekStart().getTimeInMillis() + ((mWeek*2)-mDay));
+		boolean knownPP = false;
 		label:while(ok != JOptionPane.NO_OPTION){
 			if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, "For the pay period to be entered, did the Injured Person work regular Full-Time hours?",
 					"Full Time Hours Worked?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
@@ -922,14 +931,16 @@ public class WCReimbursementCalculatorMenu {
 						break label;
 					}
 					else{
+						knownPP = wcPC.getPayPeriodStart().compareTo(epoch) > 0;
 						wcPC.setFullTimeHours(true);
-						wcPayments = sLC.addWCPaycheck(wcPC, wcPayments, rs.getClaimSummary().getPriorWeekStart());
+						if (knownPP) wcPayments = sLC.addWCPaycheck(wcPC, wcPayments, rs.getClaimSummary().getPriorWeekStart());
+						else wcPayments = sLC.addWCPaycheckNoKnownPP(wcPC, wcPayments, rs.getClaimSummary().getPriorWeekStart());
 						rs.setWCPayments(wcPayments);
 						ro.setTPDRSumm(rs);
 						claimListModel.set(claimantList.getSelectedIndex(), ro);
 					}
 					message = "Payment Added. "+eol+
-							"Select OK to add another payment, or Select NO to save and exit Work Comp Payment Entry.";
+							"Select YES to add another payment, or Select NO to save and exit Work Comp Payment Entry.";
 					ok = JOptionPane.showConfirmDialog(frmWorkersCompensationLost, message, "Add Another Payment?", JOptionPane.YES_NO_OPTION);
 				}
 				
@@ -941,7 +952,14 @@ public class WCReimbursementCalculatorMenu {
 					break label;
 				}
 				else{
-					wcPayments = sLC.addWCPaycheck(wcPC, wcPayments, rs.getClaimSummary().getPriorWeekStart());
+					knownPP = wcPC.getPayPeriodStart().compareTo(epoch) > 0;
+					if (knownPP) wcPayments = sLC.addWCPaycheck(wcPC, wcPayments, rs.getClaimSummary().getPriorWeekStart());
+					else wcPayments = sLC.addWCPaycheckNoKnownPP(wcPC, wcPayments, rs.getClaimSummary().getPriorWeekStart());
+					WorkCompPaycheck p = wcPayments.get(wcPayments.size()-1);
+					dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TPD", p.getIsContested(),
+							p.getIsLate(), p.getFullTimeHours(), new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
+							new java.sql.Date(p.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(p.getPayPeriodEnd().getTimeInMillis()), p.getGrossAmount(), p.getAmountStillOwed(),
+							new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()));
 					rs.setWCPayments(wcPayments);
 					ro.setTPDRSumm(rs);
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
@@ -964,8 +982,7 @@ public class WCReimbursementCalculatorMenu {
 					try {
 						workPayments = sLC.addTPDWorkPaycheck(pc, workPayments, rs.getClaimSummary().getPriorWeekStart());
 					} catch (Exception ex) {
-						long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
-						long mWeek = mDay * 7;
+						
 						ex.printStackTrace();
 						System.out.println("Paycheck parameters: " + pc.toString());
 						Calendar fD = rs.getClaimSummary().getPriorWeekStart();
@@ -980,7 +997,7 @@ public class WCReimbursementCalculatorMenu {
 				ArrayList<Paycheck> pcList = dataAccess.selectPaychecks(ro.getClaimant().getID(), "WORKPAYMENT");
 				boolean exists = false;
 				for(Paycheck p : pcList){
-					exists = (p.getPayPeriodEnd().compareTo(pc.getPayPeriodEnd()) == 0);
+					exists = (Math.abs(p.getPayPeriodEnd().getTimeInMillis() - pc.getPayPeriodEnd().getTimeInMillis()) < mDay);
 				}
 				if(!exists){
 					dataAccess.insertPaychecks(ro.getClaimant().getID(), "WORKPAYMENT", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
@@ -1026,6 +1043,8 @@ public class WCReimbursementCalculatorMenu {
 	}
 	
 	public boolean addWorkPayments(TPDReimbursementSummary rs){
+		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
+		long mWeek = mDay * 7;
 		String eol = System.getProperty("line.separator");
 		ReimbursementOverview ro = claimantList.getSelectedValue();
 		ArrayList<TPDPaycheck> workPayments = new ArrayList<TPDPaycheck>();
@@ -1040,7 +1059,7 @@ public class WCReimbursementCalculatorMenu {
 			}
 			boolean exists = false;
 			for(Paycheck p : workPayments){
-				exists = (p.getPayPeriodEnd().compareTo(pc.getPayPeriodEnd()) == 0);
+				exists = (Math.abs(p.getPayPeriodEnd().getTimeInMillis() - pc.getPayPeriodEnd().getTimeInMillis()) < mDay);
 			}
 			if(!exists){
 				try {
@@ -1051,8 +1070,6 @@ public class WCReimbursementCalculatorMenu {
 					try {
 						workPayments = sLC.addTPDWorkPaycheck(pc, workPayments, rs.getClaimSummary().getPriorWeekStart());
 					} catch (Exception ex) {
-						long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
-						long mWeek = mDay * 7;
 						ex.printStackTrace();
 						System.out.println("Paycheck parameters: " + pc.toString());
 						Calendar fD = rs.getClaimSummary().getPriorWeekStart();
@@ -1080,6 +1097,8 @@ public class WCReimbursementCalculatorMenu {
 				}
 			}
 			rs.updateReceivedWorkPayments(workPayments);
+			ro.setTPDRSumm(rs);
+			claimListModel.set(claimantList.getSelectedIndex(), ro);
 			yes = JOptionPane.showConfirmDialog(frmWorkersCompensationLost, "Would you like to add another Light Duty Work Payment? (You can enter more later.)", "Add Another Payment?", JOptionPane.YES_NO_OPTION);
 		}
 		rs.computeAmountNotPaidAndAnyLateCompensation();
@@ -1101,15 +1120,15 @@ public class WCReimbursementCalculatorMenu {
 	
 	public TPDPaycheck createWorkPayment(){
 		TPDPaycheck pc = null;
-		GregorianCalendar pPS = getCalendar("Select Pay Period Start Date", "Pay Period Start", true, true);
+		Calendar pPS = getCalendar("Select Pay Period Start Date", "Pay Period Start", true, true);
 		if(pPS == null){
 			return null;
 		}
-		GregorianCalendar pPE = getCalendar("Select Pay Period End Date", "Pay Period End", true, false);
+		Calendar pPE = getCalendar("Select Pay Period End Date", "Pay Period End", true, false);
 		if(pPE == null){
 			return null;
 		}
-		GregorianCalendar pD = getCalendar("Select Payment Date", "Payment Date", true, false);
+		Calendar pD = getCalendar("Select Payment Date", "Payment Date", true, false);
 		if(pD == null){
 			return null;
 		}
@@ -1480,7 +1499,7 @@ public class WCReimbursementCalculatorMenu {
 		if(selected == 0){
 			String message = "Please select the Paycheck you would like to Delete: ";
 			SortedMap<Paycheck, Integer> paychecksDB = dataAccess.selectPaychecksHashMap(ro.getClaimant().getID(), "PRIORWAGES");
-			SortedMap<Paycheck, Integer> workPayments = dataAccess.selectPaychecksHashMap(ro.getClaimant().getID(), "WORKPAYMENTS");
+			SortedMap<Paycheck, Integer> workPayments = dataAccess.selectPaychecksHashMap(ro.getClaimant().getID(), "WORKPAYMENT");
 			if(!workPayments.isEmpty()){
 				paychecksDB.putAll(workPayments);
 			}
@@ -1776,7 +1795,7 @@ public class WCReimbursementCalculatorMenu {
         	}
         	if(nulled){
         		btnEditPersonalInfo.setEnabled(true);
-	            	btnEditClaimHistory.setEnabled(true);
+	            btnEditClaimHistory.setEnabled(true);
         		btnChangeInjuryDate.setEnabled(false);
             	btnEntercompletePriorWage.setEnabled(false);
             	btnEditWageReimbursement.setEnabled(false);
