@@ -440,7 +440,7 @@ public class WCReimbursementCalculatorMenu {
     	btnDeleteAPaycheck.setEnabled(false);
 		panel_1.add(btnDeleteAPaycheck);
 		
-		btnFullDutyDate = new JButton("Enter Full Duty Return Date");
+		btnFullDutyDate = new JButton("Enter Full-Time Return Date");
 		btnFullDutyDate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setFullDutyReturnDate(claimantList.getSelectedValue());
@@ -579,8 +579,8 @@ public class WCReimbursementCalculatorMenu {
 		JXDatePicker picker = new JXDatePicker();
 		java.util.Date start = new java.util.Date(claimSumm.getEarliestPriorWageDate().getTimeInMillis());
 		final java.util.Date startDate = new java.util.Date(claimSumm.getEarliestPriorWageDate().getTimeInMillis());
-		java.util.Date end = new java.util.Date(claimSumm.getPriorWeekStart().getTimeInMillis());
-		final java.util.Date endDate = new java.util.Date(claimSumm.getPriorWeekStart().getTimeInMillis());
+		java.util.Date end = new java.util.Date(claimSumm.getPriorWeekStart().getTimeInMillis()+mWeek);
+		final java.util.Date endDate = new java.util.Date(claimSumm.getPriorWeekStart().getTimeInMillis()+mWeek);
 		if(ppS){
 			start.setTime(startDate.getTime() - mWeek);
 			end.setTime(endDate.getTime() + (mWeek - mDay));
@@ -612,6 +612,11 @@ public class WCReimbursementCalculatorMenu {
 		Object[] params = {message,picker};		
 		GregorianCalendar selected = new GregorianCalendar(this.sLC.getTimeZone());
 		if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) return null;
+		while (ppS && ((JXDatePicker) params[1]).getDate().compareTo(endDate) >= 0){
+			params[0] = "Entered Start Date is after the last accepted date for Prior Wages."+eol+
+					"Make sure date is entered correctly or enter the Paycheck under Wage Reimbursement Details/TPD Light Duty."+eol+message;
+			if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) return null;
+		}
 		selected.setTime(((JXDatePicker)params[1]).getDate());
 		
 		while(selected.getTime().compareTo(end) >= 0){
@@ -973,7 +978,8 @@ public class WCReimbursementCalculatorMenu {
 					"(Note: This is necessary to compute appropriate amount owed for Work Comp Payments(TPD).)";
 			if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, message, "Enter Light Duty Work Payment?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
 				TPDPaycheck pc = createWorkPayment();
-				
+				if (pc == null) break label;
+				pc.computeWCCalcPay(rs.getClaimSummary().getAvgPriorGrossWeeklyPayment());
 				try {
 					workPayments = sLC.addTPDWorkPaycheck(pc, workPayments, rs.getClaimSummary().getPriorWeekStart());
 				} catch (Exception e) {
@@ -1057,6 +1063,7 @@ public class WCReimbursementCalculatorMenu {
 			if(pc == null){
 				return false;
 			}
+			pc.computeWCCalcPay(rs.getClaimSummary().getAvgPriorGrossWeeklyPayment());
 			boolean exists = false;
 			for(Paycheck p : workPayments){
 				exists = (Math.abs(p.getPayPeriodEnd().getTimeInMillis() - pc.getPayPeriodEnd().getTimeInMillis()) < mDay);
@@ -1136,7 +1143,7 @@ public class WCReimbursementCalculatorMenu {
 		if(grossAmnt.compareTo("") == 0){
 			return null;
 		}
-		pc = new TPDPaycheck(grossAmnt, pD, pPS, pPE, "0");
+		pc = new TPDPaycheck(grossAmnt, pD, pPS, pPE, sLC);
 		return pc;
 	}
 	
@@ -1212,16 +1219,17 @@ public class WCReimbursementCalculatorMenu {
 				else{
 					long pWE = cHist.getPriorWeekStart().getTimeInMillis();
 					pWE += mWeek;
-					if(pc.getPayPeriodEnd().getTimeInMillis() > pWE){
+					if(pc.getPayPeriodEnd().getTimeInMillis() > pWE && pc.getPayPeriodStart().getTimeInMillis() < pWE){
 	
-						BigDecimal gA = pc.getGrossAmount();
+						//BigDecimal gA = pc.getGrossAmount();
+						/*
 						TPDPaycheck tpdPC = new TPDPaycheck();
 						tpdPC.setGrossAmount(gA);
 						tpdPC.setPayPeriodStart(pc.getPayPeriodStart());
 						tpdPC.setPayPeriodEnd(pc.getPayPeriodEnd());
 						tpdPC.setPaymentDate(pc.getPaymentDate());
 						tpdPC.setWCCalcPay("0");
-						
+						*/
 						Paycheck[] splits = sLC.splitDateInjuredPayPeriodChecks(pc, cHist);
 						dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", new java.sql.Date(splits[0].getPaymentDate().getTimeInMillis()), new java.sql.Date(splits[0].getPayPeriodStart().getTimeInMillis()),
 							new java.sql.Date(splits[0].getPayPeriodEnd().getTimeInMillis()), splits[0].getGrossAmount());
@@ -1447,10 +1455,10 @@ public class WCReimbursementCalculatorMenu {
 	
 	public boolean setFullDutyReturnDate(ReimbursementOverview ro){
 		boolean fullDuty = false;
-		int yes = JOptionPane.showConfirmDialog(frmWorkersCompensationLost, "Has the employee returned to Full Duty (Full-Time Hours, No Work Restrictions)?", "Full Duty?", JOptionPane.YES_NO_OPTION);
+		int yes = JOptionPane.showConfirmDialog(frmWorkersCompensationLost, "Has the employee returned to Full-Time Hours?", "Returned Full-Time?", JOptionPane.YES_NO_OPTION);
 		if(yes != JOptionPane.YES_OPTION) return false;
 		
-		Calendar fDReturn = this.getCalendar("Select the date first returned to Full Duty: ", "Select Full Duty Return Date", false, false);
+		Calendar fDReturn = this.getCalendar("Select the date first returned to Full-Time: ", "Select Full-Time Return Date", false, false);
 		if (fDReturn == null) return false;
 		
 		ro.setFullDutyReturnDate(fDReturn);
@@ -1509,11 +1517,6 @@ public class WCReimbursementCalculatorMenu {
 					"Select Paycheck to Delete", 
 					JOptionPane.PLAIN_MESSAGE, null, paychecksDB.keySet().toArray(), null);
 			if (toDelete == null){
-				try{
-					throw new Exception("No Valid input given. If user cancelled input, ignore this Exception");
-				} catch (Exception ex){
-					ex.printStackTrace();
-				}
 				return deleted;
 			}
 			deleted = dataAccess.deleteSinglePaycheck(ro.getClaimant().getID(), paychecksDB.get(toDelete));
@@ -1601,11 +1604,6 @@ public class WCReimbursementCalculatorMenu {
 					"Select Work Comp Paycheck to Delete", 
 					JOptionPane.PLAIN_MESSAGE, null, wcPaychecksDB.keySet().toArray(), null);
 			if (toDelete == null){
-				try{
-					throw new Exception("No Valid input given. If user cancelled input, ignore this Exception");
-				} catch (Exception ex){
-					ex.printStackTrace();
-				}
 				return deleted;
 			}
 			deleted = dataAccess.deleteSingleWCPaycheck(ro.getClaimant().getID(), wcPaychecksDB.get(toDelete));
@@ -1774,7 +1772,7 @@ public class WCReimbursementCalculatorMenu {
         	table.setModel(tm);
         }
         else{
-        	if(claimantList.getSelectedValue().isFullDuty()) btnFullDutyDate.setText("Change Full Duty Return Date");
+        	if(claimantList.getSelectedValue().isFullDuty()) btnFullDutyDate.setText("Change Full-Time Return Date");
         	else btnFullDutyDate.setText("Enter Full Duty Return Date");
         	
         	label:for(StateLawCalculable s : (new StatesWithCalculations())){
@@ -1846,7 +1844,7 @@ public class WCReimbursementCalculatorMenu {
     	            	btnDeleteAPaycheck.setEnabled(true);
 		            	TableModel tm = table.getModel();
 		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
-		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toTableString(), 1, 1);
+		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toTableString(claimantList.getSelectedValue().getTotalTTDCalcOwed()), 1, 1);
 		            	tm.setValueAt("Not Completed.", 2, 1);
 		            	tm.setValueAt("Not Completed.", 3, 1);
 		            	table.setModel(tm);
@@ -1866,7 +1864,7 @@ public class WCReimbursementCalculatorMenu {
 	    	            	btnDeleteAPaycheck.setEnabled(true);
 			            	TableModel tm = table.getModel();
     		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
-			            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toTableString(), 1, 1);
+			            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toTableString(claimantList.getSelectedValue().getTotalTTDCalcOwed()), 1, 1);
 			            	tm.setValueAt("Not Completed.", 2, 1);
 			            	tm.setValueAt("N/A until TPD Setup Completed.", 3, 1);
 			            	table.setModel(tm);
@@ -1885,7 +1883,7 @@ public class WCReimbursementCalculatorMenu {
         	            	btnDeleteAPaycheck.setEnabled(true);
         	            	TableModel tm = table.getModel();
     		            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().getClaimSummary().toTableString(), 0, 1);
-			            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toTableString(), 1, 1);
+			            	tm.setValueAt(claimantList.getSelectedValue().getTTDRSumm().toTableString(claimantList.getSelectedValue().getTotalTTDCalcOwed()), 1, 1);
 			            	tm.setValueAt(claimantList.getSelectedValue().getTPDRSumm().toTableString(), 2, 1);
 			            	tm.setValueAt(claimantList.getSelectedValue().getTotalString(), 3, 1);
 			            	table.setModel(tm);

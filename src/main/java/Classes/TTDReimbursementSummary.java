@@ -44,14 +44,15 @@ public class TTDReimbursementSummary extends ReimbursementSummary {
 				: "Not Yet Completed.";
 	}
 	
-	public String toTableString(){
+	public String toTableString(BigDecimal calcOwed){
 		String eol = System.getProperty("line.separator");
 		
 		if(this.containsCompClaim()){
 			if (this.claimSummary.priorWagesIsComplete()){
 				return "Calculated Weekly Payment: $"+this.calculatedWeeklyPayment.toPlainString()+eol+
 						"Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString()+eol+
-						"Amount Not Yet Paid: $"+this.amountNotPaid.toPlainString();
+						"Amount Not Yet Paid: $"+this.amountNotPaid.toPlainString()+eol+
+						"Work Comp Calculated Total Owed: $"+calcOwed.toPlainString();
 			}
 			else{
 				return "Not ready to compute. Prior Wages are not complete.";

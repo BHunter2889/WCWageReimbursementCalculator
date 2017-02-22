@@ -1358,15 +1358,13 @@ public class WCReimbursementDAO {
 			while(results.next()){
 				row++;
 				TPDPaycheck p = new TPDPaycheck();
+				p.setStateLawCalculation(this.stateLawCalculation);
 				p.setPaymentDate(results.getDate(4, tZ));
-				p.setPaymentDate(this.stateLawCalculation.normalizeCalendarTime(p.getPaymentDate()));
 				p.setPayPeriodStart(results.getDate(5, tZ));
-				p.setPayPeriodStart(this.stateLawCalculation.normalizeCalendarTime(p.getPayPeriodStart()));
 				p.setPayPeriodEnd(results.getDate(6, tZ));
-				p.setPayPeriodEnd(this.stateLawCalculation.normalizeCalendarTime(p.getPayPeriodEnd()));
 				p.setGrossAmount(results.getBigDecimal(7));
 				if(results.getBigDecimal(8) != null && results.getBigDecimal(8).compareTo(new BigDecimal("0")) > 0) p.setWCCalcPay(results.getBigDecimal(8));
-				else p.setWCCalcPay("0");
+				else p.computeWCCalcPay(this.selectClaimSummary(clmnt).getAvgPriorGrossWeeklyPayment());
 				pcList.add(p);
 			}
 			if (row < 0){

@@ -279,7 +279,7 @@ public class MissouriCalculation implements StateLawCalculable {
 		tpdPPS.setTimeInMillis(pwPPE + mDay);
 		
 		TPDPaycheck tpdPC = new TPDPaycheck(fpc.getGrossAmount().subtract(pw.getGrossAmount()).toString(), fpc.getPaymentDate(),
-				tpdPPS, fpc.getPayPeriodEnd(),"0");
+				tpdPPS, fpc.getPayPeriodEnd(), this);
 		splitPCs[1] = tpdPC;
 		
 		return splitPCs;
@@ -350,9 +350,12 @@ public class MissouriCalculation implements StateLawCalculable {
 	public BigDecimal computeWCSupplementalPayment(TPDPaycheck workPayment, BigDecimal avgPriorGrossWeeklyPayment) {
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
+		long days = workPayment.getDaysInPayPeriod();
 		long mPP = (workPayment.getPayPeriodEnd().getTimeInMillis() + mDay) - workPayment.getPayPeriodStart().getTimeInMillis();
-		long days = (long) Math.ceil(mPP/mDay);
-		System.out.println("Days in Pay Period: "+String.valueOf(days));
+		long mPPDays = (long) Math.ceil(mPP/mDay);
+		
+		System.out.println("Days in Pay Period(sLC manual): "+mPPDays);
+		System.out.println("Days in Pay Period(sLC): "+days);
 		//long mDR = mPP % mWeek;
 		//long daysRemaining = Math.round((mPP % mWeek) / mDay);
 		//BigDecimal week = new BigDecimal(String.valueOf(mWeek));

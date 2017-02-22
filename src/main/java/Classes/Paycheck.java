@@ -18,6 +18,7 @@ public class Paycheck implements Comparable<Calendar> {
 	protected Calendar paymentDate;
 	protected Calendar payPeriodStart;
 	protected Calendar payPeriodEnd;
+	protected long daysInPayPeriod;
 	protected static final Comparator<Paycheck> PPS_COMPARATOR = new Comparator<Paycheck>(){
 		@Override
 		public int compare(Paycheck p1, Paycheck p2) {
@@ -35,8 +36,10 @@ public class Paycheck implements Comparable<Calendar> {
 		this.payPeriodStart.setTimeInMillis(Long.MIN_VALUE);
 		this.payPeriodEnd = new GregorianCalendar(new SimpleTimeZone(0, "Standard"));
 		this.payPeriodEnd.setTimeInMillis(Long.MAX_VALUE);
+		this.daysInPayPeriod = 0;
 	}
 	
+	@Deprecated
 	//standard constructor
 	public Paycheck(String grossAmount, int iYear, int iMonth, int iDay, int sYear, int sMonth, int sDay) {
 		BigDecimal gA = new BigDecimal(grossAmount);
@@ -50,15 +53,13 @@ public class Paycheck implements Comparable<Calendar> {
 		
 	}
 
+	@Deprecated
 	//constructor to use if payment date is not the same as end date
 	public Paycheck(String grossAmount, int iYear, int iMonth, int iDay, int sYear, int sMonth, int sDay, int eYear, int eMonth, int eDay) {
 		BigDecimal gA = new BigDecimal(grossAmount);
-		this.grossAmount = gA.setScale(2, RoundingMode.HALF_EVEN);
-		
+		this.grossAmount = gA.setScale(2, RoundingMode.HALF_EVEN);	
 		this.paymentDate = new GregorianCalendar(iYear, iMonth-1, iDay);
-		
 		this.payPeriodStart = new GregorianCalendar(sYear, sMonth-1, sDay);
-
 		this.payPeriodEnd = new GregorianCalendar (eYear, eMonth-1, eDay);
 		
 	}
@@ -67,26 +68,20 @@ public class Paycheck implements Comparable<Calendar> {
 	public Paycheck(String grossAmount, GregorianCalendar paymentDate, GregorianCalendar payPeriodStart) {
 		BigDecimal gA = new BigDecimal(grossAmount);
 		this.grossAmount = gA.setScale(2, RoundingMode.HALF_EVEN);
-		
 		this.paymentDate = paymentDate;
-		
 		this.payPeriodStart = payPeriodStart;
-
 		this.payPeriodEnd = paymentDate;
-		
+		this.setDaysInPayPeriod();		
 	}
 	
 	//Caldendar constructor, pPE and pD are different
 	public Paycheck(String grossAmount, Calendar paymentDate, Calendar payPeriodStart, Calendar payPeriodEnd) {
 		BigDecimal gA = new BigDecimal(grossAmount);
-		this.grossAmount = gA.setScale(2, RoundingMode.HALF_EVEN);
-		
-		this.paymentDate = paymentDate;
-		
+		this.grossAmount = gA.setScale(2, RoundingMode.HALF_EVEN);		
+		this.paymentDate = paymentDate;		
 		this.payPeriodStart = payPeriodStart;
-
 		this.payPeriodEnd = payPeriodEnd;
-		
+		this.setDaysInPayPeriod();		
 	}
 	
 	@Override
@@ -133,15 +128,15 @@ public class Paycheck implements Comparable<Calendar> {
 		BigDecimal gA = new BigDecimal(newGrossAmount);
 		this.grossAmount = gA.setScale(2, RoundingMode.HALF_EVEN);
 	}
-	
+	@Deprecated
 	public void setPaymentDate(int year, int month, int day){
 		this.paymentDate.set(year, month, day);
 	}
-	
+	@Deprecated
 	public void setPayPeriodStart(int year, int month, int day){
 		this.payPeriodStart.set(year, month, day);
 	}
-	
+	@Deprecated
 	public void setPayPeriodEnd(int year, int month, int day){
 		this.payPeriodEnd.set(year, month, day);
 	}
@@ -156,6 +151,7 @@ public class Paycheck implements Comparable<Calendar> {
 	
 	public void setPayPeriodEnd(Calendar payPE){
 		this.payPeriodStart = payPE;
+		this.setDaysInPayPeriod();
 	}
 
 	public String toString(){
@@ -198,14 +194,22 @@ public class Paycheck implements Comparable<Calendar> {
 		GregorianCalendar pPE = new GregorianCalendar(tZ);
 		pPE.setTime(payPE);
 		this.payPeriodEnd = new MissouriCalculation().normalizeCalendarTime(pPE);
+		this.setDaysInPayPeriod();
+	}
+	
+	public void setDaysInPayPeriod(){
+		this.daysInPayPeriod = 0;
+		LocalDate start = this.payPeriodStart.getTime().toInstant().atZone(new SimpleTimeZone(0, "UTC").toZoneId()).toLocalDate();
+		System.out.println("PayPeriodStart: "+start.toString());
+		LocalDate end = this.payPeriodEnd.getTime().toInstant().atZone(new SimpleTimeZone(0, "UTC").toZoneId()).toLocalDate();
+		System.out.println("PayPeriodEnd: "+end.toString());
+		long days = ChronoUnit.DAYS.between( start, end) + 1;
+		System.out.println("Days in Pay Period: "+days);
+		this.daysInPayPeriod = days;	
 	}
 	
 	public long getDaysInPayPeriod(){
-		LocalDate start = this.payPeriodStart.getTime().toInstant().atZone(new SimpleTimeZone(0, "UTC").toZoneId()).toLocalDate();
-		LocalDate end = this.payPeriodEnd.getTime().toInstant().atZone(new SimpleTimeZone(0, "UTC").toZoneId()).toLocalDate();
-		long days = (long) ChronoUnit.DAYS.between( start, end) + 1;
-		return days;
-		
+		return this.daysInPayPeriod;
 	}
 	
 	public boolean doPayPeriodsOverlap(Paycheck pc){

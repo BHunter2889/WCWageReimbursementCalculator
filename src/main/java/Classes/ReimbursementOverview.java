@@ -48,6 +48,9 @@ public class ReimbursementOverview {
 		if (tpdRSumm == null) return;
 		this.tpdRSumm = tpdRSumm;
 		if (this.containsTTD()) this.computeTTDaNPNoLatePayCalculation();
+		for (TPDPaycheck p : this.tpdRSumm.getReceivedWorkPayments()){
+			System.out.println(p.toWCPayString());
+		}
 	}
 	
 	public boolean determineAnyLatePay(){
@@ -55,8 +58,7 @@ public class ReimbursementOverview {
 		else if(this.containsTTD())this.anyLatePay = this.ttdRSumm.determineAnyLatePay();
 		else if(this.containsTPD())this.anyLatePay = this.tpdRSumm.determineAnyLatePay();
 		else this.anyLatePay = false;
-		
-		
+			
 		return anyLatePay;
 	}
 	
@@ -103,9 +105,9 @@ public class ReimbursementOverview {
 		if (tpd.isEmpty()) return this.ttdRSumm.claimSummary.daysInjured;
 		long daysTPD = 0;
 		if (tpd.size() > 1){
-		label:for(int i = 0, j=tpd.size()-1; i<j; i++, j--){
+	  label:for(int i = 0, j=tpd.size()-1; i<j; i++, j--){
 				daysTPD += tpd.get(i).getDaysInPayPeriod() + tpd.get(j).getDaysInPayPeriod();
-				if(j - i == 2){
+				if(i+2 == j){
 					i++;
 					daysTPD += tpd.get(i).getDaysInPayPeriod();
 					break label;
@@ -116,13 +118,16 @@ public class ReimbursementOverview {
 			daysTPD += tpd.get(0).getDaysInPayPeriod();
 		}
 		ReimbursementSummary rs = (this.containsTTD()) ? this.getTTDRSumm():this.getTPDRSumm();
+		System.out.println("Days TPD: "+daysTPD);
 		long daysNotTPD = rs.claimSummary.getDaysInjured() - daysTPD;
+		System.out.println("Days TTD: "+daysNotTPD);
 		return daysNotTPD;
 	}
 	
 	public void computeTTDaNPNoLatePayCalculation(){
 		if (!this.containsTTD()) return;
 		BigDecimal totalCalcPay = this.getTotalTTDCalcOwed();
+		System.out.println("TTD Total Calculated Pay no Late Pay: $"+totalCalcPay.toPlainString());
 		BigDecimal amountNotPaid = new BigDecimal("0.00");
 		BigDecimal wcPAID = this.ttdRSumm.getWCPayToDate(); 
 		

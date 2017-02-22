@@ -51,7 +51,8 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 	public void computeAmountNotPaidAndAnyLateCompensation(){
 		String aNP = "0.00";
 		BigDecimal amountNotPaid = new BigDecimal(aNP);
-		BigDecimal wcTotalPay = this.getWCPayToDate();
+		this.amountNotPaid = amountNotPaid;
+		BigDecimal wcTotalPay = new BigDecimal(this.getWCPayToDate().toString());
 		BigDecimal wcCalcTotalPay = this.getWCCalcPayToDate();
 		amountNotPaid = wcCalcTotalPay.subtract(wcTotalPay);
 		amountNotPaid = amountNotPaid.setScale(2, RoundingMode.HALF_EVEN);
@@ -159,18 +160,22 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 	}
 	
 	public BigDecimal getWCCalcPayToDate(){
-		BigDecimal wcCalcPTD = new BigDecimal("0");
-		for (int i=0, j=this.receivedWorkPayments.size()-1; i<j; i++, j--){
-			TPDPaycheck p1 = this.receivedWorkPayments.get(i);
-			TPDPaycheck p2 = this.receivedWorkPayments.get(j);
-			if (p1.getWCCalcPay().compareTo(new BigDecimal("0")) <= 0) p1.computeWCCalcPay(stateLawCalculation, this.claimSummary.getAvgPriorGrossWeeklyPayment());
-			if (p2.getWCCalcPay().compareTo(new BigDecimal("0")) <= 0) p2.computeWCCalcPay(stateLawCalculation, this.claimSummary.getAvgPriorGrossWeeklyPayment());
-			wcCalcPTD = wcCalcPTD.add(p1.getWCCalcPay()).add(p2.getWCCalcPay());
-			if(i+2 == j){
-				p1 = this.receivedWorkPayments.get(i+1);
-				if (p1.getWCCalcPay().compareTo(new BigDecimal("0")) <= 0) p1.computeWCCalcPay(stateLawCalculation, this.claimSummary.getAvgPriorGrossWeeklyPayment());
-				wcCalcPTD = wcCalcPTD.add(p1.getGrossAmount());
-				break;
+		BigDecimal wcCalcPTD = new BigDecimal("0.00");
+		if (this.receivedWorkPayments.isEmpty()) return wcCalcPTD;
+		if(this.receivedWorkPayments.size() < 2) wcCalcPTD = wcCalcPTD.add(this.receivedWorkPayments.get(0).getWCCalcPay());
+		else{
+			for (int i=0, j=this.receivedWorkPayments.size()-1; i<j; i++, j--){
+				TPDPaycheck p1 = this.receivedWorkPayments.get(i);
+				TPDPaycheck p2 = this.receivedWorkPayments.get(j);
+				if (p1.getWCCalcPay().compareTo(new BigDecimal("0")) <= 0) p1.computeWCCalcPay(this.claimSummary.getAvgPriorGrossWeeklyPayment());
+				if (p2.getWCCalcPay().compareTo(new BigDecimal("0")) <= 0) p2.computeWCCalcPay(this.claimSummary.getAvgPriorGrossWeeklyPayment());
+				wcCalcPTD = wcCalcPTD.add(p1.getWCCalcPay()).add(p2.getWCCalcPay());
+				if(i+2 == j){
+					p1 = this.receivedWorkPayments.get(i+1);
+					if (p1.getWCCalcPay().compareTo(new BigDecimal("0")) <= 0) p1.computeWCCalcPay(this.claimSummary.getAvgPriorGrossWeeklyPayment());
+					wcCalcPTD = wcCalcPTD.add(p1.getWCCalcPay());
+					break;
+				}
 			}
 		}
 		wcCalcPTD = wcCalcPTD.setScale(2, RoundingMode.HALF_EVEN);
@@ -194,7 +199,8 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 		String eol = System.getProperty("line.separator");
 		return "Amount Not Yet Paid: $"+this.amountNotPaid.toPlainString()+eol+
 				"Light Duty Pay-To-Date: $"+this.getWorkPayToDate().toPlainString()+eol+
-				"Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString();
+				"Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString()+eol+
+				"Work Comp Calculated Total Owed: $"+this.getWCCalcPayToDate();
 	}
 	/*public void setReceivedWorkPayments(){
 		boolean added = false;
