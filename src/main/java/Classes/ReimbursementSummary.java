@@ -275,6 +275,7 @@ public abstract class ReimbursementSummary {
 	public BigDecimal getWCPayToDate(){
 		String zero = "0.00";
 		BigDecimal wcPTD = new BigDecimal(zero);
+		
 		if (this.wcPayments.isEmpty()) return wcPTD;
 		if (this.wcPayments.size() < 2){
 			wcPTD = wcPTD.add(this.wcPayments.get(0).getGrossAmount());

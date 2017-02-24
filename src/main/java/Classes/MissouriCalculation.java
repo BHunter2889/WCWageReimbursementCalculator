@@ -53,8 +53,8 @@ public class MissouriCalculation implements StateLawCalculable {
 		formatter.setLenient(false);
 		formatter.setTimeZone(timeZone);
 		java.util.Date ePWD = earliestPriorWageDate.getTime();
-		System.out.println("EPW Date: "+formatter.format(ePWD));
-		System.out.println("PWS Date: "+formatter.format(priorWeekStart.getTime()));
+		//System.out.println("EPW Date: "+formatter.format(ePWD));
+		//System.out.println("PWS Date: "+formatter.format(priorWeekStart.getTime()));
 		//Date dPPS = (Date) pcPPS.getTime();
 		 
 		long mPWeekEnd =  priorWeekStart.getTimeInMillis() + (mDay * 6);
@@ -167,11 +167,11 @@ public class MissouriCalculation implements StateLawCalculable {
 		}
 		if (newPC != null){
 			pchecks.add(newPC);
-			System.out.println(newPC.toString());
+			//System.out.println(newPC.toString());
 		}
 		else{
 			pchecks.add(pc);
-			System.out.println(pc.toString());
+			//System.out.println(pc.toString());
 		}
 		cHist.setPriorWages(pchecks);
 		System.out.println("Prior Wages: "+eol+cHist.listPriorWages());
@@ -350,12 +350,12 @@ public class MissouriCalculation implements StateLawCalculable {
 	public BigDecimal computeWCSupplementalPayment(TPDPaycheck workPayment, BigDecimal avgPriorGrossWeeklyPayment) {
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		long mWeek = mDay * 7;
-		long days = workPayment.getDaysInPayPeriod();
+		//long days = workPayment.getDaysInPayPeriod();
 		long mPP = (workPayment.getPayPeriodEnd().getTimeInMillis() + mDay) - workPayment.getPayPeriodStart().getTimeInMillis();
-		long mPPDays = (long) Math.ceil(mPP/mDay);
+		//long mPPDays = (long) Math.ceil(mPP/mDay);
 		
-		System.out.println("Days in Pay Period(sLC manual): "+mPPDays);
-		System.out.println("Days in Pay Period(sLC): "+days);
+		//System.out.println("Days in Pay Period(sLC manual): "+mPPDays);
+		//System.out.println("Days in Pay Period(sLC): "+days);
 		//long mDR = mPP % mWeek;
 		//long daysRemaining = Math.round((mPP % mWeek) / mDay);
 		//BigDecimal week = new BigDecimal(String.valueOf(mWeek));

@@ -200,11 +200,11 @@ public class Paycheck implements Comparable<Calendar> {
 	public void setDaysInPayPeriod(){
 		this.daysInPayPeriod = 0;
 		LocalDate start = this.payPeriodStart.getTime().toInstant().atZone(new SimpleTimeZone(0, "UTC").toZoneId()).toLocalDate();
-		System.out.println("PayPeriodStart: "+start.toString());
+		//System.out.println("PayPeriodStart: "+start.toString());
 		LocalDate end = this.payPeriodEnd.getTime().toInstant().atZone(new SimpleTimeZone(0, "UTC").toZoneId()).toLocalDate();
-		System.out.println("PayPeriodEnd: "+end.toString());
+		//System.out.println("PayPeriodEnd: "+end.toString());
 		long days = ChronoUnit.DAYS.between( start, end) + 1;
-		System.out.println("Days in Pay Period: "+days);
+		//System.out.println("Days in Pay Period: "+days);
 		this.daysInPayPeriod = days;	
 	}
 	

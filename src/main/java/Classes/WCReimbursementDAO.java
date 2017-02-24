@@ -1527,7 +1527,9 @@ public class WCReimbursementDAO {
 	}
 	
 	public ArrayList<WorkCompPaycheck> selectWorkCompPaychecks(int id, String wcpcType){
+		System.out.println("******Getting "+wcpcType+" WC Paychecks..... ************");
 		ArrayList<WorkCompPaycheck> wcpcList = new ArrayList<WorkCompPaycheck>();
+		BigDecimal totalAmnt = new BigDecimal("0.00");
 		PreparedStatement stmtSelectWCPaychecks = null;
 		try {
 			stmtSelectWCPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtSelectWCPCType());
@@ -1564,6 +1566,7 @@ public class WCReimbursementDAO {
 		this.stateLawCalculation = this.getStateLawCalculation(clmnt.getState());
 		Calendar tZ = Calendar.getInstance(this.stateLawCalculation.getTimeZone());
 		int row = -1;
+		boolean deleted = false;
 		try{
 			while(results.next()){
 				row++;
@@ -1579,7 +1582,21 @@ public class WCReimbursementDAO {
 				wp.setGrossAmount(results.getBigDecimal(11));
 				wp.setAmountStillOwed(results.getBigDecimal(12));
 				wp.setContestResolutionDate(results.getDate(13, tZ));
-				wcpcList.add(wp);
+				System.out.println(wp.toString()+" ROW ID = "+results.getInt(1));
+		  label:for (WorkCompPaycheck p : wcpcList){
+					if (WorkCompPaycheck.WC_COMPARATOR.compare(wp, p) == 0){
+						this.deleteSinglePaycheck(id, results.getInt(1));
+						deleted = true;
+						break label;
+					}
+				}
+				
+				if(!deleted){ 
+					wcpcList.add(wp);
+					totalAmnt = totalAmnt.add(wp.getGrossAmount());
+					System.out.println("***"+wp.toString()+" ROW ID = "+results.getInt(1));
+				}
+				
 			}
 			if (row < 0){
 				results.close();
@@ -1604,6 +1621,7 @@ public class WCReimbursementDAO {
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
+		System.out.println("********TOTAL "+wcpcType+" WC Pay: $"+totalAmnt.toPlainString()+"********");
 		return wcpcList;
 	}
 	

@@ -1038,12 +1038,6 @@ public class WCReimbursementCalculatorMenu {
 					new Date(ro.getFullDutyReturnDate().getTimeInMillis()));
 			else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", rs.getCalculatedWeeklyPayment(), rs.getAmountNotPaid(), null);
 		}
-		for(WorkCompPaycheck p : ro.tpdRSumm.wcPayments){
-			dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TPD", p.getIsContested(),
-					p.getIsLate(), p.getFullTimeHours(), new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
-					new java.sql.Date(p.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(p.getPayPeriodEnd().getTimeInMillis()), p.getGrossAmount(), p.getAmountStillOwed(),
-					new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()));
-		}
 		claimListModel.set(claimantList.getSelectedIndex(), ro);
 		return true;
 	}
