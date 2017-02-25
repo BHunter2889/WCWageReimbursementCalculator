@@ -1688,8 +1688,8 @@ public class WCReimbursementDAO {
 				}catch(IllegalArgumentException i){
 					i.printStackTrace();
 				}
-				System.out.println("Prior to Map: "+wp.toString());
-				System.out.println("After Map: "+wcpcList.lastKey().toString()+" or "+wcpcList.firstKey().toString());
+				//System.out.println("Prior to Map: "+wp.toString());
+				//System.out.println("After Map: "+wcpcList.lastKey().toString()+" or "+wcpcList.firstKey().toString());
 			}
 			
 		} catch (SQLException e){
@@ -1711,7 +1711,7 @@ public class WCReimbursementDAO {
 			e.printStackTrace();
 		}
 		//SortedMap<WorkCompPaycheck, Integer> newWCPCList = sLC.sortWCPCHashMapByDate(wcpcList);
-		System.out.println("Selected WCPC SortedMap: "+wcpcList.toString());
+		//System.out.println("Selected WCPC SortedMap: "+wcpcList.toString());
 		return wcpcList;
 	}
 	
