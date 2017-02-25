@@ -1756,7 +1756,10 @@ public class WCReimbursementDAO {
 		try{
 			while(results.next()){
 				row++;
-				tpdRSumm = new TPDReimbursementSummary(results.getBigDecimal(4), claimSum, results.getBigDecimal(5), tpdWCPay, workPay);
+				BigDecimal aNP = results.getBigDecimal(5);
+				tpdRSumm = new TPDReimbursementSummary(results.getBigDecimal(4), claimSum, aNP, tpdWCPay, workPay);
+				if(!tpdRSumm.determineAnyLatePay()) tpdRSumm.computeAmountNotPaidAndAnyLateCompensation();
+				if(aNP.compareTo(tpdRSumm.amountNotPaid) > 0) tpdRSumm.setAmountNotPaid(aNP);
 			}
 			if (row < 0){
 				results.close();

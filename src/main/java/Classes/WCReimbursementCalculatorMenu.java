@@ -522,8 +522,8 @@ public class WCReimbursementCalculatorMenu {
 		
 		Object[] params = {message,picker};		
 		GregorianCalendar selected = new GregorianCalendar(this.sLC.getTimeZone());
-		boolean cancel = JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION;
-		if (cancel) return null;
+		int cancel = JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.OK_CANCEL_OPTION);
+		if (cancel == JOptionPane.CANCEL_OPTION || cancel == JOptionPane.CLOSED_OPTION) return null;
 		selected.setTime(((JXDatePicker)params[1]).getDate());
 		while(selected.compareTo(new GregorianCalendar(sLC.getTimeZone())) == 0){
 			String m = "You must select a date within the dates provided in order to continue." +System.getProperty("line.separator")+
@@ -531,8 +531,8 @@ public class WCReimbursementCalculatorMenu {
 			if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, m, null, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.CANCEL_OPTION){
 				return null;
 			}
-			cancel = JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION;
-			if (cancel) return null;
+			cancel = JOptionPane.showConfirmDialog(frmWorkersCompensationLost,params,title, JOptionPane.OK_CANCEL_OPTION);
+			if (cancel == JOptionPane.CANCEL_OPTION || cancel == JOptionPane.CLOSED_OPTION) return null;
 			selected.setTime(((JXDatePicker)params[1]).getDate());
 		}
 		
@@ -1289,17 +1289,16 @@ public class WCReimbursementCalculatorMenu {
 						"(Note: This will automatically update the period for which paychecks prior to injury are used to calculate the weekly payment owed. "
 						+ "If you have already entered prior wage paychecks they will be deleted and will need to be reentered.)"+eol+
 						"If You still wish to continue, select OK to continue. Otherwise, select CANCEL to exit.";
-				if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, historyMessage, "Information Required to Continue", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION){
-					return false;
-				}
+				int cancel = JOptionPane.showConfirmDialog(frmWorkersCompensationLost, historyMessage, "Information Required to Continue", JOptionPane.OK_CANCEL_OPTION);
+				if(cancel == JOptionPane.CANCEL_OPTION || cancel == JOptionPane.CLOSED_OPTION) return false;
 				// Int selection of date obsolete with popup date picker, saving in case problems are encountered
 				//int year = getPositiveInt("Enter Year of Injury: ", "Enter Year Injured");
 				//int month = getPositiveInt("Enter Month of Injury: ", "Enter Month Injured");
 				//int day = getPositiveInt("Enter Day of Month (i.e. 21 for January 21st) of Injury: ", "Enter Day Injured");
 				Calendar dateInjured = getCalendar("Select the Date of Injury", "Date Injured", false, false);
-				if (dateInjured.compareTo(ro.getTTDRSumm().getClaimSummary().getDateInjured()) == 0){
-					return false;
-				}
+				if (dateInjured == null) return false;
+				if (dateInjured.compareTo(ro.getTTDRSumm().getClaimSummary().getDateInjured()) == 0) return false;
+				
 				dataAccess.deletePaychecksFrmSingleClaim(ro.getClaimant().getID(), "PRIORWAGES");
 				CompClaim cHist = new CompClaim(new java.sql.Date(dateInjured.getTimeInMillis()), sLC);
 				dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),

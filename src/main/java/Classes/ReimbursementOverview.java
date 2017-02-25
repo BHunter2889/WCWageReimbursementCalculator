@@ -47,6 +47,7 @@ public class ReimbursementOverview {
 	public void setTPDRSumm(TPDReimbursementSummary tpdRSumm){
 		if (tpdRSumm == null) return;
 		this.tpdRSumm = tpdRSumm;
+		if (!this.tpdRSumm.determineAnyLatePay()) this.tpdRSumm.computeAmountNotPaidAndAnyLateCompensation();
 		if (this.containsTTD()) this.computeTTDaNPNoLatePayCalculation();
 		for (TPDPaycheck p : this.tpdRSumm.getReceivedWorkPayments()){
 			System.out.println(p.toWCPayString());
