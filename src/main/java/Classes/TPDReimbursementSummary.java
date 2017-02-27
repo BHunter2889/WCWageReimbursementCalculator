@@ -188,6 +188,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 	
 	public void setReceivedWorkPayments(ArrayList<TPDPaycheck> rWP){
 		this.receivedWorkPayments = rWP;
+		this.computeAmountNotPaidAndAnyLateCompensation();
 	}
 	
 	public String toString(){

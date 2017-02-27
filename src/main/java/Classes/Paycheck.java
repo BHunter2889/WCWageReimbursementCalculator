@@ -147,6 +147,7 @@ public class Paycheck implements Comparable<Calendar> {
 	
 	public void setPayPeriodStart(Calendar payPS){
 		this.payPeriodStart = payPS;
+		this.setDaysInPayPeriod();
 	}
 	
 	public void setPayPeriodEnd(Calendar payPE){

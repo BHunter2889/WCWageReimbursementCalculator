@@ -15,14 +15,16 @@ public class ReimbursementOverview {
 	protected TTDReimbursementSummary ttdRSumm;
 	protected TPDReimbursementSummary tpdRSumm;
 	protected Calendar fullDutyReturnDate;
+	protected Calendar lightDutyStartDate;
 	protected boolean anyLatePay;
 	
 
-	public ReimbursementOverview(Claimant clmnt, TTDReimbursementSummary ttdRSumm, TPDReimbursementSummary tpdRSumm, Calendar fullDutyReturnDate) {
+	public ReimbursementOverview(Claimant clmnt, TTDReimbursementSummary ttdRSumm, TPDReimbursementSummary tpdRSumm, Calendar fullDutyReturnDate, Calendar lightDutyReturnDate) {
 		this.claimant = clmnt;
 		this.ttdRSumm = ttdRSumm;
 		this.tpdRSumm = tpdRSumm;
 		this.fullDutyReturnDate = fullDutyReturnDate;
+		this.lightDutyStartDate = lightDutyReturnDate;
 		this.anyLatePay = false;
 	}
 	
@@ -31,6 +33,7 @@ public class ReimbursementOverview {
 		this.ttdRSumm = null;
 		this.tpdRSumm = null;
 		this.fullDutyReturnDate = null;
+		this.lightDutyStartDate = null;
 		this.anyLatePay = false;
 	}
 	
@@ -70,6 +73,13 @@ public class ReimbursementOverview {
 		System.out.println("Full Duty Return Date: "+this.toStringFullDutyReturn());
 	}
 	
+	public void setLightDutyStartDate(Calendar lightDutyStartDate){
+		if (lightDutyStartDate == null) return;
+		this.lightDutyStartDate = lightDutyStartDate;
+		this.computeTTDaNPNoLatePayCalculation();
+		System.out.println("Light Duty Return Date: "+this.toStringLightDutyStart());
+	}
+	
 	public void computeDaysAndWeeksInjured(){
 		if (this.fullDutyReturnDate == null) return;
 		LocalDate end = this.fullDutyReturnDate.getTime().toInstant().atZone(new SimpleTimeZone(0, "UTC").toZoneId()).toLocalDate();
@@ -91,10 +101,25 @@ public class ReimbursementOverview {
 		if(this.containsTPD()) this.tpdRSumm.claimSummary.setDaysAndWeeksInjuredByFullDutyReturn(days, weeks);
 	}
 	
+	public long getDaysTTD(){
+		if (this.hasLightDuty()){
+			LocalDate start = this.ttdRSumm.claimSummary.dateInjured.getTime().toInstant().atZone(new SimpleTimeZone(0, "UTC").toZoneId()).toLocalDate();
+			LocalDate end = this.lightDutyStartDate.getTime().toInstant().atZone(new SimpleTimeZone(0, "UTC").toZoneId()).toLocalDate();
+			return ChronoUnit.DAYS.between(start, end) + 1;
+		}
+		else return 0;
+				
+
+	}
+	//accounts for any days not covered by a return to TTD Status for more than a pay period.
 	public long getNumDaysNotInTPD(){
 		this.computeDaysAndWeeksInjured();
+		this.checkForLDOverlap();
 		if (!this.containsTPD()){
-			if (this.containsTTD()) return this.ttdRSumm.claimSummary.daysInjured;
+			if (this.containsTTD()){
+				
+				return this.hasLightDuty() ? this.getDaysTTD(): this.ttdRSumm.claimSummary.daysInjured;
+			}
 			else try{
 				throw new NullPointerException("Neither ReimbursementSummary contains a CompClaim with a valid Date of Injury.");
 			} catch (NullPointerException e){
@@ -103,7 +128,11 @@ public class ReimbursementOverview {
 			}
 		}
 		ArrayList<TPDPaycheck> tpd = this.getTPDRSumm().getReceivedWorkPayments();
-		if (tpd.isEmpty()) return this.ttdRSumm.claimSummary.daysInjured;
+		if (tpd.isEmpty()){
+			if (this.hasLightDuty()) return this.getDaysTTD();
+					
+			return this.ttdRSumm.claimSummary.daysInjured;
+		}
 		long daysTPD = 0;
 		if (tpd.size() > 1){
 	  label:for(int i = 0, j=tpd.size()-1; i<j; i++, j--){
@@ -120,7 +149,8 @@ public class ReimbursementOverview {
 		}
 		ReimbursementSummary rs = (this.containsTTD()) ? this.getTTDRSumm():this.getTPDRSumm();
 		System.out.println("Days TPD: "+daysTPD);
-		long daysNotTPD = rs.claimSummary.getDaysInjured() - daysTPD;
+		long daysNotTPD = Math.max(this.getDaysTTD(), rs.getClaimSummary().getDaysInjured() - daysTPD);
+
 		System.out.println("Days TTD: "+daysNotTPD);
 		return daysNotTPD;
 	}
@@ -173,6 +203,9 @@ public class ReimbursementOverview {
 	public Calendar getFullDutyReturnDate(){
 		return this.fullDutyReturnDate;
 	}
+	public Calendar getLightDutyStartDate(){
+		return this.lightDutyStartDate;
+	}
 	
 	public boolean containsTTD(){
 		return this.ttdRSumm != null;
@@ -186,12 +219,111 @@ public class ReimbursementOverview {
 		return this.fullDutyReturnDate != null;
 	}
 	
+	public boolean hasLightDuty(){
+		return this.lightDutyStartDate != null;
+	}
+	
+	public boolean checkForLDOverlap(){
+		boolean trimmed = false;
+		if (!this.hasLightDuty() || !this.containsTPD()) return trimmed;
+		if (this.checkForTPDLightDutyPayPeriodStart()) return trimmed;
+		ArrayList<TPDPaycheck> tpd = this.tpdRSumm.receivedWorkPayments;
+		if(tpd.isEmpty()) return false;
+		if (tpd.size() > 1){
+	  label:for(int i = 0, j=tpd.size()-1; i<j; i++, j--){
+				if(tpd.get(i).getPayPeriodStart().before(lightDutyStartDate)){
+					tpd.get(i).setPayPeriodStart(lightDutyStartDate);
+					tpd.get(i).computeWCCalcPay(this.tpdRSumm.claimSummary.getAvgPriorGrossWeeklyPayment());
+					trimmed = true;
+					break label;
+				}
+				if(tpd.get(j).getPayPeriodStart().before(lightDutyStartDate)){
+					tpd.get(j).setPayPeriodStart(lightDutyStartDate);
+					tpd.get(j).computeWCCalcPay(this.tpdRSumm.claimSummary.getAvgPriorGrossWeeklyPayment());
+					trimmed = true;
+					break label;
+				}
+				if(i+2 == j){
+					i++;
+					if(tpd.get(i).getPayPeriodStart().before(lightDutyStartDate)){
+						tpd.get(i).setPayPeriodStart(lightDutyStartDate);
+						tpd.get(i).computeWCCalcPay(this.tpdRSumm.claimSummary.getAvgPriorGrossWeeklyPayment());
+						trimmed = true;
+						break label;
+					}
+				}
+			}
+		}
+		else {
+			if(tpd.get(0).getPayPeriodStart().before(lightDutyStartDate)){
+				tpd.get(0).setPayPeriodStart(lightDutyStartDate);
+				tpd.get(0).computeWCCalcPay(this.tpdRSumm.claimSummary.getAvgPriorGrossWeeklyPayment());
+				trimmed = true;
+			}
+		}
+		if (trimmed){
+			this.tpdRSumm.setReceivedWorkPayments(tpd);
+			if (this.containsTTD()) this.computeTTDaNPNoLatePayCalculation();
+		}
+		return trimmed;
+	}
+	
+	public boolean checkForTPDLightDutyPayPeriodStart(){
+		boolean lDPPS = false;
+		if (!this.hasLightDuty() || !this.containsTPD()) return lDPPS;
+		ArrayList<TPDPaycheck> tpd = this.tpdRSumm.receivedWorkPayments;
+		if(tpd.isEmpty()) return false;
+		if (tpd.size() > 1){
+			for(int i = 0, j=tpd.size()-1; i<j; i++, j--){
+				if(tpd.get(i).getPayPeriodStart().compareTo(lightDutyStartDate) == 0){
+					lDPPS = true;
+					tpd.get(i).computeWCCalcPay(this.tpdRSumm.claimSummary.getAvgPriorGrossWeeklyPayment());
+					this.tpdRSumm.setReceivedWorkPayments(tpd);
+					return lDPPS;
+				}
+				if(tpd.get(j).getPayPeriodStart().compareTo(lightDutyStartDate) == 0){			
+					tpd.get(j).computeWCCalcPay(this.tpdRSumm.claimSummary.getAvgPriorGrossWeeklyPayment());
+					lDPPS = true;
+					this.tpdRSumm.setReceivedWorkPayments(tpd);
+					return lDPPS;
+				}
+				if(i+2 == j){
+					i++;
+					if(tpd.get(i).getPayPeriodStart().compareTo(lightDutyStartDate) == 0){
+						tpd.get(i).computeWCCalcPay(this.tpdRSumm.claimSummary.getAvgPriorGrossWeeklyPayment());
+						lDPPS = true;
+						this.tpdRSumm.setReceivedWorkPayments(tpd);
+						return lDPPS;
+					}
+				}
+			}
+		}
+		else {
+			if(tpd.get(0).getPayPeriodStart().compareTo(lightDutyStartDate) == 0){
+				lDPPS = true;
+				tpd.get(0).computeWCCalcPay(this.tpdRSumm.claimSummary.getAvgPriorGrossWeeklyPayment());
+				this.tpdRSumm.setReceivedWorkPayments(tpd);
+				return lDPPS;
+			}
+		}
+		
+		return lDPPS;
+	}
+	
 	public String toStringFullDutyReturn(){
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formatter.setLenient(false);
 		formatter.setTimeZone(new SimpleTimeZone(0, "Standard"));
 		java.util.Date fDR = this.fullDutyReturnDate.getTime();
 		return formatter.format(fDR);
+	}
+	
+	public String toStringLightDutyStart(){
+		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
+		formatter.setLenient(false);
+		formatter.setTimeZone(new SimpleTimeZone(0, "Standard"));
+		java.util.Date lDR = this.lightDutyStartDate.getTime();
+		return formatter.format(lDR);
 	}
 	
 	public String getTotalString(){

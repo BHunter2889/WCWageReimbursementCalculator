@@ -179,7 +179,7 @@ public class MissouriCalculation implements StateLawCalculable {
 	}
 
 	@Override
-	public ArrayList<TPDPaycheck> addTPDWorkPaycheck(TPDPaycheck pc, ArrayList<TPDPaycheck> pchecks, Calendar priorWeekStart) throws Exception {
+	public ArrayList<TPDPaycheck> addTPDWorkPaycheck(TPDPaycheck pc, ArrayList<TPDPaycheck> pchecks, Calendar priorWeekStart, Calendar lightDutyStart) throws Exception {
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		String message = "";
 		Calendar pcPPS = pc.getPayPeriodStart();
@@ -195,7 +195,11 @@ public class MissouriCalculation implements StateLawCalculable {
 		Calendar pcPPE = pc.getPayPeriodEnd();
 		//Date dPPE = (Date) pcPPE.getTime();
 		//Date dPWE = (Date) priorWeekEnd.getTime();
-		
+		if (lightDutyStart != null){
+			if(pc.getPayPeriodStart().before(lightDutyStart)){
+				pc.setPayPeriodStart(lightDutyStart);
+			}
+		}
 
 		if(pcPPE.compareTo(priorWeekEnd) <= 0){
 			message = "Invalid paycheck end date. Pay Period End Date must be after the end of the week immediately prior to week of injury.";

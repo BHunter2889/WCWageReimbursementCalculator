@@ -507,7 +507,7 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
-	public boolean updateRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid, Date fullDutyDate){
+	public boolean updateRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid, Date fullDutyDate, Date lightDutyDate){
 		boolean updated = false;
 		PreparedStatement stmtUpdateRSummary = null;
 		try {
@@ -524,8 +524,10 @@ public class WCReimbursementDAO {
 			stmtUpdateRSummary.setBigDecimal(3, bdAmntNotPaid);
 			if (fullDutyDate == null) stmtUpdateRSummary.setNull(4, java.sql.Types.DATE);
 			else stmtUpdateRSummary.setDate(4, fullDutyDate, tZ);
-			stmtUpdateRSummary.setInt(5, id);
-			stmtUpdateRSummary.setString(6, tdType);	
+			if (lightDutyDate == null) stmtUpdateRSummary.setNull(4, java.sql.Types.DATE);
+			else stmtUpdateRSummary.setDate(5, lightDutyDate, tZ);
+			stmtUpdateRSummary.setInt(6, id);
+			stmtUpdateRSummary.setString(7, tdType);	
 			stmtUpdateRSummary.executeUpdate();
 			updated = true;
 		} catch (SQLException e) {
@@ -736,7 +738,7 @@ public class WCReimbursementDAO {
 		return id;
 	}
 	
-	public boolean insertRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid, Date fullDutyDate){
+	public boolean insertRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid, Date fullDutyDate, Date lightDutyDate){
 		boolean updated = false;
 		PreparedStatement stmtInsertRSummary = null;
 		try {
@@ -755,6 +757,8 @@ public class WCReimbursementDAO {
 			stmtInsertRSummary.setBigDecimal(4, bdAmntNotPaid);
 			if (fullDutyDate == null) stmtInsertRSummary.setNull(5, java.sql.Types.DATE);
 			else stmtInsertRSummary.setDate(5, fullDutyDate, tZ);
+			if (lightDutyDate == null) stmtInsertRSummary.setNull(5, java.sql.Types.DATE);
+			else stmtInsertRSummary.setDate(5, lightDutyDate, tZ);
 			rows = stmtInsertRSummary.executeUpdate();
 			updated = true;
 		} catch (SQLException e) {
@@ -1853,7 +1857,7 @@ public class WCReimbursementDAO {
 			}
 			if (ttdRSumm == null && claimSum != null){
 				try{
-					this.insertRSummary(clmnt.getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"), null);
+					this.insertRSummary(clmnt.getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"), null, null);
 				} catch (Exception e){
 					e.printStackTrace();
 					try{
@@ -1966,6 +1970,63 @@ public class WCReimbursementDAO {
 		return this.getStateLawCalculation(clmnt.getState()).normalizeCalendarTime(fdDate);
 	}
 	
+	public Calendar selectLightDutyDate(Claimant clmnt){
+		PreparedStatement stmtSelectFDDate = null;
+		try {
+			stmtSelectFDDate = this.dbConnection.prepareStatement("SELECT LD_DATE FROM APP.R_SUMMARY " + 
+					"where CLAIM_ID = ?");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ResultSet results = null;
+		try{
+			stmtSelectFDDate.clearParameters();
+			stmtSelectFDDate.setInt(1, clmnt.getID());
+			if (!stmtSelectFDDate.execute()){
+				stmtSelectFDDate.close();
+				try{
+					throw new Exception("Could not Execute LD_DATE Query.");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return null;
+			}
+			results = stmtSelectFDDate.getResultSet();
+			if(results == null){
+				try{
+					throw new SQLException("Null LD_DATE ResultSet for:"+clmnt.toString());
+				} catch (SQLException e){
+					e.printStackTrace();
+					stmtSelectFDDate.close();
+				}
+			}
+			
+			//ResultSetMetaData rsmd = results.getMetaData();
+            //int numberCols = rsmd.getColumnCount();
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				stmtSelectFDDate.close();
+			} catch (SQLException se){
+				se.printStackTrace();
+			}
+			return null;
+		}
+		GregorianCalendar ldDate = new GregorianCalendar(this.getStateLawCalculation(clmnt.getState()).getTimeZone());
+		try {
+			if(results.next()){
+				if (results.getDate("LD_DATE") != null) ldDate.setTimeInMillis(results.getDate("LD_DATE").getTime());
+				else return null;
+			}
+			else{
+				return null;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return this.getStateLawCalculation(clmnt.getState()).normalizeCalendarTime(ldDate);
+	}
+	
 	public ReimbursementOverview selectReimbursementOverview(Claimant clmnt){
 		System.out.println("Adding ReimbursementOverview for Claimant: "+clmnt.toString()+"...");
 
@@ -1973,6 +2034,7 @@ public class WCReimbursementDAO {
 		ro.setClaimant(clmnt);
 		ro.setTTDRSumm(this.selectTTDRSummary(clmnt));
 		ro.setFullDutyReturnDate(this.selectFullDutyDate(clmnt));
+		ro.setLightDutyStartDate(this.selectLightDutyDate(clmnt));
 		if(ro.containsTTD()){
 			System.out.println("TTDRS & ClaimSummar for: "+clmnt.toString()+" Added: "+ro.ttdRSumm.toString()+" TTD WC Paychecks: "+ro.ttdRSumm.listWCPCs());
 			System.out.println("TTDRS & ClaimSummar for: "+clmnt.toString()+" Added: "+ro.ttdRSumm.claimSummary.toString());
