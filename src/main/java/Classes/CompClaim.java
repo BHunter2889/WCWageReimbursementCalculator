@@ -21,12 +21,14 @@ public class CompClaim {
 	protected BigDecimal avgPriorGrossWeeklyPayment; //calculated after priorWages is set. See above. 
 	//protected Scanner s;
 	protected StateLawCalculable stateLawCalculation;
+	protected MathLogger mathLog;
 	//moved to StateLawCalculable: protected BigDecimal stateWeeksPriorPeriod; //for Missouri, this is 13 weeks.
 	
 	
 	//constructor - month should be actual month (i.e. January = 1), not Java Calendar month
 	public CompClaim(int year, int month, int day) {
 		//this.s = new Scanner(System.in);
+		mathLog = new MathLogger();
 		this.priorWages = new ArrayList<Paycheck>();
 		setDateInjured(year, month, day);
 
@@ -57,6 +59,7 @@ public class CompClaim {
 	//constructor to set stateWeeksPriorPeriod
 	public CompClaim(int year, int month, int day, StateLawCalculable sLC) {
 		//this.s = new Scanner(System.in);
+		mathLog = new MathLogger();
 		this.priorWages = new ArrayList<Paycheck>();
 		setDateInjured(year, month, day);
 
@@ -90,6 +93,7 @@ public class CompClaim {
 	// Constructor to complete all CompClaim fields when called from DAO, should take sql.Date object
 	public CompClaim(Date dateInjured, StateLawCalculable sLC) {
 		//this.s = new Scanner(System.in);
+		mathLog = new MathLogger();
 		this.priorWages = new ArrayList<Paycheck>();
 		this.avgPriorGrossWeeklyPayment = null;
 		
@@ -155,6 +159,7 @@ public class CompClaim {
 	
 	public void setPriorWagesAndComputeAPGWP(ArrayList<Paycheck> priorWages){
 		this.priorWages = priorWages;
+		mathLog.put(2, this.listPriorWagesAndMathLog());
 		this.computeAvgPriorGrossWeeklyPayment();
 		this.sortPaychecksByDate();
 	}
@@ -164,6 +169,7 @@ public class CompClaim {
 		if(this.priorWages.size() < 2){
 			return;
 		}
+		mathLog.put(2, this.listPriorWagesAndMathLog());
 		this.computeAvgPriorGrossWeeklyPayment();
 	}
 /*
@@ -530,11 +536,15 @@ public class CompClaim {
 		long cur = current.getTimeInMillis();
 		this.daysInjured = (long) Math.floor((cur - mDI) / mDay);
 		this.weeksInjured = (long) Math.floor((cur - mDI) / mWeek);
+		String dW = "Days Injured: "+this.daysInjured+" | Weeks Injured: "+this.weeksInjured;
+		mathLog.put(1, dW);
 	}
 	
 	public void setDaysAndWeeksInjuredByFullDutyReturn(long days, long weeks){
 		this.daysInjured = days;
 		this.weeksInjured = weeks;
+		String dW = "Days Injured: "+this.daysInjured+" | Weeks Injured: "+this.weeksInjured;
+		mathLog.put(1, dW);
 	}
 	
 	public void sortPaychecksByDate(){
@@ -584,6 +594,22 @@ public class CompClaim {
 		int num = 1;
 		for(Paycheck p : this.priorWages){
 			list += num + ")" + p.toString() + eol;
+			num++;
+		}
+		
+		return list;
+	}
+	
+	public String listPriorWagesAndMathLog(){
+		if (this.priorWages.isEmpty()) return "No Prior Wages Set.";
+		if (this.priorWages.size() == 1) return "1) " + this.priorWages.get(priorWages.size()-1).toString();
+		
+		sortPaychecksByDate();
+		String eol = System.getProperty("line.separator");
+		String list = "";
+		int num = 1;
+		for(Paycheck p : this.priorWages){
+			list += num + ")" + p.toString() + eol+p.mathLog.toString()+eol;
 			num++;
 		}
 		

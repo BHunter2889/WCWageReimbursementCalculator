@@ -19,6 +19,7 @@ public class Paycheck implements Comparable<Calendar> {
 	protected Calendar payPeriodStart;
 	protected Calendar payPeriodEnd;
 	protected long daysInPayPeriod;
+	protected MathLogger mathLog;
 	protected static final Comparator<Paycheck> PPS_COMPARATOR = new Comparator<Paycheck>(){
 		@Override
 		public int compare(Paycheck p1, Paycheck p2) {
@@ -29,6 +30,7 @@ public class Paycheck implements Comparable<Calendar> {
 
 	//null constructor
 	public Paycheck(){
+		mathLog = new MathLogger();
 		this.grossAmount = new BigDecimal("0");
 		this.paymentDate = new GregorianCalendar(new SimpleTimeZone(0, "Standard"));
 		this.paymentDate.setTimeInMillis(Long.MAX_VALUE); 
@@ -66,6 +68,7 @@ public class Paycheck implements Comparable<Calendar> {
 	
 	//Calendar constructor, pD and ppE are the same
 	public Paycheck(String grossAmount, GregorianCalendar paymentDate, GregorianCalendar payPeriodStart) {
+		mathLog = new MathLogger();
 		BigDecimal gA = new BigDecimal(grossAmount);
 		this.grossAmount = gA.setScale(2, RoundingMode.HALF_EVEN);
 		this.paymentDate = paymentDate;
@@ -76,6 +79,7 @@ public class Paycheck implements Comparable<Calendar> {
 	
 	//Caldendar constructor, pPE and pD are different
 	public Paycheck(String grossAmount, Calendar paymentDate, Calendar payPeriodStart, Calendar payPeriodEnd) {
+		mathLog = new MathLogger();
 		BigDecimal gA = new BigDecimal(grossAmount);
 		this.grossAmount = gA.setScale(2, RoundingMode.HALF_EVEN);		
 		this.paymentDate = paymentDate;		

@@ -16,17 +16,16 @@ import java.util.TreeMap;
 
 import javax.swing.JOptionPane;
 
-
-public class MissouriCalculation extends DefaultStateLawCalculation implements StateLawCalculable {
-	private static final String stateName = "Missouri";
-	private static final String stateAbbrv = "MO";
+public class DefaultStateLawCalculation implements StateLawCalculable {
+	private static final String stateName = "Default";
+	private static final String stateAbbrv = "USA";
 	private static final BigDecimal stateWPP = new BigDecimal("13.0"); 
 	private static final int stateDaysToLate = 30; 
 	private static final SimpleTimeZone timeZone = new SimpleTimeZone(0, "Standard");
 
-	public MissouriCalculation() {
+	public DefaultStateLawCalculation() {
+		// TODO Auto-generated constructor stub
 	}
-
 	@Override
 	public ArrayList<Paycheck> addAndTrimToPriorWages(Paycheck pc, ArrayList<Paycheck> pchecks, CompClaim cHist) {
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
@@ -272,7 +271,6 @@ public class MissouriCalculation extends DefaultStateLawCalculation implements S
 		return wcPayments;
 	}
 	
-	@Override
 	public Paycheck[] splitDateInjuredPayPeriodChecks(Paycheck pc, CompClaim cHist){
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		Paycheck[] splitPCs = {new Paycheck(), new TPDPaycheck()};
@@ -507,25 +505,24 @@ public class MissouriCalculation extends DefaultStateLawCalculation implements S
 
 	@Override
 	public String getStateAbbrv() {
-		return MissouriCalculation.stateAbbrv;
+		return DefaultStateLawCalculation.stateAbbrv;
 	}
 	
-	@Override
 	public int getStateDaysToLate(){
-		return MissouriCalculation.stateDaysToLate;
+		return DefaultStateLawCalculation.stateDaysToLate;
 	}
 	
 	@Override
 	public String getStateName(){
-		return MissouriCalculation.stateName;
+		return DefaultStateLawCalculation.stateName;
 	}
 	public BigDecimal getStateWeeksPriorPeriod(){
-		return MissouriCalculation.stateWPP;
+		return DefaultStateLawCalculation.stateWPP;
 	}
 	
 	@Override
 	public TimeZone getTimeZone(){
-		return MissouriCalculation.timeZone;
+		return DefaultStateLawCalculation.timeZone;
 	}
 
 	@Override
@@ -559,9 +556,12 @@ public class MissouriCalculation extends DefaultStateLawCalculation implements S
 		return false;
 	}
 	
+	
 	/* for testing purposes
 	public void main(){
 		WorkCompPaycheck wc = new WorkCompPaycheck();
 		BigDecimal test = computeWCSupplementalPayment(wc, new BigDecimal("500"));
 	}*/
 }
+	
+

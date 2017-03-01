@@ -17,18 +17,24 @@ public class ReimbursementOverview {
 	protected Calendar fullDutyReturnDate;
 	protected Calendar lightDutyStartDate;
 	protected boolean anyLatePay;
+	protected MathLogger mathLog;
 	
 
 	public ReimbursementOverview(Claimant clmnt, TTDReimbursementSummary ttdRSumm, TPDReimbursementSummary tpdRSumm, Calendar fullDutyReturnDate, Calendar lightDutyReturnDate) {
+		mathLog = new MathLogger();
 		this.claimant = clmnt;
 		this.ttdRSumm = ttdRSumm;
 		this.tpdRSumm = tpdRSumm;
 		this.fullDutyReturnDate = fullDutyReturnDate;
 		this.lightDutyStartDate = lightDutyReturnDate;
+		logMath(1);
+		logMath(2);
+		logMath(3);
 		this.anyLatePay = false;
 	}
 	
 	public ReimbursementOverview(){
+		mathLog = new MathLogger();
 		this.claimant = null;
 		this.ttdRSumm = null;
 		this.tpdRSumm = null;
@@ -44,13 +50,20 @@ public class ReimbursementOverview {
 	public void setTTDRSumm(TTDReimbursementSummary ttdRSumm){
 		if (ttdRSumm == null) return;
 		this.ttdRSumm = ttdRSumm;
+		logMath(2);
+		logMath(3);
+		
 		this.computeTTDaNPNoLatePayCalculation();
 	}
 	
 	public void setTPDRSumm(TPDReimbursementSummary tpdRSumm){
 		if (tpdRSumm == null) return;
 		this.tpdRSumm = tpdRSumm;
+		logMath(2);
+		
 		if (!this.tpdRSumm.determineAnyLatePay()) this.tpdRSumm.computeAmountNotPaidAndAnyLateCompensation();
+		logMath(3);
+		
 		if (this.containsTTD()) this.computeTTDaNPNoLatePayCalculation();
 		for (TPDPaycheck p : this.tpdRSumm.getReceivedWorkPayments()){
 			System.out.println(p.toWCPayString());
@@ -69,6 +82,7 @@ public class ReimbursementOverview {
 	public void setFullDutyReturnDate(Calendar fullDutyReturnDate){
 		if (fullDutyReturnDate == null) return;
 		this.fullDutyReturnDate = fullDutyReturnDate;
+		logMath(1);
 		this.computeTTDaNPNoLatePayCalculation();
 		System.out.println("Full Duty Return Date: "+this.toStringFullDutyReturn());
 	}
@@ -76,6 +90,7 @@ public class ReimbursementOverview {
 	public void setLightDutyStartDate(Calendar lightDutyStartDate){
 		if (lightDutyStartDate == null) return;
 		this.lightDutyStartDate = lightDutyStartDate;
+		logMath(1);
 		this.computeTTDaNPNoLatePayCalculation();
 		System.out.println("Light Duty Return Date: "+this.toStringLightDutyStart());
 	}
@@ -173,10 +188,15 @@ public class ReimbursementOverview {
 	
 	public BigDecimal getTotalTTDCalcOwed(){
 		//this.computeDaysAndWeeksInjured();
+		String ttdANP = "Amount Not Paid: (Days in TTD) ";
 		long nonTPDInjDays = this.getNumDaysNotInTPD();
+		ttdANP += nonTPDInjDays;
 		if (nonTPDInjDays <= 0) return new BigDecimal("0.00");
 		if (this.ttdRSumm.calculatedWeeklyPayment.compareTo(new BigDecimal("0")) <= 0) this.ttdRSumm.calculateAndSetWeeklyPayment();
+		ttdANP += " x ( (TTD Caclulated Weekly Payment) "+this.ttdRSumm.calculatedWeeklyPayment.toPlainString()+" / (Days in Week) 7 ) = ";
 		BigDecimal dailyPay = this.ttdRSumm.calculatedWeeklyPayment.divide(new BigDecimal("7"), 3, RoundingMode.HALF_EVEN);
+		ttdANP += dailyPay.multiply(new BigDecimal(String.valueOf(nonTPDInjDays))).setScale(2, RoundingMode.HALF_EVEN).toPlainString();
+		this.ttdRSumm.mathLog.put(3, ttdANP);
 		return dailyPay.multiply(new BigDecimal(String.valueOf(nonTPDInjDays))).setScale(2, RoundingMode.HALF_EVEN);
 	}
 	
@@ -193,11 +213,28 @@ public class ReimbursementOverview {
 	}
 	
 	public BigDecimal getTotalNotPaid(){
-		return this.ttdRSumm.getAmountNotPaid().add(this.getTPDRSumm().getAmountNotPaid());
+		if (this.containsTPD() && this.containsTTD()) return this.ttdRSumm.getAmountNotPaid().add(this.getTPDRSumm().getAmountNotPaid());
+		else if (this.containsTTD()) return this.ttdRSumm.getAmountNotPaid();
+		else if (this.containsTPD()) return this.tpdRSumm.getAmountNotPaid();
+		
+		return new BigDecimal("0.00");
+	}
+	
+	public BigDecimal getTotalCalculatedOwed(){
+		if (this.containsTPD() && this.containsTTD()) return this.getTotalTTDCalcOwed().add(this.getTPDRSumm().getWCCalcPayToDate());
+		else if (this.containsTTD()) return this.getTotalTTDCalcOwed();
+		else if (this.containsTPD()) return this.getTPDRSumm().getWCCalcPayToDate();
+		
+		return new BigDecimal("0.00");
+		
 	}
 	
 	public BigDecimal getTotalWCPayToDate(){
-		return this.getTTDRSumm().getWCPayToDate().add(this.getTPDRSumm().getWCPayToDate());
+		if (this.containsTPD() && this.containsTTD()) return this.getTTDRSumm().getWCPayToDate().add(this.getTPDRSumm().getWCPayToDate());
+		else if (this.containsTTD()) return this.getTTDRSumm().getWCPayToDate();
+		else if (this.containsTPD()) return this.getTPDRSumm().getWCPayToDate();
+		
+		return new BigDecimal("0.00");
 	}
 	
 	public Calendar getFullDutyReturnDate(){
@@ -308,6 +345,49 @@ public class ReimbursementOverview {
 		}
 		
 		return lDPPS;
+	}
+	
+	public void logMath(int num){
+		switch(num){
+			case 1: String dates = "";
+				if(this.hasLightDuty() && this.isFullDuty()) dates = "Light Duty Start Date: "+this.toStringLightDutyStart()+" | Full-Time Return Date: "+this.toStringFullDutyReturn(); 
+				else if(this.isFullDuty()) dates ="Light Duty Start Date: N/A | Full-Time Return Date: "+this.toStringFullDutyReturn();
+				else if(this.hasLightDuty()) dates = "Light Duty Start Date: "+this.toStringLightDutyStart()+" | Full-Time Return Date: N/A";
+				
+				mathLog.put(1, dates);
+			
+			case 2: String totalPaid = "";
+				if(this.containsTTD() && this.containsTPD()){
+					totalPaid = "Total Work Comp Pay to Date: (TTD Total) "+this.ttdRSumm.getWCPayToDate().toPlainString()+
+							" + (TPD Total) "+this.tpdRSumm.getWCPayToDate().toPlainString()+" = "+ this.getTotalWCPayToDate().toPlainString();
+				}
+				else if(this.containsTTD()){
+						totalPaid = "Total Work Comp Pay to Date: (TTD Total) "+this.ttdRSumm.getWCPayToDate().toPlainString()+
+								" + (TPD Total) 0.00 = "+this.ttdRSumm.getWCPayToDate().toPlainString();
+				}
+				else if(this.containsTPD()){
+					totalPaid = "Total Work Comp Pay to Date: (TTD Total) 0.00 + (TPD Total) "+this.tpdRSumm.getWCPayToDate().toPlainString()+
+							" = "+ this.tpdRSumm.getWCPayToDate().toPlainString();
+				}
+				mathLog.put(2, totalPaid);
+				
+			case 3: String owed = "";
+				if(this.containsTPD() && this.containsTTD()){
+					owed = "Total Calculated Owed: (TTD Calc. Owed) "+this.getTotalTTDCalcOwed().toPlainString()+
+							" + (TPD Calc. Owed) "+this.tpdRSumm.getWCCalcPayToDate().toPlainString()+" = "+this.getTotalCalculatedOwed().toPlainString();
+				}
+				else if(this.containsTTD()){
+					owed = "Total Calculated Owed: (TTD Calc. Owed) "+this.getTotalTTDCalcOwed().toPlainString()+
+							" + (TPD Calc. Owed) 0.00"+" = "+this.getTotalCalculatedOwed().toPlainString();
+				}
+				else if(this.containsTPD()){
+					owed = "Total Calculated Owed: (TTD Calc. Owed) 0.00 + (TPD Calc. Owed) "+this.tpdRSumm.getWCCalcPayToDate().toPlainString()+
+							" = "+this.getTotalCalculatedOwed().toPlainString();
+				}
+				mathLog.put(3, owed);
+					
+			//TODO AmountNotPaid
+		}
 	}
 	
 	public String toStringFullDutyReturn(){

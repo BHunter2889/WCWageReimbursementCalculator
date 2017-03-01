@@ -17,11 +17,12 @@ public abstract class ReimbursementSummary {
 	protected BigDecimal amountNotPaid;
 	protected ArrayList<WorkCompPaycheck> wcPayments;
 	protected StateLawCalculable stateLawCalculation;
+	protected MathLogger mathLog;
 	//protected Scanner s;
 
 	//constructor
 	public ReimbursementSummary(CompClaim claim, StateLawCalculable stateLawcalc) {
-		//this.s = new Scanner(System.in);
+		mathLog = new MathLogger();
 		this.claimSummary = claim;
 		this.wcPayments = new ArrayList<WorkCompPaycheck>();
 		this.stateLawCalculation = stateLawcalc;
@@ -30,7 +31,7 @@ public abstract class ReimbursementSummary {
 	}
 	
 	public ReimbursementSummary() {
-		//this.s = new Scanner(System.in);
+		mathLog = new MathLogger();
 		this.claimSummary = null;
 		this.wcPayments = new ArrayList<WorkCompPaycheck>();
 		this.calculatedWeeklyPayment = null;
@@ -39,7 +40,7 @@ public abstract class ReimbursementSummary {
 	
 	//for super() subclass construction
 	public ReimbursementSummary(BigDecimal calculatedWeeklyPayment, CompClaim claimSummary, BigDecimal amountNotPaid, ArrayList<WorkCompPaycheck> wcPayments) {
-		//this.s = new Scanner(System.in);
+		mathLog = new MathLogger();
 		boolean priorWages = false;
 		if(calculatedWeeklyPayment.compareTo(new BigDecimal("0")) <= 0){
 			this.wcPayments = wcPayments;
@@ -61,7 +62,7 @@ public abstract class ReimbursementSummary {
 	}
 	
 	public ReimbursementSummary(ReimbursementSummary rsumm) {
-		//this.s = new Scanner(System.in);
+		mathLog = new MathLogger();
 		this.claimSummary = rsumm.claimSummary;
 		this.stateLawCalculation = this.claimSummary.stateLawCalculation;
 		this.wcPayments = rsumm.wcPayments;
@@ -189,6 +190,7 @@ public abstract class ReimbursementSummary {
 		}
 		
 		this.wcPayments.add(pc);
+		mathLog.put(2, this.listWCPaymentsAndMathLog());
 		this.computeAmountNotPaidAndAnyLateCompensation();
 		return true;
 		
@@ -202,7 +204,7 @@ public abstract class ReimbursementSummary {
 		//long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		//long mWeek = mDay * 7;
 		sortWCPaymentsByDate();
-		
+		mathLog.put(2, this.listWCPaymentsAndMathLog());
 		this.wcPayments.add(pc);
 		return true;
 		
@@ -210,6 +212,7 @@ public abstract class ReimbursementSummary {
 	public boolean addWCPaycheckNoPeriodDates(WorkCompPaycheck wcPC){
 		this.wcPayments.add(wcPC);
 		sortWCPaymentsByDate();
+		mathLog.put(2, this.listWCPaymentsAndMathLog());
 		return true;
 		
 	}
@@ -242,6 +245,7 @@ public abstract class ReimbursementSummary {
 		}
 		
 		this.wcPayments.add(pc);
+		mathLog.put(2, this.listWCPaymentsAndMathLog());
 		this.computeAmountNotPaidAndAnyLateCompensation();
 		return true;
 		
@@ -249,18 +253,34 @@ public abstract class ReimbursementSummary {
 	
 	//calculates and sets amountNotPaid total and sets the amountStillOwed for each pay period entered in wcPayments
 	//also determines if wcPC was late and adds and late payment owed to wcPC grossAmnt
-	public void computeAmountNotPaidAndAnyLateCompensation(){
+	public BigDecimal computeAmountNotPaidAndAnyLateCompensation(){
+		String eol = System.lineSeparator();
 		String aNP = "0.00";
 		BigDecimal amountNotPaid = new BigDecimal(aNP);
+		String calc = "Amount Not Paid (Calculated Weekly Payment weighted by Days in Pay Period Check - Paid: ";
 		if(!this.wcPayments.isEmpty()){
+			int line = 0;
 			for (WorkCompPaycheck p : this.wcPayments){
 				p.computeAnyAddtionalLatePaymentCompensation(this.calculatedWeeklyPayment);
 				BigDecimal aSO = p.getAmountStillOwed();
 				amountNotPaid = amountNotPaid.add(aSO);
+				if(this.wcPayments.lastIndexOf(p) == this.wcPayments.size()-1){
+					calc += aSO.toPlainString();
+				}
+				else if(line < 5){
+					calc += aSO.toPlainString()+" + ";
+					line++;
+				}
+				else if(line == 5){
+					calc += aSO.toPlainString()+" +"+eol;
+				}
 			}
 		}
 		amountNotPaid = amountNotPaid.setScale(2, RoundingMode.HALF_EVEN);
+		calc += " = "+amountNotPaid.toPlainString();
+		mathLog.put(3, calc);
 		this.amountNotPaid = amountNotPaid;
+		return this.amountNotPaid;
 	}
 	
 	public void sortWCPaymentsByDate(){
@@ -362,10 +382,46 @@ public abstract class ReimbursementSummary {
 		this.wcPayments = wcP;
 		this.sortWCPaymentsByDate();
 		if(this.determineAnyLatePay()) this.computeAmountNotPaidAndAnyLateCompensation();
+		mathLog.put(2, this.listWCPaymentsAndMathLog());
 	}
 	
 	public boolean containsCompClaim(){
 		return this.claimSummary != null;
+	}
+	
+	//sorts Prior Wages by date and then returns them on newlines in the format "#) pPS - pPE: $grossAmount paid on pD"
+	public String listWCPayments(){
+		String eol = System.getProperty("line.separator");
+		if (this.wcPayments.isEmpty()) return "No Work Comp Payments Set.";
+		if (this.wcPayments.size() == 1) return "1) " + this.wcPayments.get(wcPayments.size()-1).toString()+eol;
+		
+		sortWCPaymentsByDate();
+		
+		String list = "";
+		int num = 1;
+		for(WorkCompPaycheck p : this.wcPayments){
+			list += num + ")" + p.toString() + eol;
+			num++;
+		}
+		
+		return list;
+	}
+	
+	public String listWCPaymentsAndMathLog(){
+		String eol = System.getProperty("line.separator");
+		if (this.wcPayments.isEmpty())  return "No Prior Wages Set.";
+		if (this.wcPayments.size() == 1) return "1) " + this.wcPayments.get(wcPayments.size()-1).toString()+eol+this.wcPayments.get(wcPayments.size()-1).mathLog.toString()+eol;
+		
+		sortWCPaymentsByDate();
+		
+		String list = "";
+		int num = 1;
+		for(WorkCompPaycheck p : this.wcPayments){
+			list += num + ")" + p.toString() + eol + p.mathLog.toString()+eol;
+			num++;
+		}
+		
+		return list;
 	}
 	
 	
