@@ -30,6 +30,7 @@ public class TTDReimbursementSummary extends ReimbursementSummary {
 		int num = 1;
 		for(WorkCompPaycheck p : this.wcPayments){
 			list += num + ")" + p.toString() + eol;
+			p.logMath(2, this.calculatedWeeklyPayment);
 			num++;
 		}
 		

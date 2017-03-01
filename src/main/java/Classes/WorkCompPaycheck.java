@@ -164,6 +164,7 @@ public class WorkCompPaycheck extends Paycheck {
 		}
 		aSO = aSO.setScale(2, RoundingMode.HALF_EVEN);
 		this.amountStillOwed = this.amountStillOwed.add(aSO);
+		logMath(2, calculatedWeeklyPayment);
 	}
 	
 	public void computeAnyAddtionalLatePaymentCompensation(BigDecimal calculatedWeeklyPayment){
@@ -323,5 +324,26 @@ public class WorkCompPaycheck extends Paycheck {
 	
 	public Calendar getContestResolutionDate(){
 		return this.contestResolvedDate;
+	}
+	
+	public void logMath(int num, BigDecimal bD){
+		switch(num){
+			case 1: 
+				
+				mathLog.put(1, );
+			
+			case 2: String aSO = "Amount Still Owed: ";
+				GregorianCalendar epoch = new GregorianCalendar(new SimpleTimeZone(0, "Standard"));
+				epoch.setTimeInMillis(1000*60*60*24);
+				boolean pPS = this.getPayPeriodStart().compareTo(epoch) > 0;
+				if(pPS) aSO += "(Calc. WeeklyPayment) "+bD.toPlainString()+" - (Payment Amnt.) "+this.grossAmount.toPlainString()+" = "+this.amountStillOwed.toPlainString();
+				else aSO += "Amount Still Owed could not be computed per Payment due to unknown Pay Period Dates.";
+			
+				mathLog.put(2, aSO);
+				
+			case 3: 
+				
+				mathLog.put(3, value);
+		}
 	}
 }

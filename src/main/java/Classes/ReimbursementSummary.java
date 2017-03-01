@@ -43,10 +43,10 @@ public abstract class ReimbursementSummary {
 		mathLog = new MathLogger();
 		boolean priorWages = false;
 		if(calculatedWeeklyPayment.compareTo(new BigDecimal("0")) <= 0){
-			this.wcPayments = wcPayments;
+			this.setWCPayments(wcPayments);
 			priorWages = this.setClaimSummary(claimSummary);
 			if (!priorWages){
-				this.calculatedWeeklyPayment = calculatedWeeklyPayment;
+				this.calculatedWeeklyPayment = calculatedWeeklyPayment; //TODO MathLog
 				this.amountNotPaid = amountNotPaid;
 			}
 			if(!this.wcPayments.isEmpty())this.sortWCPaymentsByDate();
@@ -54,9 +54,9 @@ public abstract class ReimbursementSummary {
 		else{
 			this.claimSummary = claimSummary;
 			this.stateLawCalculation = this.claimSummary.stateLawCalculation;
-			this.wcPayments = wcPayments;
+			this.setWCPayments(wcPayments);
 			if(!this.wcPayments.isEmpty())this.sortWCPaymentsByDate();
-			this.calculatedWeeklyPayment = calculatedWeeklyPayment;
+			this.calculatedWeeklyPayment = calculatedWeeklyPayment; //TODO MathLog
 			this.amountNotPaid = amountNotPaid;
 		}
 	}
@@ -257,7 +257,7 @@ public abstract class ReimbursementSummary {
 		String eol = System.lineSeparator();
 		String aNP = "0.00";
 		BigDecimal amountNotPaid = new BigDecimal(aNP);
-		String calc = "Amount Not Paid (Calculated Weekly Payment weighted by Days in Pay Period Check - Paid: ";
+		String calc = "Amount Not Paid (Calculated Weekly Payment weighted by Days in Pay Period Check - Paid): ";
 		if(!this.wcPayments.isEmpty()){
 			int line = 0;
 			for (WorkCompPaycheck p : this.wcPayments){
@@ -267,13 +267,14 @@ public abstract class ReimbursementSummary {
 				if(this.wcPayments.lastIndexOf(p) == this.wcPayments.size()-1){
 					calc += aSO.toPlainString();
 				}
-				else if(line < 5){
+				else if(line % 5 != 0){
 					calc += aSO.toPlainString()+" + ";
 					line++;
 				}
-				else if(line == 5){
+				else if(line % 5 == 0){
 					calc += aSO.toPlainString()+" +"+eol;
 				}
+				p.logMath(2, this.calculatedWeeklyPayment);
 			}
 		}
 		amountNotPaid = amountNotPaid.setScale(2, RoundingMode.HALF_EVEN);
@@ -299,15 +300,19 @@ public abstract class ReimbursementSummary {
 		if (this.wcPayments.isEmpty()) return wcPTD;
 		if (this.wcPayments.size() < 2){
 			wcPTD = wcPTD.add(this.wcPayments.get(0).getGrossAmount());
+			this.wcPayments.get(0).logMath(2, this.calculatedWeeklyPayment);
 		}
 		else{
 			for (int i=0, j=this.wcPayments.size()-1; i<j; i++, j--){
 				WorkCompPaycheck wc1 = this.wcPayments.get(i);
+				wc1.logMath(2, this.calculatedWeeklyPayment);
 				WorkCompPaycheck wc2 = this.wcPayments.get(j);
+				wc2.logMath(2, this.calculatedWeeklyPayment);
 				wcPTD = wcPTD.add(wc1.getGrossAmount()).add(wc2.getGrossAmount());
 				if(i+2 == j){
 					wc1 = this.wcPayments.get(i+1);
 					wcPTD = wcPTD.add(wc1.getGrossAmount());
+					wc1.logMath(2, this.calculatedWeeklyPayment);
 					break;
 				}
 			}
