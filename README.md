@@ -1,4 +1,5 @@
 # WCWageReimbursementCalculator
+This project is licensed under the accompanying LICENSE.md within the same directory as the current README.md document.
 ## ***Please read the Wiki on the GitHubRepository for a better understanding of my code, application usage, and personal development related to this project.
 gradle build
 
