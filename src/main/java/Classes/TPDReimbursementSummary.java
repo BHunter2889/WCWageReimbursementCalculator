@@ -68,6 +68,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 		amountNotPaid = amountNotPaid.setScale(2, RoundingMode.HALF_EVEN);
 		//TODO Implement LatePayCalc for noKnownPP
 		this.amountNotPaid = amountNotPaid;
+		logMath(5, null);
 		return this.amountNotPaid;
 	}
 	//calculates and sets amountNotPaid total and sets the amountStillOwed for each pay period entered in wcPayments
@@ -272,6 +273,11 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 				wcPay += " = "+bD.get(bD.size()-1).toPlainString();
 				
 				mathLog.put(4, wcPay);
+				
+			case 5: String aNP = "Total Supplemental Amount Not Paid: (TPD Calc. Owed - Paid) ";
+				aNP += this.getWCCalcPayToDate().toPlainString()+" - "+this.getWCPayToDate().toPlainString()+" = "+this.getAmountNotPaid().toPlainString();
+				
+				mathLog.put(5, aNP);
 		}
 	}
 	

@@ -317,6 +317,7 @@ public class MissouriCalculation extends DefaultStateLawCalculation implements S
 		BigDecimal two3 = new BigDecimal("2").divide(new BigDecimal("3"), 20, RoundingMode.HALF_UP);
 		BigDecimal cWP = avgPGrossWeekPay.multiply(two3);
 		System.out.println("Calculated Weelkly Payment (unrounded): $"+cWP.toPlainString());
+ 
 		return cWP.setScale(2, RoundingMode.HALF_EVEN);
 	}
 

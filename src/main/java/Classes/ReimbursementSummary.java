@@ -289,8 +289,9 @@ public abstract class ReimbursementSummary {
 	}
 	
 	public void calculateAndSetWeeklyPayment(){
-		BigDecimal calcWP = this.stateLawCalculation.computeCalculatedWeeklyPayment(this.claimSummary.avgPriorGrossWeeklyPayment);
-		this.calculatedWeeklyPayment = calcWP;
+		BigDecimal cWP = this.stateLawCalculation.computeCalculatedWeeklyPayment(this.claimSummary.avgPriorGrossWeeklyPayment);
+		this.calculatedWeeklyPayment = cWP;
+		logMath(1);
 	}
 	
 	public BigDecimal getWCPayToDate(){
@@ -377,6 +378,7 @@ public abstract class ReimbursementSummary {
 	
 	public void setCalculatedWeeklyPayment(BigDecimal cWP){
 		this.calculatedWeeklyPayment = cWP;
+		logMath(1);
 	}
 	
 	public void setAmountNotPaid(BigDecimal aNP){
@@ -392,6 +394,16 @@ public abstract class ReimbursementSummary {
 	
 	public boolean containsCompClaim(){
 		return this.claimSummary != null;
+	}
+	
+	public void logMath(int num){
+		switch(num){
+			case 1: String calcWeekPay = "TTD Calculated Weekly Payment (Avg. Prior Gross Weekly Wage / (66 & 2/3 percent): ";
+				calcWeekPay += this.getClaimSummary().getAvgPriorGrossWeeklyPayment().toPlainString()+" / "+
+						new BigDecimal("2").divide(new BigDecimal("3"), 10, RoundingMode.HALF_UP).toPlainString()+" = "+this.getCalculatedWeeklyPayment().toPlainString();
+				
+				mathLog.put(1, calcWeekPay);
+		}
 	}
 	
 	//sorts Prior Wages by date and then returns them on newlines in the format "#) pPS - pPE: $grossAmount paid on pD"
