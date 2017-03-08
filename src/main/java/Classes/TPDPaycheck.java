@@ -68,7 +68,17 @@ public class TPDPaycheck extends Paycheck {
 	
 	public void computeWCCalcPay(BigDecimal aPGWP){
 		this.wcCalcPay = sLC.computeWCSupplementalPayment(this, aPGWP);
+		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
+		long mWeek = mDay * 7;
 		System.out.println(this.wcCalcPay.toPlainString());
+		
+		String calc = "Calculated Supplemental Payment: ";
+		long mPP = this.payPeriodEnd.getTimeInMillis() - this.payPeriodStart.getTimeInMillis();
+		BigDecimal payPWeeks = (new BigDecimal(String.valueOf(mPP)).divide(new BigDecimal(String.valueOf(mWeek)), 8, RoundingMode.HALF_UP));
+		BigDecimal two3 = new BigDecimal("2").divide(new BigDecimal("3"), 8, RoundingMode.HALF_UP);
+		calc += "{((Avg. Gross Prior Weekly Wage) "+aPGWP+" x (Weeks in Pay Period) "+payPWeeks.toPlainString()+") - "+this.grossAmount.toPlainString()+") x "+two3.toPlainString();
+		calc += " = "+this.wcCalcPay.toPlainString();
+		this.mathLog.put(1, calc);
 	}
 	
 	public BigDecimal getWCCalcPay(){
