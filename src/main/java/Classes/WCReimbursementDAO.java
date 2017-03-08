@@ -19,8 +19,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import org.apache.derby.tools.ij;
 
@@ -507,7 +509,7 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
-	public boolean updateRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid, Date fullDutyDate, Date lightDutyDate){
+	public boolean updateRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid, Date fullDutyDate, Date lightDutyDate, MathLogger ml){
 		boolean updated = false;
 		PreparedStatement stmtUpdateRSummary = null;
 		try {
@@ -529,6 +531,7 @@ public class WCReimbursementDAO {
 			stmtUpdateRSummary.setInt(6, id);
 			stmtUpdateRSummary.setString(7, tdType);	
 			stmtUpdateRSummary.executeUpdate();
+			this.updateMathLog(id, tdType, ml);
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -543,7 +546,7 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
-	public boolean updateClaimSummary(int id, Date dateInj, Date priorWS, Date earliestPW, BigDecimal avgPGWP, long daysInj, long weeksInj){
+	public boolean updateClaimSummary(int id, Date dateInj, Date priorWS, Date earliestPW, BigDecimal avgPGWP, long daysInj, long weeksInj, MathLogger ml){
 		boolean updated = false;
 		PreparedStatement stmtUpdateClaimSummary = null;
 		try {
@@ -564,6 +567,7 @@ public class WCReimbursementDAO {
 			stmtUpdateClaimSummary.setLong(6, weeksInj);
 			stmtUpdateClaimSummary.setInt(7, id);
 			stmtUpdateClaimSummary.executeUpdate();
+			this.updateMathLog(id, "CC", ml);
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -578,11 +582,11 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
-	public boolean updatePaychecks(int id, String pcType, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt){
+	public boolean updatePaychecks(int id, String pcType, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, MathLogger ml){
 		boolean updated = false;
 		PreparedStatement stmtUpdatePaychecks = null;
 		try {
-			stmtUpdatePaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtUpdatePaychecks());
+			stmtUpdatePaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtUpdatePaychecks(), PreparedStatement.RETURN_GENERATED_KEYS);
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
@@ -600,6 +604,13 @@ public class WCReimbursementDAO {
 			stmtUpdatePaychecks.setString(7, pcType);
 			stmtUpdatePaychecks.setDate(8, payEnd, tZ);
 			stmtUpdatePaychecks.executeUpdate();
+			ResultSet rs = stmtUpdatePaychecks.getGeneratedKeys();
+			if(rs.next()){
+				this.updatePCMathLog(id, rs.getInt(1), "PC", ml);
+			}
+			else{
+				System.out.println("Could not update MathLog for Paycheck.");
+			}
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -614,7 +625,7 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
-	public boolean updateTPDPaychecks(Claimant clmnt, int id, String pcType, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdWCCalc){
+	public boolean updateTPDPaychecks(Claimant clmnt, int id, String pcType, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdWCCalc, MathLogger ml){
 		boolean updated = false;
 		PreparedStatement stmtUpdateTPDPaychecks = null;
 		try {
@@ -628,7 +639,7 @@ public class WCReimbursementDAO {
 				    "    BD_WC_CALC = ? " +
 				    "where CLAIM_ID = ? " +
 				    "AND PC_TYPE = ?" +
-				    "AND ID = ?");
+				    "AND ID = ?", PreparedStatement.RETURN_GENERATED_KEYS);
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
@@ -646,6 +657,13 @@ public class WCReimbursementDAO {
 			stmtUpdateTPDPaychecks.setString(8, pcType);
 			stmtUpdateTPDPaychecks.setInt(9, id);
 			stmtUpdateTPDPaychecks.executeUpdate();
+			ResultSet rs = stmtUpdateTPDPaychecks.getGeneratedKeys();
+			if(rs.next()){
+				this.updatePCMathLog(id, rs.getInt(1), "TPDPC", ml);
+			}
+			else{
+				System.out.println("Could not update MathLog for TPDPaycheck.");
+			}
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -661,7 +679,7 @@ public class WCReimbursementDAO {
 	}
 	
 	public boolean updateWCPaychecks(int id, String wcPCType, boolean isContest, boolean isLate, boolean ftHours, int stDaysToLate, 
-			Date payReceived, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdAmntOwed, Date contestRslvd){
+			Date payReceived, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdAmntOwed, Date contestRslvd, MathLogger ml){
 		boolean updated = false;
 		PreparedStatement stmtUpdateWCPaychecks = null;
 		try {
@@ -688,6 +706,7 @@ public class WCReimbursementDAO {
 			stmtUpdateWCPaychecks.setString(12, wcPCType);
 			stmtUpdateWCPaychecks.setDate(13, contestRslvd, tZ);
 			stmtUpdateWCPaychecks.executeUpdate();
+			//TODO updateML
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -702,7 +721,117 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
-	public int insertClaimants(String lastname, String firstname, String middlename, String workplace, String state){
+	public boolean updateMathLog(int id, String type, MathLogger ml){
+		if(ml == null || ml.size() < 1) return false;
+		boolean updated = false;
+		String prepare = "UPDATE APP.MATH_LOGS" + 
+				"SET ML_TYPE = ?, " +
+			    "    ML_ORDER = ?, " +
+			    "    LOG_STRING = ? " +
+			    "where CLAIM_ID = ? " + 
+			    "AND ML_TYPE = ? "+
+			    "AND ML_ORDER = ?";
+		PreparedStatement updateML = null;
+		try{
+			updateML = this.dbConnection.prepareStatement(prepare);
+		}catch (SQLException e){
+			e.printStackTrace();
+		}
+		
+		Set<Entry<Integer, String>> set = ml.entrySet();
+		for (Entry<Integer, String> pair : set){
+			try{
+				if(this.selectMathLogger(id, type) != null && this.selectMathLogger(id, type).containsKey(pair.getKey())){
+					updateML.clearParameters();
+					updateML.setString(1, type);
+					updateML.setInt(2, pair.getKey());
+					updateML.setString(3, pair.getValue());
+					updateML.setInt(4, id);
+					updateML.setString(5, type);
+					updateML.setInt(6, pair.getKey());
+					updated = (updateML.executeUpdate() > 0);
+				}
+				else{
+					MathLogger oneML = new MathLogger();
+					oneML.put(pair.getKey(), pair.getValue());
+					this.insertMathLog(id, type, oneML);
+				}
+			} catch (SQLException e){
+				e.printStackTrace();
+				try{
+					throw new Exception("MathLog for "+type+" with claim ID "+id+" for Log #"+pair.getKey()+" could not be Updated.");
+				} catch(Exception ex){
+					ex.printStackTrace();
+				}
+			}
+			System.out.println("MathLog for "+type+" with claim ID "+id+" for Log #"+pair.getKey()+" successfully Updated");
+		}
+		try{
+			updateML.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return updated;
+	}
+	
+	public boolean updatePCMathLog(int id, int pcID, String type, MathLogger ml){
+		if(ml == null || ml.size() < 1) return false;
+		boolean updated = false;
+		String prepare = "UPDATE APP.MATH_LOGS" + 
+				"SET ML_TYPE = ?, " +
+			    "    ML_ORDER = ?, " +
+			    "    LOG_STRING = ? " +
+			    "where CLAIM_ID = ? " + 
+			    "AND ML_TYPE = ? "+
+			    "AND ML_ORDER = ?"+
+			    "AND PC_ID = ?";
+		PreparedStatement updateML = null;
+		try{
+			updateML = this.dbConnection.prepareStatement(prepare);
+		}catch (SQLException e){
+			e.printStackTrace();
+		}
+		
+		Set<Entry<Integer, String>> set = ml.entrySet();
+		for (Entry<Integer, String> pair : set){
+			try{
+				if(this.selectMathLogger(id, type) != null && this.selectMathLogger(id, type).containsKey(pair.getKey())){
+					updateML.clearParameters();
+					updateML.setString(1, type);
+					updateML.setInt(2, pair.getKey());
+					updateML.setString(3, pair.getValue());
+					updateML.setInt(4, id);
+					updateML.setString(5, type);
+					updateML.setInt(6, pair.getKey());
+					updateML.setInt(7, pcID);
+					updated = (updateML.executeUpdate() > 0);
+				}
+				else{
+					MathLogger oneML = new MathLogger();
+					oneML.put(pair.getKey(), pair.getValue());
+					this.insertMathLog(id, type, oneML);
+				}
+			} catch (SQLException e){
+				e.printStackTrace();
+				try{
+					throw new Exception("MathLog for "+type+" with claim ID "+id+" for Log #"+pair.getKey()+" could not be Updated.");
+				} catch(Exception ex){
+					ex.printStackTrace();
+				}
+			}
+			System.out.println("MathLog for "+type+" with claim ID "+id+" for Log #"+pair.getKey()+" successfully Updated");
+		}
+		try{
+			updateML.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return updated;
+	}
+	
+	public int insertClaimants(String lastname, String firstname, String middlename, String workplace, String state, MathLogger ml){
 		int id = -1;
 		PreparedStatement stmtInsertClaimants = null;
 		try {
@@ -738,7 +867,7 @@ public class WCReimbursementDAO {
 		return id;
 	}
 	
-	public boolean insertRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid, Date fullDutyDate, Date lightDutyDate){
+	public boolean insertRSummary(int id, String tdType, BigDecimal bdCalcWeekPay, BigDecimal bdAmntNotPaid, Date fullDutyDate, Date lightDutyDate, MathLogger ml){
 		boolean updated = false;
 		PreparedStatement stmtInsertRSummary = null;
 		try {
@@ -760,6 +889,7 @@ public class WCReimbursementDAO {
 			if (lightDutyDate == null) stmtInsertRSummary.setNull(5, java.sql.Types.DATE);
 			else stmtInsertRSummary.setDate(5, lightDutyDate, tZ);
 			rows = stmtInsertRSummary.executeUpdate();
+			this.insertMathLog(id, tdType, ml);
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -775,7 +905,7 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
-	public boolean insertClaimSummary(int id, Date dateInj, Date priorWS, Date earliestPW, BigDecimal avgPGWP, long daysInj, long weeksInj){
+	public boolean insertClaimSummary(int id, Date dateInj, Date priorWS, Date earliestPW, BigDecimal avgPGWP, long daysInj, long weeksInj, MathLogger ml){
 		boolean updated = false;
 		try{
 			if (dateInj == null){
@@ -803,6 +933,7 @@ public class WCReimbursementDAO {
 			stmtInsertClaimSummary.setLong(6, daysInj);
 			stmtInsertClaimSummary.setLong(7, weeksInj);
 			rows = stmtInsertClaimSummary.executeUpdate();
+			this.insertMathLog(id, "CC", ml);
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -818,11 +949,11 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
-	public boolean insertPaychecks(int id, String pcType, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt){
+	public boolean insertPaychecks(int id, String pcType, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, MathLogger ml){
 		boolean updated = false;
 		PreparedStatement stmtInsertPaychecks = null;
 		try {
-			stmtInsertPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtInsertPaychecks());
+			stmtInsertPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtInsertPaychecks(), PreparedStatement.RETURN_GENERATED_KEYS);
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
@@ -838,6 +969,13 @@ public class WCReimbursementDAO {
 			stmtInsertPaychecks.setDate(5, payEnd, tZ);
 			stmtInsertPaychecks.setBigDecimal(6, bdGrossAmnt);
 			rows = stmtInsertPaychecks.executeUpdate();
+			ResultSet rs = stmtInsertPaychecks.getGeneratedKeys();
+			if(rs.next()){
+				this.updatePCMathLog(id, rs.getInt(1), "PC", ml);
+			}
+			else{
+				System.out.println("Could not update MathLog for Paycheck.");
+			}
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -853,14 +991,14 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
-	public boolean insertTPDPaychecks(int id, String pcType, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdWCCalc){
+	public boolean insertTPDPaychecks(int id, String pcType, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdWCCalc, MathLogger ml){
 		boolean updated = false;
 		PreparedStatement stmtInsertTPDPaychecks = null;
 		try {
 			stmtInsertTPDPaychecks = this.dbConnection.prepareStatement(
 					"INSERT INTO APP.PAYCHECKS" + 
 					"(CLAIM_ID, PC_TYPE, PAY_DATE, PAY_START, PAY_END, BD_GROSS_AMNT, BD_WC_CALC) VALUES" +
-					"(?,?,?,?,?,?,?)");
+					"(?,?,?,?,?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
@@ -877,6 +1015,13 @@ public class WCReimbursementDAO {
 			stmtInsertTPDPaychecks.setBigDecimal(6, bdGrossAmnt);
 			stmtInsertTPDPaychecks.setBigDecimal(7, bdWCCalc);
 			rows = stmtInsertTPDPaychecks.executeUpdate();
+			ResultSet rs = stmtInsertTPDPaychecks.getGeneratedKeys();
+			if(rs.next()){
+				this.updatePCMathLog(id, rs.getInt(1), "TPDPC", ml);
+			}
+			else{
+				System.out.println("Could not update MathLog for TPDPaycheck.");
+			}
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -893,11 +1038,11 @@ public class WCReimbursementDAO {
 	}
 	
 	public boolean insertWCPaychecks(int id, String wcPCType, boolean isContest, boolean isLate, boolean ftHours, 
-			Date payReceived, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdAmntOwed, Date contestRslvd){
+			Date payReceived, Date payDate, Date payStart, Date payEnd, BigDecimal bdGrossAmnt, BigDecimal bdAmntOwed, Date contestRslvd, MathLogger ml){
 		boolean updated = false;
 		PreparedStatement stmtInsertWCPaychecks = null;
 		try {
-			stmtInsertWCPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtInsertWCPaychecks());
+			stmtInsertWCPaychecks = this.dbConnection.prepareStatement(this.preparedStatements.getStmtInsertWCPaychecks(), PreparedStatement.RETURN_GENERATED_KEYS);
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
@@ -921,6 +1066,13 @@ public class WCReimbursementDAO {
 			stmtInsertWCPaychecks.setBigDecimal(11, bdAmntOwed);
 			stmtInsertWCPaychecks.setDate(12, contestRslvd, tZ);
 			rows = stmtInsertWCPaychecks.executeUpdate();
+			ResultSet rs = stmtInsertWCPaychecks.getGeneratedKeys();
+			if(rs.next()){
+				this.updatePCMathLog(id, rs.getInt(1), "WCPC", ml);
+			}
+			else{
+				System.out.println("Could not update MathLog for WCPaycheck.");
+			}
 			updated = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -935,6 +1087,89 @@ public class WCReimbursementDAO {
 		}
 		
 		return updated;
+	}
+	
+	public boolean insertMathLog(int id, String type, MathLogger ml){
+		if(ml == null || ml.size() < 1) return false;
+		boolean inserted = false;
+		String prepare = "INSERT INTO APP.MATH_LOGS" + 
+		"(CLAIM_ID, ML_TYPE, ML_ORDER, LOG_STRING) VALUES" +
+		"(?,?,?,?)";
+		PreparedStatement insertML = null;
+		try{
+			insertML = this.dbConnection.prepareStatement(prepare);
+		}catch (SQLException e){
+			e.printStackTrace();
+		}
+		
+		Set<Entry<Integer, String>> set = ml.entrySet();
+		for (Entry<Integer, String> pair : set){
+			try{
+				insertML.clearParameters();
+				insertML.setInt(1, id);
+				insertML.setString(2, type);
+				insertML.setInt(3, pair.getKey());
+				insertML.setString(4, pair.getValue());
+				inserted = (insertML.executeUpdate() > 0);	
+			} catch (SQLException e){
+				e.printStackTrace();
+				try{
+					throw new Exception("MathLog for "+type+" with claim ID "+id+" for Log #"+pair.getKey()+" could not be Inserted.");
+				} catch(Exception ex){
+					ex.printStackTrace();
+				}
+			}
+			System.out.println("MathLog for "+type+" with claim ID "+id+" for Log #"+pair.getKey()+" successfully Inserted");
+		}
+		try{
+			insertML.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return inserted;
+	}
+	
+	public boolean insertPCMathLog(int id, int pcID, String type, MathLogger ml){
+		if(ml == null || ml.size() < 1) return false;
+		boolean inserted = false;
+		String prepare = "INSERT INTO APP.MATH_LOGS" + 
+		"(CLAIM_ID, ML_TYPE, ML_ORDER, LOG_STRING, PC_ID) VALUES" +
+		"(?,?,?,?,?)";
+		PreparedStatement insertML = null;
+		try{
+			insertML = this.dbConnection.prepareStatement(prepare);
+		}catch (SQLException e){
+			e.printStackTrace();
+		}
+		
+		Set<Entry<Integer, String>> set = ml.entrySet();
+		for (Entry<Integer, String> pair : set){
+			try{
+				insertML.clearParameters();
+				insertML.setInt(1, id);
+				insertML.setString(2, type);
+				insertML.setInt(3, pair.getKey());
+				insertML.setString(4, pair.getValue());
+				insertML.setInt(5, pcID);
+				inserted = (insertML.executeUpdate() > 0);	
+			} catch (SQLException e){
+				e.printStackTrace();
+				try{
+					throw new Exception("MathLog for "+type+" with claim ID "+id+" for Log #"+pair.getKey()+" could not be Inserted.");
+				} catch(Exception ex){
+					ex.printStackTrace();
+				}
+			}
+			System.out.println("MathLog for "+type+" with claim ID "+id+" for Log #"+pair.getKey()+" successfully Inserted");
+		}
+		try{
+			insertML.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return inserted;
 	}
 	
 	public Claimant selectClaimants(int id) {
@@ -1295,6 +1530,9 @@ public class WCReimbursementDAO {
 				p.setPayPeriodStart(results.getDate(5, tZ));
 				p.setPayPeriodEnd(results.getDate(6, tZ));
 				p.setGrossAmount(results.getBigDecimal(7));
+				if (this.selectPCMathLogger(id, results.getInt(1), "PC") != null && this.selectPCMathLogger(id, results.getInt(1), "PC").size() > 0){
+					p.setMathLog(this.selectPCMathLogger(id, results.getInt(1), "PC"));
+				}
 				pcList.add(p);
 			}
 			if (row < 0){
@@ -1857,7 +2095,7 @@ public class WCReimbursementDAO {
 			}
 			if (ttdRSumm == null && claimSum != null){
 				try{
-					this.insertRSummary(clmnt.getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"), null, null);
+					this.insertRSummary(clmnt.getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"), null, null, null);
 				} catch (Exception e){
 					e.printStackTrace();
 					try{
@@ -1900,6 +2138,130 @@ public class WCReimbursementDAO {
 			e.printStackTrace();
 		}
 		return ttdRSumm;
+	}
+	
+	public MathLogger selectMathLogger(int id, String type){
+		MathLogger ml = new MathLogger();
+		String prepare = "SELECT * FROM APP.MATH_LOGS "+
+				"where CLAIM_ID = ? "+
+				"AND ML_TYPE = ?";
+		PreparedStatement selectML = null;
+		try {
+			selectML = this.dbConnection.prepareStatement(prepare);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		ResultSet results = null;
+		
+		try{
+			selectML.clearParameters();
+			selectML.setInt(1, id);
+			selectML.setString(2, type);
+			if (!selectML.execute()){
+				selectML.close();
+				return ml;
+			}
+			results = selectML.getResultSet();
+
+			//ResultSetMetaData rsmd = results.getMetaData();
+            //int numberCols = rsmd.getColumnCount();
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				selectML.close();
+			} catch (SQLException se){
+				se.printStackTrace();
+			}
+			return ml;
+		}
+		
+		try{
+			while(results.next()){
+				ml.put(results.getInt(4), results.getString(5));
+			}
+			
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				results.close();
+				selectML.close();
+				return ml;
+			} catch (SQLException se){
+				se.printStackTrace();
+				return ml;
+			}
+		}
+		
+		try{
+			results.close();
+			selectML.close();
+		} catch (SQLException e){
+			e.printStackTrace();
+		}
+		return ml;
+	}
+	
+	public MathLogger selectPCMathLogger(int id, int pcID, String type){
+		MathLogger ml = new MathLogger();
+		String prepare = "SELECT * FROM APP.MATH_LOGS "+
+				"where CLAIM_ID = ? "+
+				"AND ML_TYPE = ? "+
+				"AND PC_ID = ?";
+		PreparedStatement selectML = null;
+		try {
+			selectML = this.dbConnection.prepareStatement(prepare);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		ResultSet results = null;
+		
+		try{
+			selectML.clearParameters();
+			selectML.setInt(1, id);
+			selectML.setString(2, type);
+			selectML.setInt(3, pcID);
+			if (!selectML.execute()){
+				selectML.close();
+				return ml;
+			}
+			results = selectML.getResultSet();
+
+			//ResultSetMetaData rsmd = results.getMetaData();
+            //int numberCols = rsmd.getColumnCount();
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				selectML.close();
+			} catch (SQLException se){
+				se.printStackTrace();
+			}
+			return ml;
+		}
+		
+		try{
+			while(results.next()){
+				ml.put(results.getInt(4), results.getString(5));
+			}
+			
+		} catch (SQLException e){
+			e.printStackTrace();
+			try{
+				results.close();
+				selectML.close();
+				return ml;
+			} catch (SQLException se){
+				se.printStackTrace();
+				return ml;
+			}
+		}
+		
+		try{
+			results.close();
+			selectML.close();
+		} catch (SQLException e){
+			e.printStackTrace();
+		}
+		return ml;
 	}
 	
 	public boolean shutdownAllConnectionInstances(){

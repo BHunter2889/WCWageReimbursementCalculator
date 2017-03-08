@@ -213,6 +213,10 @@ public class Paycheck implements Comparable<Calendar> {
 		this.daysInPayPeriod = days;	
 	}
 	
+	public void setMathLog(MathLogger ml){
+		this.mathLog = ml;
+	}
+	
 	public long getDaysInPayPeriod(){
 		return this.daysInPayPeriod;
 	}
@@ -223,5 +227,9 @@ public class Paycheck implements Comparable<Calendar> {
 		overlap = this.payPeriodStart.after(pc.getPayPeriodStart()) && this.payPeriodStart.before(pc.getPayPeriodEnd());
 		
 		return overlap;
+	}
+	
+	public void logMath(int num){
+		
 	}
 }

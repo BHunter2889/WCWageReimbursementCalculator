@@ -95,7 +95,7 @@ public class ClaimPreparedStatements {
 			    "    BD_ANOTPAID = ?, " +
 			    "	 FD_DATE = ?," +
 			    "	 LD_DATE = ?" +
-			    "where CLAIM_ID = ? " + //This AND statement may throw an error
+			    "where CLAIM_ID = ? " + 
 			    "AND TD_TYPE = ?";
 	}
 	
