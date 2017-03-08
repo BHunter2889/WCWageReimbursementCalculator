@@ -13,7 +13,6 @@ import java.util.SimpleTimeZone;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
-
 import javax.swing.JOptionPane;
 
 
@@ -66,7 +65,7 @@ public class MissouriCalculation extends DefaultStateLawCalculation implements S
 		//Date dPPE = (Date) pcPPE.getTime();
 		java.util.Date dPWE = priorWeekEnd.getTime();
 		
-
+		String trim = "";
 		if(pcPPS.compareTo(priorWeekEnd) > 0){
 			message = "Invalid paycheck start date. Pay Period Start Date must be before the end of the week immediately prior to week of injury."+eol+
 					"Date Entered: "+formatter.format(pcPPS.getTime());
@@ -92,6 +91,10 @@ public class MissouriCalculation extends DefaultStateLawCalculation implements S
 				BigDecimal nG = pGAMult.setScale(2, RoundingMode.HALF_EVEN);
 				String newGross = String.valueOf(nG);
 				pc.setGrossAmount(newGross);
+				int ogPPDays = (int) Math.ceil((pcE-mPCPPS) / mDay);
+				trim += "Trimmed and Adjusted Gross Amount: ((Days After Earliest Prior Wage Date) "+PPDays+" / (Days in Orignal Pay Period) "+ogPPDays+") x ";
+				trim += "(Original Gross)"+gA.toPlainString()+" = "+pc.getGrossAmount().toPlainString();
+				pc.mathLog.put(1, trim);
 				message = "Only last " + String.valueOf(PPDays) + " Days of submitted Pay Check entered and calculated for Gross Amount due to earliest accepted date for prior wages relative to date of injury";
 				JOptionPane.showMessageDialog(null, message);
 				//System.out.print("If work hours used to calculate pay during this period were not evenly distributed for the above number of days,");
@@ -136,7 +139,11 @@ public class MissouriCalculation extends DefaultStateLawCalculation implements S
 				BigDecimal nG = pGAMult.setScale(2, RoundingMode.HALF_EVEN);
 				String newGross = String.valueOf(nG);
 				//pc.setGrossAmount(newGross);
+				int ogPPDays = (int) Math.ceil((pcE-mPCPPS) / mDay);
 				newPC = new Paycheck(newGross, pc.getPaymentDate(), pc.getPayPeriodStart(), priorWeekEnd);
+				trim += "Injury Prior Week Adjusted Gross Amount: ((Days in Week Prior to Injury) "+PPDays+" / (Days in Pay Period) "+ogPPDays+") x ";
+				trim += "(Original Gross) "+gA.toPlainString()+" = "+nG.toPlainString();
+				newPC.mathLog.put(1, trim);
 				message = "Only first " + String.valueOf(PPDays) + " Days of entered Pay Check entered and calculated for Gross Amount due to last accepted date for prior wages relative to date of injury (end of prior week)";
 				JOptionPane.showMessageDialog(null, message);
 				/*System.out.println("If work hours used to calculate pay during this period were not evenly distributed for the above number of days,");
