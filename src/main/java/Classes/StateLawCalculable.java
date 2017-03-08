@@ -20,7 +20,7 @@ public interface StateLawCalculable {
 	public BigDecimal computeCalculatedWeeklyPayment(BigDecimal avgPGrossWeekPay); //ReimbursementSummary
 	public Calendar computeEarliestPriorWageDate(Calendar priorWeekStart); //CompClaim
 	public BigDecimal computeWCSupplementalPayment(TPDPaycheck workPayment, BigDecimal avgPriorGrossWeeklyPayment);
-	public boolean determineAndSetIsLate(Calendar payPeriodEnd, Calendar payReceived); //WCPaycheck
+	public Object[] determineAndSetIsLate(Calendar payPeriodEnd, Calendar payReceived); //WCPaycheck
 	public Calendar normalizeCalendarTime(Calendar calendar);
 	public boolean isWithinTPDPeriod(ArrayList<Paycheck> tpdWork, Paycheck pc);
 	//public ArrayList<GregorianCalendar> getPaycheckDateRanges(ArrayList<Paycheck> pchecks);

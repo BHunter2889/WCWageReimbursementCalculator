@@ -274,7 +274,8 @@ public abstract class ReimbursementSummary {
 				else if(line % 5 == 0){
 					calc += aSO.toPlainString()+" +"+eol;
 				}
-				p.logMath(2, this.calculatedWeeklyPayment);
+				BigDecimal[] bD = {this.getCalculatedWeeklyPayment()};
+				p.logMath(2, bD);
 			}
 		}
 		amountNotPaid = amountNotPaid.setScale(2, RoundingMode.HALF_EVEN);
@@ -301,19 +302,23 @@ public abstract class ReimbursementSummary {
 		if (this.wcPayments.isEmpty()) return wcPTD;
 		if (this.wcPayments.size() < 2){
 			wcPTD = wcPTD.add(this.wcPayments.get(0).getGrossAmount());
-			this.wcPayments.get(0).logMath(2, this.calculatedWeeklyPayment);
+			BigDecimal[] bD = {this.getCalculatedWeeklyPayment()};
+			this.wcPayments.get(0).logMath(2, bD);
 		}
 		else{
 			for (int i=0, j=this.wcPayments.size()-1; i<j; i++, j--){
 				WorkCompPaycheck wc1 = this.wcPayments.get(i);
-				wc1.logMath(2, this.calculatedWeeklyPayment);
+				BigDecimal[] bD = {this.getCalculatedWeeklyPayment()};
+				wc1.logMath(2, bD);
 				WorkCompPaycheck wc2 = this.wcPayments.get(j);
-				wc2.logMath(2, this.calculatedWeeklyPayment);
+				BigDecimal[] bD2 = {this.getCalculatedWeeklyPayment()};
+				wc2.logMath(2, bD2);
 				wcPTD = wcPTD.add(wc1.getGrossAmount()).add(wc2.getGrossAmount());
 				if(i+2 == j){
 					wc1 = this.wcPayments.get(i+1);
 					wcPTD = wcPTD.add(wc1.getGrossAmount());
-					wc1.logMath(2, this.calculatedWeeklyPayment);
+					BigDecimal[] bD1 = {this.getCalculatedWeeklyPayment()};
+					wc1.logMath(2, bD1);
 					break;
 				}
 			}

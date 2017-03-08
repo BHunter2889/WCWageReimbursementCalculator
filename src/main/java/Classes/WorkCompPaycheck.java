@@ -51,6 +51,8 @@ public class WorkCompPaycheck extends Paycheck {
 	any point, isContested should be true, otherwise false.*/
 	public WorkCompPaycheck(String grossAmount, GregorianCalendar paymentDate, GregorianCalendar payPeriodStart, boolean isContested) {
 		super(grossAmount, paymentDate, payPeriodStart);
+		this.mathLog.put(1, "N/A: Pay Period Dates Not Provided.");
+		this.mathLog.put(3, "N/A: Pay Period Dates Not Provided.");
 		this.payReceivedDate = paymentDate;
 		this.isContested = isContested;
 		this.fullTimeHours = false;
@@ -62,6 +64,8 @@ public class WorkCompPaycheck extends Paycheck {
 	any point, isContested should be true, otherwise false.)*/
 	public WorkCompPaycheck(String grossAmount, GregorianCalendar paymentDate, GregorianCalendar payPeriodStart, GregorianCalendar payPeriodEnd, boolean isContested) {
 		super(grossAmount, paymentDate, payPeriodStart, payPeriodEnd);
+		this.mathLog.put(1, "N/A: Pay Period Dates Not Provided.");
+		this.mathLog.put(3, "N/A: Pay Period Dates Not Provided.");
 		this.payReceivedDate = paymentDate;
 		this.isContested = isContested;
 		this.fullTimeHours = false;
@@ -73,6 +77,8 @@ public class WorkCompPaycheck extends Paycheck {
 	any point, isContested should be true, otherwise false.*/
 	public WorkCompPaycheck(String grossAmount, GregorianCalendar paymentDate, GregorianCalendar payPeriodStart, boolean isContested, StateLawCalculable sLC) {
 		super(grossAmount, paymentDate, payPeriodStart);
+		this.mathLog.put(1, "N/A: Pay Period Dates Not Provided.");
+		this.mathLog.put(3, "N/A: Pay Period Dates Not Provided.");
 		this.payReceivedDate = paymentDate;
 		this.isContested = isContested;
 		this.stateLawCalculation = sLC;
@@ -86,6 +92,8 @@ public class WorkCompPaycheck extends Paycheck {
 	any point, isContested should be true, otherwise false.)*/
 	public WorkCompPaycheck(String grossAmount, GregorianCalendar paymentDate, GregorianCalendar payPeriodStart, GregorianCalendar payPeriodEnd, boolean isContested, StateLawCalculable sLC) {
 		super(grossAmount, paymentDate, payPeriodStart, payPeriodEnd);
+		this.mathLog.put(1, "N/A: Pay Period Dates Not Provided.");
+		this.mathLog.put(3, "N/A: Pay Period Dates Not Provided.");
 		this.payReceivedDate = paymentDate;
 		this.isContested = isContested;
 		this.stateLawCalculation = sLC;
@@ -99,6 +107,8 @@ public class WorkCompPaycheck extends Paycheck {
 	any point, isContested should be true, otherwise false.*/
 	public WorkCompPaycheck(String grossAmount, GregorianCalendar payReceivedDate, GregorianCalendar payPeriodStart, boolean isContested, StateLawCalculable sLC, GregorianCalendar paymentDate) {
 		super(grossAmount, paymentDate, payPeriodStart);
+		this.mathLog.put(1, "N/A: Pay Period Dates Not Provided.");
+		this.mathLog.put(3, "N/A: Pay Period Dates Not Provided.");
 		this.payReceivedDate = payReceivedDate;
 		this.isContested = isContested;
 		this.stateLawCalculation = sLC;
@@ -112,6 +122,8 @@ public class WorkCompPaycheck extends Paycheck {
 	any point, isContested should be true, otherwise false.)*/
 	public WorkCompPaycheck(String grossAmount, Calendar pRD, Calendar pPS, Calendar pPE, boolean isContested, StateLawCalculable sLC, Calendar pD) {
 		super(grossAmount, pD, pPS, pPE);
+		this.mathLog.put(1, "N/A: Pay Period Dates Not Provided.");
+		this.mathLog.put(3, "N/A: Pay Period Dates Not Provided.");
 		this.stateLawCalculation = sLC;
 		GregorianCalendar epoch = new GregorianCalendar(this.stateLawCalculation.getTimeZone());
 		this.payReceivedDate = pRD;
@@ -125,6 +137,8 @@ public class WorkCompPaycheck extends Paycheck {
 	
 	public WorkCompPaycheck() {
 		super();
+		this.mathLog.put(1, "N/A: Pay Period Dates Not Provided.");
+		this.mathLog.put(3, "N/A: Pay Period Dates Not Provided.");
 		this.isContested = false;
 		this.isLate = false;
 		this.amountStillOwed = new BigDecimal("0");
@@ -144,7 +158,10 @@ public class WorkCompPaycheck extends Paycheck {
 	public void determineAndSetIsLate(){
 		
 		if (this.isContested && this.contestResolvedDate != null){
-			this.isLate = this.stateLawCalculation.determineAndSetIsLate(this.contestResolvedDate, this.payReceivedDate);
+			Object[] bM = this.stateLawCalculation.determineAndSetIsLate(this.contestResolvedDate, this.payReceivedDate);
+			this.isLate = (boolean) bM[0];
+			BigDecimal[] bD = {new BigDecimal(String.valueOf(bM[1]))};
+			logMath(1, bD);
 		}
 		else if(this.isContested && this.contestResolvedDate == null){
 			System.out.println("No Resolution Date for the Contested paycheck is set (date contest was settled or resolved in court.");
@@ -152,7 +169,10 @@ public class WorkCompPaycheck extends Paycheck {
 			this.isLate = false;
 		}
 		else{
-			this.isLate = stateLawCalculation.determineAndSetIsLate(this.payPeriodEnd, this.payReceivedDate);
+			Object[] bM = stateLawCalculation.determineAndSetIsLate(this.payPeriodEnd, this.payReceivedDate);
+			this.isLate = (boolean) bM[0];
+			BigDecimal[] bD = {new BigDecimal(String.valueOf(bM[1]))};
+			logMath(1, bD);
 		}
 	}
 	
@@ -164,7 +184,8 @@ public class WorkCompPaycheck extends Paycheck {
 		}
 		aSO = aSO.setScale(2, RoundingMode.HALF_EVEN);
 		this.amountStillOwed = this.amountStillOwed.add(aSO);
-		logMath(2, calculatedWeeklyPayment);
+		BigDecimal[] bD = {calculatedWeeklyPayment};
+		logMath(2, bD);
 	}
 	
 	public void computeAnyAddtionalLatePaymentCompensation(BigDecimal calculatedWeeklyPayment){
@@ -173,12 +194,13 @@ public class WorkCompPaycheck extends Paycheck {
 		if(!this.isLate){
 			return;
 		}
-		BigDecimal lPC = this.stateLawCalculation.computeAnyLatePaymentCompensation(this.grossAmount, calculatedWeeklyPayment);
+		BigDecimal lPC = this.stateLawCalculation.computeAnyLatePaymentCompensation(this.grossAmount, calculatedWeeklyPayment);	
 		BigDecimal zero = new BigDecimal("0");
 		if(lPC.compareTo(zero) <= 0){
 			return;
 		}
-		
+		BigDecimal[] bD = {lPC, calculatedWeeklyPayment};
+		logMath(3, bD);
 		BigDecimal lateAdjustment = this.amountStillOwed.add(lPC);
 		this.amountStillOwed = lateAdjustment.setScale(2, RoundingMode.HALF_EVEN);
 	}
@@ -326,29 +348,33 @@ public class WorkCompPaycheck extends Paycheck {
 		return this.contestResolvedDate;
 	}
 	
-	public void logMath(int num, BigDecimal bD){
+	public void logMath(int num, BigDecimal[] bD){
 		switch(num){
-			case 1: String exp = "Is Payment More that 30 days late?: ";
-			SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
-			formatter.setLenient(false);
-			formatter.setTimeZone(this.stateLawCalculation.getTimeZone());
-			
-			exp += "(Pay Period End) "+formatter.format(payPeriodEnd.getTime()+" - ");
+			case 1: String late = "Is Payment More that 30 days late?: ";
+				SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
+				formatter.setLenient(false);
+				formatter.setTimeZone(this.stateLawCalculation.getTimeZone());
 				
-				mathLog.put(1, );
+				late += "(Pay Period End) "+formatter.format(this.payPeriodEnd.getTime()+" - ");
+				late += "(Pay Received Date) "+formatter.format(this.payReceivedDate.getTime()+" = ");
+				late += this.isLate ? bD[0].toBigInteger().toString()+" (Late)": bD[0].toBigInteger().toString()+" (Not Late)";
+				
+				mathLog.put(1, late);
 			
 			case 2: String aSO = "Amount Still Owed: ";
 				GregorianCalendar epoch = new GregorianCalendar(new SimpleTimeZone(0, "Standard"));
 				epoch.setTimeInMillis(1000*60*60*24);
 				boolean pPS = this.getPayPeriodStart().compareTo(epoch) > 0;
-				if(pPS) aSO += "(Calc. WeeklyPayment) "+bD.toPlainString()+" - (Payment Amnt.) "+this.grossAmount.toPlainString()+" = "+this.amountStillOwed.toPlainString();
+				if(pPS) aSO += "(Calc. WeeklyPayment) "+bD[0].toPlainString()+" - (Payment Amnt.) "+this.grossAmount.toPlainString()+" = "+this.amountStillOwed.toPlainString();
 				else aSO += "Amount Still Owed could not be computed per Payment due to unknown Pay Period Dates.";
 			
 				mathLog.put(2, aSO);
 				
-			case 3: 
+			case 3: String latePay = "Late Payment Added: ";
+				latePay+= "(10% of Calculated Weekly Payment Added) ((0.10 x "+bD[1].toPlainString()+") + "+bD[1].toPlainString()+") - ";
+				latePay+= "(Amount Paid) "+this.grossAmount.toPlainString()+" = "+bD[0].toPlainString()+"(Amount added to Amount Still Owed)";
 				
-				mathLog.put(3, value);
+				mathLog.put(3, latePay);
 		}
 	}
 }

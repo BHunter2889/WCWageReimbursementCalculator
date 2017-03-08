@@ -371,20 +371,31 @@ public class DefaultStateLawCalculation implements StateLawCalculable {
 	}
 
 	@Override
-	public boolean determineAndSetIsLate(Calendar payPeriodEnd, Calendar payReceived) {
+	public Object[] determineAndSetIsLate(Calendar payPeriodEnd, Calendar payReceived) {
 		boolean isLate = false;
+		int late = 0;
+		Object[] bM = {isLate, late};
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
+		formatter.setLenient(false);
+		formatter.setTimeZone(timeZone);
+		
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		//long mWeek = mDay * 7;
 		long mPPE = payPeriodEnd.getTimeInMillis();
 		long mPRD = payReceived.getTimeInMillis();
 		int daysLate = (int) Math.ceil((mPRD - mPPE) / mDay);
+		bM[1] = daysLate;
 		if(daysLate > stateDaysToLate){
 			isLate = true;
+			bM[0] = isLate;
+			
 		}
 		else{
 			isLate = false;
+			bM[0] = isLate;
 		}		
-		return isLate;
+		return bM;
 	}
 	
 	//ensures Calendar time is set to 00:00 on same date
