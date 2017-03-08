@@ -1600,6 +1600,8 @@ public class WCReimbursementDAO {
 			while(results.next()){
 				row++;
 				TPDPaycheck p = new TPDPaycheck();
+				if(this.selectPCMathLogger(id, results.getInt(1), "TPDPC") == null) p.setMathLog(new MathLogger());
+				else p.setMathLog(this.selectPCMathLogger(id, results.getInt(1), "TPDPC"));
 				p.setStateLawCalculation(this.stateLawCalculation);
 				p.setPaymentDate(results.getDate(4, tZ));
 				p.setPayPeriodStart(results.getDate(5, tZ));
@@ -1813,6 +1815,8 @@ public class WCReimbursementDAO {
 			while(results.next()){
 				row++;
 				WorkCompPaycheck wp = new WorkCompPaycheck();
+				if(this.selectPCMathLogger(id, results.getInt(1), "WCPC") == null) wp.setMathLog(new MathLogger());
+				else wp.setMathLog(this.selectPCMathLogger(id, results.getInt(1), "WCPC"));
 				wp.setStateLawCalculation(this.stateLawCalculation);
 				wp.setIsContested(results.getBoolean(4));
 				wp.setIsLate(results.getBoolean(5));
@@ -2393,6 +2397,8 @@ public class WCReimbursementDAO {
 		System.out.println("Adding ReimbursementOverview for Claimant: "+clmnt.toString()+"...");
 
 		ReimbursementOverview ro = new ReimbursementOverview();
+		//if(this.selectMathLogger(clmnt.getID(), "RO") == null) ro.mathLog = new MathLogger();
+		//else ro.mathLog = this.selectMathLogger(clmnt.getID(), "RO");
 		ro.setClaimant(clmnt);
 		ro.setTTDRSumm(this.selectTTDRSummary(clmnt));
 		ro.setFullDutyReturnDate(this.selectFullDutyDate(clmnt));
@@ -2433,7 +2439,3 @@ public class WCReimbursementDAO {
 		return null;
 	}
 }
-
-
-
-

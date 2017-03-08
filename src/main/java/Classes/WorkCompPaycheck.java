@@ -328,7 +328,12 @@ public class WorkCompPaycheck extends Paycheck {
 	
 	public void logMath(int num, BigDecimal bD){
 		switch(num){
-			case 1: 
+			case 1: String exp = "Is Payment More that 30 days late?: ";
+			SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
+			formatter.setLenient(false);
+			formatter.setTimeZone(this.stateLawCalculation.getTimeZone());
+			
+			exp += "(Pay Period End) "+formatter.format(payPeriodEnd.getTime()+" - ");
 				
 				mathLog.put(1, );
 			

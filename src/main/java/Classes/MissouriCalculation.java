@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.Map;
+import java.util.Set;
 import java.util.SimpleTimeZone;
 import java.util.SortedMap;
 import java.util.TimeZone;
@@ -376,16 +377,29 @@ public class MissouriCalculation extends DefaultStateLawCalculation implements S
 	@Override
 	public boolean determineAndSetIsLate(Calendar payPeriodEnd, Calendar payReceived) {
 		boolean isLate = false;
+		Integer num = 1;
+		String exp = "Is Payment More that 30 days late?: ";
+		Object[] bM = {isLate, num, exp};
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy");
+		formatter.setLenient(false);
+		formatter.setTimeZone(timeZone);
+		
 		long mDay = (1000 * 60 * 60 * 24); // 24 hours in milliseconds
 		//long mWeek = mDay * 7;
 		long mPPE = payPeriodEnd.getTimeInMillis();
+		bM[3] += "(Pay Period End) "+formatter.format(payPeriodEnd.getTime()+" - ");
 		long mPRD = payReceived.getTimeInMillis();
+		bM[3] += "(Pay Received Date) "+formatter.format(payReceived.getTime()+" = ");
 		int daysLate = (int) Math.ceil((mPRD - mPPE) / mDay);
+		bM[3] += daysLate+" ";
 		if(daysLate > stateDaysToLate){
 			isLate = true;
+			bM[3] += "(Late)";
 		}
 		else{
 			isLate = false;
+			bM[3] += "(Not Late, or not determinable)";
 		}		
 		return isLate;
 	}
