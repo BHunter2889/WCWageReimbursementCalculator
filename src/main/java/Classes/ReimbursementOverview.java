@@ -355,6 +355,7 @@ public class ReimbursementOverview {
 				else if(this.hasLightDuty()) dates = "Light Duty Start Date: "+this.toStringLightDutyStart()+" | Full-Time Return Date: N/A";
 				
 				mathLog.put(1, dates);
+				break;
 			
 			case 2: String totalPaid = "";
 				if(this.containsTTD() && this.containsTPD()){
@@ -370,6 +371,7 @@ public class ReimbursementOverview {
 							" = "+ this.tpdRSumm.getWCPayToDate().toPlainString();
 				}
 				mathLog.put(2, totalPaid);
+				break;
 				
 			case 3: String owed = "";
 				if(this.containsTPD() && this.containsTTD()){
@@ -385,6 +387,7 @@ public class ReimbursementOverview {
 							" = "+this.getTotalCalculatedOwed().toPlainString();
 				}
 				mathLog.put(3, owed);
+				break;
 				
 			case 4: String aNP = "";
 				if(this.containsTPD() && this.containsTTD()){
@@ -400,6 +403,7 @@ public class ReimbursementOverview {
 							" = "+this.getTotalNotPaid().toPlainString();
 				}
 				mathLog.put(4, aNP);
+				break;
 		}
 	}
 	
@@ -423,15 +427,15 @@ public class ReimbursementOverview {
 		String eol = System.getProperty("line.separator");
 		if(this.hasLightDuty() && this.isFullDuty()){
 			return "Total Not Paid: $"+this.getTotalNotPaid().toPlainString()+" | Total Work Comp Pay-To-Date: $"+this.getTotalWCPayToDate().toPlainString()+eol+
-					"Light Duty Start Date: "+this.toStringLightDutyStart()+" | Full-Time Return Date: "+this.toStringFullDutyReturn();
+					"Light Duty Start Date: "+this.toStringLightDutyStart()+eol+"Full-Time Return Date: "+this.toStringFullDutyReturn();
 		}
 		else if(this.isFullDuty()){
 			return "Total Not Paid: $"+this.getTotalNotPaid().toPlainString()+" | Total Work Comp Pay-To-Date: $"+this.getTotalWCPayToDate().toPlainString()+eol+
-					"Light Duty Start Date: None Set. | Full-Time Return Date: "+this.toStringFullDutyReturn();
+					"Light Duty Start Date: None Set."+eol+"Full-Time Return Date: "+this.toStringFullDutyReturn();
 		}
 		else if(this.hasLightDuty()){
 			return "Total Not Paid: $"+this.getTotalNotPaid().toPlainString()+" | Total Work Comp Pay-To-Date: $"+this.getTotalWCPayToDate().toPlainString()+eol+
-					"Light Duty Start Date: "+this.toStringLightDutyStart()+" | Full-Time Return Date: None Set.";
+					"Light Duty Start Date: "+this.toStringLightDutyStart()+eol+"Full-Time Return Date: None Set.";
 		}
 		
 		return "Total Not Paid: $"+this.getTotalNotPaid().toPlainString()+" | Total Work Comp Pay-To-Date: $"+this.getTotalWCPayToDate().toPlainString();		

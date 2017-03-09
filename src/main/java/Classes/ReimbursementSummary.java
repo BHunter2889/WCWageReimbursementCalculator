@@ -408,6 +408,7 @@ public abstract class ReimbursementSummary {
 						new BigDecimal("2").divide(new BigDecimal("3"), 10, RoundingMode.HALF_UP).toPlainString()+" = "+this.getCalculatedWeeklyPayment().toPlainString();
 				
 				mathLog.put(1, calcWeekPay);
+				break;
 		}
 	}
 	

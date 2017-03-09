@@ -189,6 +189,7 @@ public class WorkCompPaycheck extends Paycheck {
 	}
 	
 	public void computeAnyAddtionalLatePaymentCompensation(BigDecimal calculatedWeeklyPayment){
+		if (calculatedWeeklyPayment == null) return;
 		this.computeAmountStillOwed(calculatedWeeklyPayment);
 		this.determineAndSetIsLate();
 		if(!this.isLate){
@@ -360,6 +361,7 @@ public class WorkCompPaycheck extends Paycheck {
 				late += this.isLate ? bD[0].toBigInteger().toString()+" (Late)": bD[0].toBigInteger().toString()+" (Not Late)";
 				
 				mathLog.put(1, late);
+				break;
 			
 			case 2: String aSO = "Amount Still Owed: ";
 				GregorianCalendar epoch = new GregorianCalendar(new SimpleTimeZone(0, "Standard"));
@@ -369,12 +371,16 @@ public class WorkCompPaycheck extends Paycheck {
 				else aSO += "Amount Still Owed could not be computed per Payment due to unknown Pay Period Dates.";
 			
 				mathLog.put(2, aSO);
+				break;
 				
 			case 3: String latePay = "Late Payment Added: ";
+				BigDecimal bigD = bD[1];
+				System.out.println("calcWeekPay: $"+bigD.toPlainString());
 				latePay+= "(10% of Calculated Weekly Payment Added) ((0.10 x "+bD[1].toPlainString()+") + "+bD[1].toPlainString()+") - ";
 				latePay+= "(Amount Paid) "+this.grossAmount.toPlainString()+" = "+bD[0].toPlainString()+"(Amount added to Amount Still Owed)";
 				
 				mathLog.put(3, latePay);
+				break;
 		}
 	}
 }

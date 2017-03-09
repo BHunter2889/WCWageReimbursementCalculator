@@ -174,7 +174,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 	public BigDecimal getWCCalcPayToDate(){
 		BigDecimal wcCalcPTD = new BigDecimal("0.00");
 		ArrayList<BigDecimal> bD = new ArrayList<BigDecimal>();
-		if (this.receivedWorkPayments.isEmpty()) return wcCalcPTD;
+		if (this.receivedWorkPayments == null || this.receivedWorkPayments.isEmpty()) return wcCalcPTD;
 		if(this.receivedWorkPayments.size() < 2) wcCalcPTD = wcCalcPTD.add(this.receivedWorkPayments.get(0).getWCCalcPay());		
 		else{
 			for (int i=0, j=this.receivedWorkPayments.size()-1; i<j; i++, j--){
@@ -233,8 +233,10 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 		String eol = System.lineSeparator();
 		switch(num){
 			case 1: mathLog.put(1, this.listReceivedWorkPaymentsAndMathLog());
+					break;
 			
 			case 2: mathLog.put(2, this.listWCPaymentsAndMathLog());
+					break;
 				
 			case 3: String wcCalc = "Total TPD Calculated Supplemental Pay Owed (Sum of each TPD Light Duty Calculated Supplemental Payment): ";
 				int line = 0;
@@ -254,6 +256,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 				wcCalc += " = "+bD.get(bD.size()-1).toPlainString();
 				
 				mathLog.put(3, wcCalc);
+				break;
 				
 			case 4: String wcPay = "Total TPD Supplemental Pay Received (Sum of each TPD Supplemental Payment): ";
 				line = 0;
@@ -273,11 +276,13 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 				wcPay += " = "+bD.get(bD.size()-1).toPlainString();
 				
 				mathLog.put(4, wcPay);
+				break;
 				
 			case 5: String aNP = "Total Supplemental Amount Not Paid: (TPD Calc. Owed - Paid) ";
 				aNP += this.getWCCalcPayToDate().toPlainString()+" - "+this.getWCPayToDate().toPlainString()+" = "+this.getAmountNotPaid().toPlainString();
 				
 				mathLog.put(5, aNP);
+				break;
 		}
 	}
 	

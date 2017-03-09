@@ -30,4 +30,5 @@ public interface StateLawCalculable {
 	public SortedMap<Paycheck, Integer> sortPCHashMapByDate(Map<Paycheck, Integer> pcList);
 	public SortedMap<WorkCompPaycheck, Integer> sortWCPCHashMapByDate(Map<WorkCompPaycheck, Integer> wcpcList);
 	public boolean priorWagesIsComplete(ArrayList<Paycheck> priorWages); //CompClaim
+	public int getStateDaysToLate();
 }

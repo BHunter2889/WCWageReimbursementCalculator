@@ -1562,6 +1562,7 @@ public class WCReimbursementDAO {
 	}
 	
 	public ArrayList<TPDPaycheck> selectTPDPaychecks(int id){
+		System.out.println("******Getting TPD LD Paychecks..... ************");
 		ArrayList<TPDPaycheck> pcList = new ArrayList<TPDPaycheck>();
 		PreparedStatement selectTPDPaychecks = null;
 		try {
@@ -1577,6 +1578,7 @@ public class WCReimbursementDAO {
 			selectTPDPaychecks.setString(2, "WORKPAYMENT");
 			if (!selectTPDPaychecks.execute()){
 				selectTPDPaychecks.close();
+				System.out.println("+++++NO TPDPCs ADDED+++++++ ln 1580");
 				return pcList;
 			}
 			results = selectTPDPaychecks.getResultSet();
@@ -1590,15 +1592,16 @@ public class WCReimbursementDAO {
 			} catch (SQLException se){
 				se.printStackTrace();
 			}
+			System.out.println("+++++NO TPDPCs ADDED+++++++");
 			return pcList;
 		}
 		Claimant clmnt = this.selectClaimants(id);
 		this.stateLawCalculation = this.getStateLawCalculation(clmnt.getState());
 		Calendar tZ = Calendar.getInstance(this.stateLawCalculation.getTimeZone());
-		int row = -1;
+		//int row = -1;
 		try{
 			while(results.next()){
-				row++;
+				//row++;
 				TPDPaycheck p = new TPDPaycheck();
 				if(this.selectPCMathLogger(id, results.getInt(1), "TPDPC") == null) p.setMathLog(new MathLogger());
 				else p.setMathLog(this.selectPCMathLogger(id, results.getInt(1), "TPDPC"));
@@ -1609,18 +1612,20 @@ public class WCReimbursementDAO {
 				p.setGrossAmount(results.getBigDecimal(7));
 				if(results.getBigDecimal(8) != null && results.getBigDecimal(8).compareTo(new BigDecimal("0")) > 0) p.setWCCalcPay(results.getBigDecimal(8));
 				else p.computeWCCalcPay(this.selectClaimSummary(clmnt).getAvgPriorGrossWeeklyPayment());
+				System.out.println(p.toString()+" ROW ID = "+results.getInt(1));
 				pcList.add(p);
 			}
-			if (row < 0){
+			/*if (row < 0){
 				results.close();
 				selectTPDPaychecks.close();
 				return pcList;
-			}
+			}*/
 		} catch (SQLException e){
 			e.printStackTrace();
 			try{
 				results.close();
 				selectTPDPaychecks.close();
+				System.out.println("+++++NO TPDPCs ADDED+++++++");
 				return pcList;
 			} catch (SQLException se){
 				se.printStackTrace();
