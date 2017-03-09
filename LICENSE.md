@@ -1,4 +1,4 @@
-HUNTER SHARED SOURCE LICENSE
+HUNTX SHARED SOURCE LICENSE
 v1.0, 4 March 2017
 		
   Redistribution and modification of this license is allowed by anyone. This does not include the content covered by this license.
@@ -8,7 +8,7 @@ v1.0, 4 March 2017
 		 
   0. Definitions.
   
- "This License" refers to the current text document, Hunter Shared Source License v1.0. 
+ "This License" refers to the current text document, HuntX Shared Source License v1.0. 
  
  "The program", "the source", "the source code", "these files", "this file", "the repository", "the project" refers to any copyrightable work licensed under this License.
  
