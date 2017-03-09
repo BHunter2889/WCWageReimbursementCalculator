@@ -733,38 +733,38 @@ public class WCReimbursementCalculatorMenu {
 		
 		if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, "Is the Injured Person able to work any hours?", "Able to Work?", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION){
 			if(dataAccess.selectTTDRSummary(ro.getClaimant()) == null){
-				dataAccess.insertRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), new BigDecimal("0"), null, null);
+				dataAccess.insertRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), new BigDecimal("0"), null, null, null);
 			}
 			else{
 				if(ro.getTTDRSumm().getAmountNotPaid().compareTo(new BigDecimal("0")) <= 0){
 					if(ro.isFullDuty() && ro.hasLightDuty()){
 						dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), new BigDecimal("0"),
-								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTTDRSumm().mathLog);
 					}
 					else if(ro.hasLightDuty()){
 						dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), new BigDecimal("0"),
-								null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+								null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTTDRSumm().mathLog);
 					}
 					else if(ro.isFullDuty()){
 						dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), new BigDecimal("0"),
-								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTTDRSumm().mathLog);
 					}
-					else dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), new BigDecimal("0"), null, null);
+					else dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), new BigDecimal("0"), null, null, ro.getTTDRSumm().mathLog);
 				}
 				else{
 					if(ro.isFullDuty() && ro.hasLightDuty()){
 						dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTTDRSumm().mathLog);
 					}
 					else if(ro.hasLightDuty()){
 						dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-								null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+								null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTTDRSumm().mathLog);
 					}
 					else if(ro.isFullDuty()){
 						dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTTDRSumm().mathLog);
 					}
-					else dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null);
+					else dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null, ro.getTTDRSumm().mathLog);
 				}
 			}
 			String message = "Your current Calculated Weekly Payment owed from Work Comp is: $"+ro.getTTDRSumm().getCalculatedWeeklyPayment().toPlainString()+eol+
@@ -786,33 +786,33 @@ public class WCReimbursementCalculatorMenu {
 			}
 			if(dataAccess.selectTPDRSummary(ro.getClaimant()) == null){
 				if(ro.isFullDuty() && ro.hasLightDuty()){
-					dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-							new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+					dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+							new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 				}
 				else if(ro.hasLightDuty()){
-					dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-							null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+					dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+							null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 				}
 				else if(ro.isFullDuty()){
-					dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-							new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+					dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+							new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTPDRSumm().mathLog);
 				}
-				else dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null);
+				else dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), null, null, ro.getTPDRSumm().mathLog);
 			}
 			else{
 				if(ro.isFullDuty() && ro.hasLightDuty()){
-					dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-							new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+					dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+							new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 				}
 				else if(ro.hasLightDuty()){
-					dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-							null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+					dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+							null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 				}
 				else if(ro.isFullDuty()){
-					dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-							new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+					dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+							new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTPDRSumm().mathLog);
 				}
-				else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null);
+				else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), null, null, ro.getTPDRSumm().mathLog);
 			}
 				String message = "The current Calculated Weekly Payment owed from Work Comp during pay periods with no hours worked is: $"+ro.getTTDRSumm().getCalculatedWeeklyPayment().toPlainString()+eol+
 					"Would you like to add Work Comp Supplemental Payments for pay periods in which the Injured person was able to work hours (TPD) now? (You may enter them later if you wish.)"+eol+
@@ -897,7 +897,7 @@ public class WCReimbursementCalculatorMenu {
 					dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TTD", p.getIsContested(),
 							p.getIsLate(), p.getFullTimeHours(),new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
 							new java.sql.Date(p.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(p.getPayPeriodEnd().getTimeInMillis()), p.getGrossAmount(), p.getAmountStillOwed(),
-							new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()));
+							new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()), p.mathLog);
 					System.out.println("Known Pay Period WCPC "+p.toString()+" inserted.");
 					rs.setWCPayments(wcPayments);
 					ro.setTTDRSumm(rs);
@@ -910,7 +910,7 @@ public class WCReimbursementCalculatorMenu {
 					boolean inserted = dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TTD", p.getIsContested(),
 							p.getIsLate(), p.getFullTimeHours(), new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
 							new java.sql.Date(p.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(p.getPayPeriodEnd().getTimeInMillis()), p.getGrossAmount(), p.getAmountStillOwed(),
-							new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()));
+							new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()), p.mathLog);
 					if(inserted)System.out.println("Work Comp Paycheck "+p.toString()+" Inserted");
 					else{
 						try{
@@ -941,17 +941,17 @@ public class WCReimbursementCalculatorMenu {
 		claimListModel.set(claimantList.getSelectedIndex(), ro);
 		if(ro.isFullDuty() && ro.hasLightDuty()){
 			dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-					new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+					new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTTDRSumm().mathLog);
 		}
 		else if(ro.hasLightDuty()){
 			dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-					null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+					null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTTDRSumm().mathLog);
 		}
 		else if(ro.isFullDuty()){
 			dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-					new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+					new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTTDRSumm().mathLog);
 		}
-		else dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null);
+		else dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null, ro.getTTDRSumm().mathLog);
 		//below is obsolete. leaving for reference until final completion
 		/*for(WorkCompPaycheck p : rs.wcPayments){
 			dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TTD", p.getIsContested(),
@@ -1026,7 +1026,7 @@ public class WCReimbursementCalculatorMenu {
 					dataAccess.insertWCPaychecks(ro.getClaimant().getID(), "TPD", p.getIsContested(),
 							p.getIsLate(), p.getFullTimeHours(), new java.sql.Date(p.getPayReceivedDate().getTimeInMillis()), new java.sql.Date(p.getPaymentDate().getTimeInMillis()),
 							new java.sql.Date(p.getPayPeriodStart().getTimeInMillis()), new java.sql.Date(p.getPayPeriodEnd().getTimeInMillis()), p.getGrossAmount(), p.getAmountStillOwed(),
-							new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()));
+							new java.sql.Date(p.getContestResolutionDate().getTimeInMillis()), p.mathLog);
 					rs.setWCPayments(wcPayments);
 					ro.setTPDRSumm(rs);
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
@@ -1073,7 +1073,7 @@ public class WCReimbursementCalculatorMenu {
 				}
 				if(!exists){
 					dataAccess.insertPaychecks(ro.getClaimant().getID(), "WORKPAYMENT", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
-							new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
+							new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount(), pc.mathLog);
 				}
 				else{
 					message = "Paycheck with same period end date already exists."+eol+
@@ -1081,7 +1081,7 @@ public class WCReimbursementCalculatorMenu {
 							"(If this is a pay adjustment check for a previously entered pay period, CANCEL and add the Gross Amount from the two checks and enter them as one check with the corresponding dates of pay period)";
 					if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, message, "Overwrite Previous Pay Period Check?", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION){
 						dataAccess.updatePaychecks(ro.getClaimant().getID(), "WORKPAYMENT", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
-								new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
+								new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount(), pc.mathLog);
 					}
 					else{
 						workPayments.remove(workPayments.size()-1);
@@ -1096,33 +1096,33 @@ public class WCReimbursementCalculatorMenu {
 		ro.setTPDRSumm(rs);
 		if(dataAccess.selectTPDRSummary(ro.getClaimant()) == null){
 			if(ro.isFullDuty() && ro.hasLightDuty()){
-				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 			}
 			else if(ro.hasLightDuty()){
-				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-						null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+						null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 			}
 			if(ro.isFullDuty()){
-				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTPDRSumm().mathLog);
 			}
-			else dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null);
+			else dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), null, null, ro.getTPDRSumm().mathLog);
 		}
 		else{
 			if(ro.isFullDuty() && ro.hasLightDuty()){
-				dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+				dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 			}
 			else if(ro.hasLightDuty()){
-				dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-						null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+				dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+						null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 			}
 			if(ro.isFullDuty()){
-				dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+				dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTPDRSumm().mathLog);
 			}
-			else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null);
+			else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), null, null, ro.getTPDRSumm().mathLog);
 		}
 		claimListModel.set(claimantList.getSelectedIndex(), ro);
 		return true;
@@ -1173,7 +1173,7 @@ public class WCReimbursementCalculatorMenu {
 				}
 	
 				dataAccess.insertPaychecks(ro.getClaimant().getID(), "WORKPAYMENT", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
-						new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
+						new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount(), pc.mathLog);
 			}
 			else{
 				String message = "Paycheck with same period end date already exists."+eol+
@@ -1181,7 +1181,7 @@ public class WCReimbursementCalculatorMenu {
 						"(If this is a pay adjustment check for a previously entered pay period, CANCEL and add the Gross Amount from the two checks and enter them as one check with the corresponding dates of pay period)";
 				if(JOptionPane.showConfirmDialog(frmWorkersCompensationLost, message, "Overwrite Previous Pay Period Check?", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION){
 					dataAccess.updatePaychecks(ro.getClaimant().getID(), "WORKPAYMENT", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
-							new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
+							new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount(), pc.mathLog);
 				}
 				else{
 					workPayments.remove(workPayments.size()-1);
@@ -1197,33 +1197,33 @@ public class WCReimbursementCalculatorMenu {
 		claimListModel.set(claimantList.getSelectedIndex(), ro);
 		if(dataAccess.selectTPDRSummary(ro.getClaimant()) == null){
 			if(ro.isFullDuty() && ro.hasLightDuty()){
-				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 			}
 			else if(ro.hasLightDuty()){
-				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-						null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+						null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 			}
 			if(ro.isFullDuty()){
-				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+				dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTPDRSumm().mathLog);
 			}
-			else dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null);
+			else dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), null, null, ro.getTPDRSumm().mathLog);
 		}
 		else{
 			if(ro.isFullDuty() && ro.hasLightDuty()){
-				dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+				dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 			}
 			else if(ro.hasLightDuty()){
-				dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-						null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+				dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+						null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 			}
 			if(ro.isFullDuty()){
-				dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+				dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTPDRSumm().mathLog);
 			}
-			else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null);
+			else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), null, null, ro.getTPDRSumm().mathLog);
 		}
 		return true;
 	}	
@@ -1305,20 +1305,20 @@ public class WCReimbursementCalculatorMenu {
 			Calendar dateInjured = getInjuryDateCalendar("Select the Date of Injury", "Date Injured");
 			CompClaim cHist = new CompClaim(new java.sql.Date(dateInjured.getTimeInMillis()), sLC);
 			dataAccess.insertClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
-					new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), cHist.getDaysInjured(), cHist.getWeeksInjured());
+					new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), cHist.getDaysInjured(), cHist.getWeeksInjured(), cHist.mathLog);
 			if(ro.isFullDuty() && ro.hasLightDuty()){
 				dataAccess.insertRSummary(ro.getClaimant().getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"),
-						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTTDRSumm().mathLog);
 			}
 			else if(ro.hasLightDuty()){
 				dataAccess.insertRSummary(ro.getClaimant().getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"),
-						null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+						null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTTDRSumm().mathLog);
 			}
 			if(ro.isFullDuty()){
 				dataAccess.insertRSummary(ro.getClaimant().getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"),
-						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+						new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTTDRSumm().mathLog);
 			}
-			else dataAccess.insertRSummary(ro.getClaimant().getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"), null, null);
+			else dataAccess.insertRSummary(ro.getClaimant().getID(), "TTD", new BigDecimal("-1"), new BigDecimal("-1"), null, null, ro.getTTDRSumm().mathLog);
 			
 			ro.setTTDRSumm(new TTDReimbursementSummary());
 			ro.ttdRSumm.setClaimSummary(cHist);
@@ -1347,11 +1347,11 @@ public class WCReimbursementCalculatorMenu {
 						*/
 						Paycheck[] splits = sLC.splitDateInjuredPayPeriodChecks(pc, cHist);
 						dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", new java.sql.Date(splits[0].getPaymentDate().getTimeInMillis()), new java.sql.Date(splits[0].getPayPeriodStart().getTimeInMillis()),
-							new java.sql.Date(splits[0].getPayPeriodEnd().getTimeInMillis()), splits[0].getGrossAmount());
+							new java.sql.Date(splits[0].getPayPeriodEnd().getTimeInMillis()), splits[0].getGrossAmount(), splits[0].mathLog);
 						dataAccess.insertTPDPaychecks(ro.getClaimant().getID(), "WORKPAYMENT", new java.sql.Date(splits[1].getPaymentDate().getTimeInMillis()),
 								new java.sql.Date(splits[1].getPayPeriodStart().getTimeInMillis()), new java.sql.Date(splits[1].getPayPeriodEnd().getTimeInMillis()), splits[1].getGrossAmount(),
-								((TPDPaycheck) splits[1]).getWCCalcPay());
-						if(dataAccess.selectTPDRSummary(ro.getClaimant()) == null) dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", new BigDecimal("-1"), new BigDecimal("-1"), null, null);
+								((TPDPaycheck) splits[1]).getWCCalcPay(), splits[1].mathLog);
+						if(dataAccess.selectTPDRSummary(ro.getClaimant()) == null) dataAccess.insertRSummary(ro.getClaimant().getID(), "TPD", new BigDecimal("-1"), new BigDecimal("-1"), null, null, ro.getTPDRSumm().mathLog);
 						ro.setTPDRSumm(new TPDReimbursementSummary());
 						ro.tpdRSumm.setClaimSummary(cHist);
 						ro.tpdRSumm.addPaycheck((TPDPaycheck) splits[1]);
@@ -1372,7 +1372,7 @@ public class WCReimbursementCalculatorMenu {
 						Paycheck newPC = priorWages.get(priorWages.size() - 1);
 					
 						dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", new java.sql.Date(newPC.getPaymentDate().getTimeInMillis()), new java.sql.Date(newPC.getPayPeriodStart().getTimeInMillis()),
-								new java.sql.Date(newPC.getPayPeriodEnd().getTimeInMillis()), newPC.getGrossAmount());
+								new java.sql.Date(newPC.getPayPeriodEnd().getTimeInMillis()), newPC.getGrossAmount(), newPC.mathLog);
 						ro.ttdRSumm.claimSummary.setPriorWages(priorWages);
 						ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
 						ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
@@ -1386,7 +1386,7 @@ public class WCReimbursementCalculatorMenu {
 				ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
 				dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
 						new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment(), 
-						ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
+						ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured(), ro.getTTDRSumm().getClaimSummary().mathLog);
 				ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
 				claimListModel.set(claimantList.getSelectedIndex(), ro);
 				return true;
@@ -1396,7 +1396,7 @@ public class WCReimbursementCalculatorMenu {
 				ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
 				dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
 						new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), 
-						ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
+						ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured(), ro.getTTDRSumm().getClaimSummary().mathLog);
 				ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
 				claimListModel.set(claimantList.getSelectedIndex(), ro);
 				return false;
@@ -1423,7 +1423,7 @@ public class WCReimbursementCalculatorMenu {
 				dataAccess.deletePaychecksFrmSingleClaim(ro.getClaimant().getID(), "PRIORWAGES");
 				CompClaim cHist = new CompClaim(new java.sql.Date(dateInjured.getTimeInMillis()), sLC);
 				dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
-						new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), cHist.getDaysInjured(), cHist.getWeeksInjured());
+						new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), cHist.getDaysInjured(), cHist.getWeeksInjured(), cHist.mathLog);
 				ro.setTTDRSumm(new TTDReimbursementSummary());
 				ro.ttdRSumm.setClaimSummary(cHist);
 				claimListModel.set(claimantList.getSelectedIndex(), ro);
@@ -1447,7 +1447,7 @@ public class WCReimbursementCalculatorMenu {
 						pc = priorWages.get(priorWages.size() - 1);
 
 						dataAccess.insertPaychecks(ro.getClaimant().getID(), "PRIORWAGES", new java.sql.Date(pc.getPaymentDate().getTimeInMillis()), new java.sql.Date(pc.getPayPeriodStart().getTimeInMillis()),
-								new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount());
+								new java.sql.Date(pc.getPayPeriodEnd().getTimeInMillis()), pc.getGrossAmount(), pc.mathLog);
 						ro.ttdRSumm.claimSummary.setPriorWages(priorWages);
 						ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
 						ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
@@ -1459,7 +1459,7 @@ public class WCReimbursementCalculatorMenu {
 					ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
 					dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
 							new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment(), 
-							ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
+							ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured(), ro.getTTDRSumm().getClaimSummary().mathLog);
 					ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
 					return true;
@@ -1469,7 +1469,7 @@ public class WCReimbursementCalculatorMenu {
 					ro.ttdRSumm.claimSummary.updateDaysAndWeeksInjured();
 					dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(dateInjured.getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
 							new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), new BigDecimal("-1"), 
-							ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
+							ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured(), ro.getTTDRSumm().getClaimSummary().mathLog);
 					ro.ttdRSumm.setClaimSummary(ro.ttdRSumm.claimSummary);
 					claimListModel.set(claimantList.getSelectedIndex(), ro);
 					return false;
@@ -1590,21 +1590,21 @@ public class WCReimbursementCalculatorMenu {
 				if(ro.containsTTD()){
 					if(ro.hasLightDuty()){
 						dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTTDRSumm().mathLog);
 					}
 					else{
 						dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTTDRSumm().mathLog);
 					}
 				}
 				if(ro.containsTPD()){
 					if(ro.hasLightDuty()){
-						dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+						dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 					}
 					else{
-						dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+						dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTPDRSumm().mathLog);
 					}
 				}
 				fullDuty = true;
@@ -1644,21 +1644,21 @@ public class WCReimbursementCalculatorMenu {
 				if(ro.containsTTD()){
 					if(ro.isFullDuty()){
 						dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTTDRSumm().mathLog);
 					}
 					else{
 						dataAccess.updateRSummary(ro.getClaimant().getID(), "TTD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-								null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+								null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTTDRSumm().mathLog);
 					}
 				}
 				if(ro.containsTPD()){
 					if(ro.isFullDuty()){
-						dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+						dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+								new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 					}
 					else{
-						dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-								null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+						dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+								null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 					}
 				}
 				lightDuty = true;
@@ -1718,23 +1718,23 @@ public class WCReimbursementCalculatorMenu {
 								CompClaim cHist = ro.getTTDRSumm().getClaimSummary();
 								dataAccess.updateClaimSummary(ro.getClaimant().getID(), new java.sql.Date(cHist.getDateInjured().getTimeInMillis()), new java.sql.Date(cHist.getPriorWeekStart().getTimeInMillis()),
 										new java.sql.Date(cHist.getEarliestPriorWageDate().getTimeInMillis()), ro.getTTDRSumm().getClaimSummary().getAvgPriorGrossWeeklyPayment(), 
-										ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured());
+										ro.getTTDRSumm().getClaimSummary().getDaysInjured(), ro.getTTDRSumm().getClaimSummary().getWeeksInjured(), ro.getTTDRSumm().getClaimSummary().mathLog);
 								ro.ttdRSumm.setClaimSummary(cHist);
 								if(ro.containsTPD()){
 									ro.tpdRSumm.setClaimSummary(cHist);
 									if(ro.isFullDuty() && ro.hasLightDuty()){
-										dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-												new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+										dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+												new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 									}
 									else if(ro.hasLightDuty()){
-										dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-												null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+										dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+												null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 									}
 									if(ro.isFullDuty()){
-										dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-												new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+										dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+												new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTPDRSumm().mathLog);
 									}
-									else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null);
+									else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), null, null, ro.getTPDRSumm().mathLog);
 								}
 								claimListModel.set(claimantList.getSelectedIndex(), ro);
 								return deleted;
@@ -1757,18 +1757,18 @@ public class WCReimbursementCalculatorMenu {
 								workPay.remove(p);
 								ro.tpdRSumm.setReceivedWorkPayments(workPay);
 								if(ro.isFullDuty() && ro.hasLightDuty()){
-									dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-											new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+									dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+											new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 								}
 								else if(ro.hasLightDuty()){
-									dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-											null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+									dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+											null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 								}
 								if(ro.isFullDuty()){
-									dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-											new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+									dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+											new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTPDRSumm().mathLog);
 								}
-								else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null);
+								else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), null, null, ro.getTPDRSumm().mathLog);
 								claimListModel.set(claimantList.getSelectedIndex(), ro);
 								return deleted;
 							} catch (Exception e){
@@ -1824,18 +1824,18 @@ public class WCReimbursementCalculatorMenu {
 							if(!ro.ttdRSumm.determineAnyLatePay()) ro.computeTTDaNPNoLatePayCalculation(); 
 								
 							if(ro.isFullDuty() && ro.hasLightDuty()){
-								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-										new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+										new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 							}
 							else if(ro.hasLightDuty()){
-								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-										null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+										null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 							}
 							else if(ro.isFullDuty()){
-								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-										new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+										new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTPDRSumm().mathLog);
 							}
-							else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null);
+							else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), null, null, ro.getTPDRSumm().mathLog);
 							claimListModel.set(claimantList.getSelectedIndex(), ro);
 							return deleted;
 						} catch (Exception e){
@@ -1857,18 +1857,18 @@ public class WCReimbursementCalculatorMenu {
 							wcTPDPay.remove(p);
 							ro.tpdRSumm.setWCPayments(wcTPDPay);
 							if(ro.isFullDuty() && ro.hasLightDuty()){
-								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-										new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+										new Date(ro.getFullDutyReturnDate().getTimeInMillis()), new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 							}
 							else if(ro.hasLightDuty()){
-								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-										null, new Date(ro.getLightDutyStartDate().getTimeInMillis()));
+								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+										null, new Date(ro.getLightDutyStartDate().getTimeInMillis()), ro.getTPDRSumm().mathLog);
 							}
 							else if(ro.isFullDuty()){
-								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(),
-										new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null);
+								dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(),
+										new Date(ro.getFullDutyReturnDate().getTimeInMillis()), null, ro.getTPDRSumm().mathLog);
 							}
-							else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTTDRSumm().getAmountNotPaid(), null, null);
+							else dataAccess.updateRSummary(ro.getClaimant().getID(), "TPD", ro.getTTDRSumm().getCalculatedWeeklyPayment(), ro.getTPDRSumm().getAmountNotPaid(), null, null, ro.getTPDRSumm().mathLog);
 							claimListModel.set(claimantList.getSelectedIndex(), ro);
 							return deleted;
 						} catch (Exception e){

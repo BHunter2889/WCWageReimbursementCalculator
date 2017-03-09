@@ -831,7 +831,7 @@ public class WCReimbursementDAO {
 		return updated;
 	}
 	
-	public int insertClaimants(String lastname, String firstname, String middlename, String workplace, String state, MathLogger ml){
+	public int insertClaimants(String lastname, String firstname, String middlename, String workplace, String state){
 		int id = -1;
 		PreparedStatement stmtInsertClaimants = null;
 		try {
