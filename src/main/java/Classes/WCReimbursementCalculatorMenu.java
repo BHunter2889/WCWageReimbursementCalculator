@@ -464,6 +464,15 @@ public class WCReimbursementCalculatorMenu {
 		panel_1.add(btnFullDutyDate);
 		
 		btnViewClaimDetails = new JButton("View Claim Details");
+		btnViewClaimDetails.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFrame jf = new JFrame("Claim Details and Calculation Log");
+				jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				jf.setContentPane(claimantList.getSelectedValue().getDetails());
+				
+				
+			}
+		});
 		btnViewClaimDetails.setIconTextGap(20);
 		btnViewClaimDetails.setHorizontalTextPosition(SwingConstants.CENTER);
 		btnViewClaimDetails.setAlignmentX(Component.RIGHT_ALIGNMENT);

@@ -1,5 +1,6 @@
 package Classes;
 
+import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
@@ -8,6 +9,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.SimpleTimeZone;
+
+import javax.swing.JComponent;
+import javax.swing.JEditorPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextPane;
+import javax.swing.text.JTextComponent;
 
 public class ReimbursementOverview {
 	
@@ -466,6 +473,36 @@ public class ReimbursementOverview {
 	@Override
 	public String toString(){
 		return String.valueOf(claimant.id) +" "+ claimant.firstName +" "+ claimant.middleName +" "+ claimant.lastName +" "+ claimant.workPlace +" "+ claimant.state;
+	}
+	
+	public JTabbedPane getDetails(){
+		JTabbedPane deets = new JTabbedPane();
+		deets.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		
+		JTextComponent ro = null;
+		try {
+			ro = JTextComponent.class.newInstance();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		ro.setText(getTotalStringAndMathLog());
+		deets.addTab("Reimbursement Overview", ro);
+		deets.setMnemonicAt(0, KeyEvent.VK_0);
+		
+		JTextComponent ttd = null;
+		try {
+			ttd = JTextComponent.class.newInstance();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		ttd.setText(getTotalStringAndMathLog());
+		deets.addTab("TTD Reimbursement Summary", ttd);
+		deets.setMnemonicAt(0, KeyEvent.VK_0);
+		
 	}
 	
 
