@@ -441,6 +441,28 @@ public class ReimbursementOverview {
 		return "Total Not Paid: $"+this.getTotalNotPaid().toPlainString()+" | Total Work Comp Pay-To-Date: $"+this.getTotalWCPayToDate().toPlainString();		
 	}
 	
+	public String getTotalStringAndMathLog(){
+		String eol = System.getProperty("line.separator");
+		if(this.hasLightDuty() && this.isFullDuty()){
+			return "Total Not Paid: $"+this.getTotalNotPaid().toPlainString()+" | Total Work Comp Pay-To-Date: $"+this.getTotalWCPayToDate().toPlainString()+eol+
+					"Light Duty Start Date: "+this.toStringLightDutyStart()+eol+"Full-Time Return Date: "+this.toStringFullDutyReturn()+eol+
+					"Calculations: "+eol+this.mathLog.toString()+eol;
+		}
+		else if(this.isFullDuty()){
+			return "Total Not Paid: $"+this.getTotalNotPaid().toPlainString()+" | Total Work Comp Pay-To-Date: $"+this.getTotalWCPayToDate().toPlainString()+eol+
+					"Light Duty Start Date: None Set."+eol+"Full-Time Return Date: "+this.toStringFullDutyReturn()+eol+
+					"Calculations: "+eol+this.mathLog.toString()+eol;
+		}
+		else if(this.hasLightDuty()){
+			return "Total Not Paid: $"+this.getTotalNotPaid().toPlainString()+" | Total Work Comp Pay-To-Date: $"+this.getTotalWCPayToDate().toPlainString()+eol+
+					"Light Duty Start Date: "+this.toStringLightDutyStart()+eol+"Full-Time Return Date: None Set."+eol+
+					"Calculations: "+eol+this.mathLog.toString()+eol;
+		}
+		
+		return "Total Not Paid: $"+this.getTotalNotPaid().toPlainString()+" | Total Work Comp Pay-To-Date: $"+this.getTotalWCPayToDate().toPlainString()+eol+
+				"Calculations: "+eol+this.mathLog.toString()+eol;		
+	}
+	
 	@Override
 	public String toString(){
 		return String.valueOf(claimant.id) +" "+ claimant.firstName +" "+ claimant.middleName +" "+ claimant.lastName +" "+ claimant.workPlace +" "+ claimant.state;

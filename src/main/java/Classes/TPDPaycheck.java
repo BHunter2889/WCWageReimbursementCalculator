@@ -99,5 +99,21 @@ public class TPDPaycheck extends Paycheck {
 				"Computed Work Comp Supplemental Payment: $" + this.wcCalcPay.toPlainString();
 		
 	}
+	
+	public String toWCPayStringAndMathLog(){
+		String eol = System.lineSeparator();
+		SimpleDateFormat formatter = new SimpleDateFormat("MMM/dd/yyyy");
+		formatter.setLenient(false);
+		formatter.setTimeZone(new SimpleTimeZone(0, "Standard"));
+		
+		java.util.Date payD = this.paymentDate.getTime();
+		java.util.Date payPS = this.payPeriodStart.getTime();
+		java.util.Date payPE = this.payPeriodEnd.getTime();
+		
+		return formatter.format(payPS) + " - " + formatter.format(payPE) + ": $" + this.getGrossAmount().toPlainString() + " paid on " + formatter.format(payD) + "."+eol+
+				"Computed Work Comp Supplemental Payment: $" + this.wcCalcPay.toPlainString()+eol+
+				"Calculations: "+eol+this.mathLog.toString();
+		
+	}
 
 }

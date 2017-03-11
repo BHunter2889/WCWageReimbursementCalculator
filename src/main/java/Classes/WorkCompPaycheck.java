@@ -265,6 +265,20 @@ public class WorkCompPaycheck extends Paycheck {
 		return "Payment Received on: " + formatter.format(payRD) + ": $" + this.getGrossAmount() + " paid on " + formatter.format(payD);
 	}
 	
+	@Override
+	public String toStringAndMathLog(){
+		SimpleDateFormat formatter = new SimpleDateFormat("MMM/dd/yyyy");
+		formatter.setLenient(false);
+		formatter.setTimeZone(new SimpleTimeZone(0, "Standard"));
+		//String eol = System.getProperty("line.separator");
+		
+		java.util.Date payD = this.paymentDate.getTime();		
+		java.util.Date payRD = this.payReceivedDate.getTime();
+				
+		return "Payment Received on: " + formatter.format(payRD) + ": $" + this.getGrossAmount() + " paid on " + formatter.format(payD)+System.lineSeparator()+
+				"Calculations: "+System.lineSeparator()+this.mathLog.toString();
+	}
+	
 	public String toFullString(){
 		SimpleDateFormat formatter = new SimpleDateFormat("MMM/dd/yyyy");
 		formatter.setLenient(false);

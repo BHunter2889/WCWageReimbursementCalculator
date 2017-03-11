@@ -222,7 +222,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 		String list = "";
 		int num = 1;
 		for(TPDPaycheck p : this.receivedWorkPayments){
-			list += num + ")" + p.toString() + eol+p.mathLog.toString()+eol;
+			list += num + ")" + p.toStringAndMathLog() + eol;
 			num++;
 		}
 		
@@ -289,6 +289,28 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 	public String toString(){
 		return "Amount Not Yet Paid: $"+this.amountNotPaid.toPlainString()+" | Light Duty Pay-To-Date: $"+this.getWorkPayToDate().toPlainString()+
 				" | Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString();
+	}
+	
+	public String toStringAndMathLog(BigDecimal calcOwed){
+		String eol = System.getProperty("line.separator");
+		
+		if(this.containsCompClaim()){
+			if (this.claimSummary.priorWagesIsComplete()){
+				return "Light Duty Pay-To-Date: $"+this.getWorkPayToDate().toPlainString()+eol+
+						"Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString()+eol+
+						"Amount Not Yet Paid: $"+this.amountNotPaid.toPlainString()+eol+
+						"Work Comp Calculated Total Owed: $"+calcOwed.toPlainString()+eol+
+						"Calculations: "+eol+this.mathLog.toString()+eol+eol+
+						"TPD Work Comp Payments: "+eol+this.listWCPaymentsAndMathLog()+eol+eol+
+						"TPD Light Duty Work Payments: "+eol+this.listReceivedWorkPaymentsAndMathLog()+eol;
+			}
+			else{
+				return "Not ready to compute. Prior Wages are not complete.";
+			}
+		}
+		else{
+			return "Not Yet Completed.";
+		}
 	}
 	
 	public String toTableString(){

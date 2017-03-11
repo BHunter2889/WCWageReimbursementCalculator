@@ -171,6 +171,20 @@ public class Paycheck implements Comparable<Calendar> {
 		return formatter.format(payPS) + " - " + formatter.format(payPE) + ": $" + this.getGrossAmount().toPlainString() + " paid on " + formatter.format(payD) + ".";
 		
 	}
+	
+	public String toStringAndMathLog(){
+		SimpleDateFormat formatter = new SimpleDateFormat("MMM/dd/yyyy");
+		formatter.setLenient(false);
+		formatter.setTimeZone(new SimpleTimeZone(0, "Standard"));
+		
+		java.util.Date payD = this.paymentDate.getTime();
+		java.util.Date payPS = this.payPeriodStart.getTime();
+		java.util.Date payPE = this.payPeriodEnd.getTime();
+		
+		return formatter.format(payPS) + " - " + formatter.format(payPE) + ": $" + this.getGrossAmount().toPlainString() + " paid on " + formatter.format(payD) + "."+System.lineSeparator()+
+				"Calculations: "+System.lineSeparator()+this.mathLog.toString();
+		
+	}
 
 	public void setGrossAmount(BigDecimal grossAmnt) {
 		if (grossAmnt.scale() != 2){

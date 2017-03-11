@@ -433,14 +433,14 @@ public abstract class ReimbursementSummary {
 	public String listWCPaymentsAndMathLog(){
 		String eol = System.getProperty("line.separator");
 		if (this.wcPayments.isEmpty())  return "No Prior Wages Set.";
-		if (this.wcPayments.size() == 1) return "1) " + this.wcPayments.get(wcPayments.size()-1).toString()+eol+this.wcPayments.get(wcPayments.size()-1).mathLog.toString()+eol;
+		if (this.wcPayments.size() == 1) return "1) " + this.wcPayments.get(wcPayments.size()-1).toStringAndMathLog()+eol;
 		
 		sortWCPaymentsByDate();
 		
 		String list = "";
 		int num = 1;
 		for(WorkCompPaycheck p : this.wcPayments){
-			list += num + ")" + p.toString() + eol + p.mathLog.toString()+eol;
+			list += num + ")" + p.toStringAndMathLog() + eol;
 			num++;
 		}
 		

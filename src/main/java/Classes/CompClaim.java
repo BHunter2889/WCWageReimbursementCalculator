@@ -609,7 +609,7 @@ public class CompClaim {
 		String list = "";
 		int num = 1;
 		for(Paycheck p : this.priorWages){
-			list += num + ")" + p.toString() + eol+p.mathLog.toString()+eol;
+			list += num + ")" + p.toStringAndMathLog()+eol;
 			num++;
 		}
 		
@@ -647,6 +647,20 @@ public class CompClaim {
 		if (this.priorWagesIsComplete()){
 			return "Date Injured: "+this.toStringDateInjured()+eol+"Days Injured: "+this.daysInjured+eol+"Weeks Injured: "+this.weeksInjured+eol+
 				"Average Prior Gross Weekly Payment: $"+this.avgPriorGrossWeeklyPayment.toPlainString()+eol+"Prior Wage Paychecks: "+eol+list;
+		}
+		else{
+			return "Date Injured: "+this.toStringDateInjured()+eol+"Days Injured: "+this.daysInjured+eol+"Weeks Injured: "+this.weeksInjured+eol+
+					"Average Prior Gross Weekly Payment: Not Yet Completed."+eol+"Prior Wage Paychecks: "+eol+list;
+		}
+	}
+	
+	public String toStringAndMathLog(){
+		String eol = System.getProperty("line.separator");
+		String list = this.listPriorWagesAndMathLog();
+		if (this.priorWagesIsComplete()){
+			return "Date Injured: "+this.toStringDateInjured()+eol+"Days Injured: "+this.daysInjured+eol+"Weeks Injured: "+this.weeksInjured+eol+
+				"Average Prior Gross Weekly Payment: $"+this.avgPriorGrossWeeklyPayment.toPlainString()+eol+"Calculations: "+eol+this.mathLog.toString()+eol+eol+
+				"Prior Wage Paychecks: "+eol+list;
 		}
 		else{
 			return "Date Injured: "+this.toStringDateInjured()+eol+"Days Injured: "+this.daysInjured+eol+"Weeks Injured: "+this.weeksInjured+eol+

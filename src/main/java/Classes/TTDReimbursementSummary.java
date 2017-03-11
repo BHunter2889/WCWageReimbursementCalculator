@@ -38,12 +38,52 @@ public class TTDReimbursementSummary extends ReimbursementSummary {
 		return list;
 	}
 	
+	public String listWCPCsAndMathLog(){
+		if (this.wcPayments.isEmpty()) return "No WC Paychecks Set.";
+		if (this.wcPayments.size() == 1) return "1) " + this.wcPayments.get(this.wcPayments.size()-1).toStringAndMathLog();
+		
+		this.sortWCPaymentsByDate();
+		String eol = System.getProperty("line.separator");
+		String list = "";
+		int num = 1;
+		for(WorkCompPaycheck p : this.wcPayments){
+			BigDecimal[] bD = {this.getCalculatedWeeklyPayment()};
+			p.logMath(2, bD);
+			list += num + ")" + p.toStringAndMathLog() + eol;
+			
+			num++;
+		}
+		
+		return list;
+	}
+	
 	public String toString(){
 		String eol = System.getProperty("line.separator");
 		
 		return (this.claimSummary.priorWagesIsComplete()) ? "Calculated Weekly Payment: $"+this.calculatedWeeklyPayment.toPlainString()+" | Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString()+eol+
 				" | Amount Not Yet Paid: $"+this.amountNotPaid.toPlainString()
 				: "Not Yet Completed.";
+	}
+	
+	public String toStringAndMathLog(BigDecimal calcOwed){
+		String eol = System.getProperty("line.separator");
+		
+		if(this.containsCompClaim()){
+			if (this.claimSummary.priorWagesIsComplete()){
+				return "Calculated Weekly Payment: $"+this.calculatedWeeklyPayment.toPlainString()+eol+
+						"Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString()+eol+
+						"Amount Not Yet Paid: $"+this.amountNotPaid.toPlainString()+eol+
+						"Work Comp Calculated Total Owed: $"+calcOwed.toPlainString()+eol+
+						"Calculations: "+eol+this.mathLog.toString()+eol+eol+
+						"TTD Work Comp Payments: "+eol+this.listWCPaymentsAndMathLog();
+			}
+			else{
+				return "Not ready to compute. Prior Wages are not complete.";
+			}
+		}
+		else{
+			return "Not Yet Completed.";
+		}
 	}
 	
 	public String toTableString(BigDecimal calcOwed){
