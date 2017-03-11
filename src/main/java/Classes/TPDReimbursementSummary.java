@@ -291,7 +291,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 				" | Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString();
 	}
 	
-	public String toStringAndMathLog(BigDecimal calcOwed){
+	public String toStringAndMathLog(){
 		String eol = System.getProperty("line.separator");
 		
 		if(this.containsCompClaim()){
@@ -299,7 +299,7 @@ public class TPDReimbursementSummary extends ReimbursementSummary {
 				return "Light Duty Pay-To-Date: $"+this.getWorkPayToDate().toPlainString()+eol+
 						"Work Comp Pay-To-Date: $"+this.getWCPayToDate().toPlainString()+eol+
 						"Amount Not Yet Paid: $"+this.amountNotPaid.toPlainString()+eol+
-						"Work Comp Calculated Total Owed: $"+calcOwed.toPlainString()+eol+
+						"Work Comp Calculated Total Owed: $"+this.getWCCalcPayToDate().toPlainString()+eol+
 						"Calculations: "+eol+this.mathLog.toString()+eol+eol+
 						"TPD Work Comp Payments: "+eol+this.listWCPaymentsAndMathLog()+eol+eol+
 						"TPD Light Duty Work Payments: "+eol+this.listReceivedWorkPaymentsAndMathLog()+eol;

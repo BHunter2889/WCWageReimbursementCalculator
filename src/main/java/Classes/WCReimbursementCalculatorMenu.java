@@ -467,10 +467,9 @@ public class WCReimbursementCalculatorMenu {
 		btnViewClaimDetails.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFrame jf = new JFrame("Claim Details and Calculation Log");
-				jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				jf.setContentPane(claimantList.getSelectedValue().getDetails());
-				
-				
+				jf.setVisible(true);
 			}
 		});
 		btnViewClaimDetails.setIconTextGap(20);

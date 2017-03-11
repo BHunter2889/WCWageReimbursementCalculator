@@ -10,11 +10,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.SimpleTimeZone;
 
-import javax.swing.JComponent;
-import javax.swing.JEditorPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
-import javax.swing.text.JTextComponent;
 
 public class ReimbursementOverview {
 	
@@ -478,30 +476,42 @@ public class ReimbursementOverview {
 	public JTabbedPane getDetails(){
 		JTabbedPane deets = new JTabbedPane();
 		deets.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		String eol = System.lineSeparator();
 		
-		JTextComponent ro = null;
-		try {
-			ro = JTextComponent.class.newInstance();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
-		ro.setText(getTotalStringAndMathLog());
-		deets.addTab("Reimbursement Overview", ro);
-		deets.setMnemonicAt(0, KeyEvent.VK_0);
+		JScrollPane scr = new JScrollPane();
+		JTextPane ro = null;
+		ro = new JTextPane();
+		ro.setText(this.toString()+eol+eol+getTotalStringAndMathLog());
+		scr.add(ro);
+		deets.addTab("Reimbursement Overview", scr);
+		deets.setMnemonicAt(0, KeyEvent.VK_1);
 		
-		JTextComponent ttd = null;
-		try {
-			ttd = JTextComponent.class.newInstance();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
-		ttd.setText(getTotalStringAndMathLog());
-		deets.addTab("TTD Reimbursement Summary", ttd);
-		deets.setMnemonicAt(0, KeyEvent.VK_0);
+		JScrollPane scro = new JScrollPane();
+		JTextPane ttd = null;
+		ttd = new JTextPane();
+		ttd.setText(this.toString()+eol+eol+this.ttdRSumm.toStringAndMathLog(this.getTotalTTDCalcOwed()));
+		scro.add(ttd);
+		deets.addTab("TTD Reimbursement Summary", scro);
+		deets.setMnemonicAt(1, KeyEvent.VK_2);
+		
+		JScrollPane scrol = new JScrollPane();
+		JTextPane tpd = null;
+		tpd = new JTextPane();
+		tpd.setText(this.toString()+eol+eol+this.tpdRSumm.toStringAndMathLog());
+		scrol.add(tpd);
+		deets.addTab("TPD Reimbursement Summary", scrol);
+		deets.setMnemonicAt(2, KeyEvent.VK_3);
+		
+		JScrollPane scroll = new JScrollPane();
+		JTextPane cHist = null;
+		cHist = new JTextPane();
+		if(this.containsTTD())cHist.setText(this.toString()+eol+eol+this.ttdRSumm.claimSummary.toStringAndMathLog());
+		else cHist.setText(this.toString()+eol+eol+this.tpdRSumm.claimSummary.toStringAndMathLog());
+		scroll.add(cHist);
+		deets.addTab("Claim History", scroll);
+		deets.setMnemonicAt(3, KeyEvent.VK_4);
+		
+		return deets;
 		
 	}
 	
